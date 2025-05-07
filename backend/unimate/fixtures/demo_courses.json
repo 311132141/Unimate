@@ -1,0 +1,29 @@
+[
+    {
+        "model": "unimate.course",
+        "pk": 1,
+        "fields": {
+            "code": "ENGGEN205",
+            "name": "Engineering Mechanics",
+            "description": "Introduction to static and dynamic mechanics."
+        }
+    },
+    {
+        "model": "unimate.course",
+        "pk": 2,
+        "fields": {
+            "code": "COMPSCI101",
+            "name": "Introduction to Computer Science",
+            "description": "Fundamental concepts of computer science and programming."
+        }
+    },
+    {
+        "model": "unimate.course",
+        "pk": 3,
+        "fields": {
+            "code": "STATS100",
+            "name": "Introduction to Statistics",
+            "description": "Basic statistical concepts and methods."
+        }
+    }
+]

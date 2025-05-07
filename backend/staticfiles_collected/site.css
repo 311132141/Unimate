@@ -1,0 +1,97 @@
+/* Unimate - Main CSS styles */
+
+/* Base styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Print styles */
+@media print {
+
+    nav,
+    button,
+    #login-screen {
+        display: none !important;
+    }
+
+    body {
+        background-color: white !important;
+    }
+
+    #dashboard {
+        display: block !important;
+    }
+
+    .max-w-7xl {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    #map-container,
+    .print-hide {
+        display: none !important;
+    }
+
+    #timetable {
+        width: 100% !important;
+        page-break-inside: avoid;
+    }
+
+    #timetable>div {
+        break-inside: avoid;
+        margin-bottom: 10px !important;
+        border: 1px solid #ddd !important;
+    }
+
+    /* Logo and header for printed output */
+    #dashboard::before {
+        content: "UNIMATE TIMETABLE";
+        display: block;
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 20px;
+        color: black;
+    }
+
+    /* Paper size for different printers */
+    @page {
+        size: A4;
+        /* For laser printers */
+        margin: 1cm;
+    }
+
+    @media (max-width: 80mm) {
+        @page {
+            size: 80mm 297mm;
+            /* For thermal printers (80mm receipt) */
+            margin: 5mm;
+        }
+
+        body {
+            font-size: 10pt;
+        }
+    }
+}
+
+/* Custom components */
+.event-exam {
+    border-left: 4px solid #f97316 !important;
+}
+
+.event-class {
+    border-left: 4px solid #3b82f6 !important;
+}
+
+.event-urgent {
+    border: 1px solid #ef4444 !important;
+    background-color: #fef2f2 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #timetable {
+        font-size: 0.9rem;
+    }
+}

@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "==5.0.2"
+channels = "==4.0.0"
+djangorestframework = "==3.14.0"
+djangorestframework-simplejwt = "==5.3.1"
+python-dotenv = "==1.0.1"
+django-cors-headers = "==4.3.1"
+requests = "*"
+websocket-client = "*"
+uvicorn = "*"
+daphne = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"

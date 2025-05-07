@@ -1,0 +1,68 @@
+[
+    {
+        "model": "auth.user",
+        "pk": 1,
+        "fields": {
+            "username": "alice",
+            "password": "pbkdf2_sha256$720000$test$j8Y3Y4pG8Xv4yVf2nJhM3eN0bQnJ8mFhRzX1wE4rFpU=",
+            "first_name": "Alice",
+            "last_name": "Wonderland",
+            "email": "alice@example.com",
+            "is_staff": false,
+            "is_active": true,
+            "is_superuser": false
+        }
+    },
+    {
+        "model": "unimate.userprofile",
+        "pk": 1,
+        "fields": {
+            "user": 1,
+            "rfid_uid": "04A1B2C3D4"
+        }
+    },
+    {
+        "model": "auth.user",
+        "pk": 2,
+        "fields": {
+            "username": "bob",
+            "password": "pbkdf2_sha256$720000$test$j8Y3Y4pG8Xv4yVf2nJhM3eN0bQnJ8mFhRzX1wE4rFpU=",
+            "first_name": "Bob",
+            "last_name": "Builder",
+            "email": "bob@example.com",
+            "is_staff": false,
+            "is_active": true,
+            "is_superuser": false
+        }
+    },
+    {
+        "model": "unimate.userprofile",
+        "pk": 2,
+        "fields": {
+            "user": 2,
+            "rfid_uid": "04B5C6D7E8"
+        }
+    },
+    {
+        "model": "auth.user",
+        "pk": 3,
+        "fields": {
+            "username": "carol",
+            "password": "pbkdf2_sha256$720000$test$j8Y3Y4pG8Xv4yVf2nJhM3eN0bQnJ8mFhRzX1wE4rFpU=",
+            "first_name": "Carol",
+            "last_name": "Danvers",
+            "email": "carol@example.com",
+            "is_staff": false,
+            "is_active": true,
+            "is_superuser": false
+        }
+    },
+    {
+        "model": "unimate.userprofile",
+        "pk": 3,
+        "fields": {
+            "user": 3,
+            "rfid_uid": "0499AA11BB"
+        }
+    }
+]

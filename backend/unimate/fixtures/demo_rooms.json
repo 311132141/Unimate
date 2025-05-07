@@ -1,0 +1,44 @@
+[
+    {
+        "model": "unimate.room",
+        "pk": 1,
+        "fields": {
+            "building": "Engineering Building",
+            "number": "401-403",
+            "floor": 4,
+            "coordinates": {
+                "x": 10,
+                "y": 5,
+                "z": 0
+            }
+        }
+    },
+    {
+        "model": "unimate.room",
+        "pk": 2,
+        "fields": {
+            "building": "Science Block B",
+            "number": "101A",
+            "floor": 1,
+            "coordinates": {
+                "x": -5,
+                "y": 2,
+                "z": 1
+            }
+        }
+    },
+    {
+        "model": "unimate.room",
+        "pk": 3,
+        "fields": {
+            "building": "Library",
+            "number": "G02 (Study Hall)",
+            "floor": 0,
+            "coordinates": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            }
+        }
+    }
+]

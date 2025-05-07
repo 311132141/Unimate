@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unimate Complete Standalone</title>
+    <style>
+        /* Inline all necessary styles */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .header {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .header h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #111827;
+        }
+
+        .header p {
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .timetable-container {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+        }
+
+        .timetable-container h2 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #111827;
+        }
+
+        .timetable {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .event {
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-bottom: 0.75rem;
+        }
+
+        .event:hover {
+            background-color: #f9fafb;
+        }
+
+        .event-class {
+            border-left: 4px solid #3b82f6;
+        }
+
+        .event-exam {
+            border-left: 4px solid #f97316;
+        }
+
+        .event-urgent {
+            border: 1px solid #ef4444;
+            background-color: #fef2f2;
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .event-title-container {
+            flex: 1;
+        }
+
+        .event-title-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .event-title {
+            font-weight: bold;
+            font-size: 1.125rem;
+            color: #111827;
+        }
+
+        .event-type {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .event-type-class {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .event-type-exam {
+            background-color: #ffedd5;
+            color: #9a3412;
+        }
+
+        .event-course {
+            font-size: 0.875rem;
+            color: #4b5563;
+            margin-bottom: 0.25rem;
+        }
+
+        .event-time {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .event-right {
+            text-align: right;
+        }
+
+        .event-lecturer {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #4b5563;
+        }
+
+        .event-urgent-badge {
+            display: inline-block;
+            background-color: #ef4444;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.25rem;
+            margin-top: 0.25rem;
+        }
+
+        .print-button {
+            display: block;
+            width: 100%;
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            font-weight: 600;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.2s;
+        }
+
+        .print-button:hover {
+            background-color: #e5e7eb;
+        }
+
+        @media print {
+            body {
+                background-color: white;
+            }
+
+            .container {
+                padding: 0;
+            }
+
+            .header {
+                box-shadow: none;
+                padding: 1rem 0;
+                margin-bottom: 1rem;
+            }
+
+            .timetable-container {
+                box-shadow: none;
+                padding: 0;
+            }
+
+            .event {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .print-button {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Unimate Timetable</h1>
+            <p>This standalone page displays demo timetable data without requiring any server connections.</p>
+        </div>
+
+        <div class="timetable-container">
+            <h2>Demo Timetable</h2>
+            <div class="timetable" id="timetable"></div>
+        </div>
+    </div>
+
+    <script>
+        // Sample event data
+        const events = [
+            {
+                id: 1,
+                title: "ENGGEN205 Lecture",
+                eventType: "class",
+                course: { code: "ENGGEN205", name: "Engineering Mechanics" },
+                room: { building: "ENG", number: "340" },
+                startTime: new Date(),
+                endTime: new Date(Date.now() + 3600000), // 1 hour from now
+                lecturer: "Dr. Smith",
+                isUrgent: false
+            },
+            {
+                id: 2,
+                title: "STATS100 Mid-term Exam",
+                eventType: "exam",
+                course: { code: "STATS100", name: "Statistics" },
+                room: { building: "ENG", number: "401" },
+                startTime: new Date(Date.now() + 86400000), // Tomorrow
+                endTime: new Date(Date.now() + 86400000 + 7200000), // Tomorrow + 2 hours
+                lecturer: "N/A",
+                isUrgent: true
+            },
+            {
+                id: 3,
+                title: "COMPSCI101 Lab",
+                eventType: "class",
+                course: { code: "COMPSCI101", name: "Computer Science" },
+                room: { building: "SCI", number: "201" },
+                startTime: new Date(Date.now() + 2 * 86400000), // 2 days from now
+                endTime: new Date(Date.now() + 2 * 86400000 + 5400000), // 2 days + 1.5 hours
+                lecturer: "Prof. Ada",
+                isUrgent: false
+            }
+        ];
+
+        // Format date to display
+        function formatDate(date) {
+            const options = { weekday: 'short', month: 'short', day: 'numeric' };
+            return date.toLocaleDateString(undefined, options);
+        }
+
+        // Format time to display
+        function formatTime(date) {
+            const options = { hour: '2-digit', minute: '2-digit' };
+            return date.toLocaleTimeString(undefined, options);
+        }
+
+        // Render timetable
+        function renderTimetable() {
+            const timetable = document.getElementById('timetable');
+            timetable.innerHTML = '';
+
+            // Check if events exist
+            if (!events || events.length === 0) {
+                timetable.innerHTML = '<p style="text-align:center;color:#6b7280;padding:1rem;">No upcoming events found.</p>';
+                return;
+            }
+
+            // Render each event
+            events.forEach(event => {
+                const eventElement = document.createElement('div');
+                eventElement.className = 'event';
+                eventElement.classList.add(event.eventType === 'exam' ? 'event-exam' : 'event-class');
+
+                if (event.isUrgent) {
+                    eventElement.classList.add('event-urgent');
+                }
+
+                const eventTypeClass = event.eventType === 'exam' ? 'event-type-exam' : 'event-type-class';
+                const eventTypeLabel = event.eventType === 'exam' ? 'EXAM' : 'CLASS';
+
+                const courseCode = event.course?.code || 'N/A';
+                const roomInfo = event.room ?
+                    `${event.room.building || ''} ${event.room.number || ''}`.trim() :
+                    'TBA';
+
+                eventElement.innerHTML = `
+                    <div class="event-header">
+                        <div class="event-title-container">
+                            <div class="event-title-row">
+                                <div class="event-title">${event.title || 'Untitled Event'}</div>
+                                <div class="event-type ${eventTypeClass}">${eventTypeLabel}</div>
+                            </div>
+                            <div class="event-course">${courseCode} - ${roomInfo}</div>
+                            <div class="event-time">
+                                ${formatDate(event.startTime)} •
+                                ${formatTime(event.startTime)} - ${formatTime(event.endTime)}
+                            </div>
+                        </div>
+                        <div class="event-right">
+                            <div class="event-lecturer">${event.lecturer || 'No lecturer'}</div>
+                            ${event.isUrgent ? '<div class="event-urgent-badge">Urgent</div>' : ''}
+                        </div>
+                    </div>
+                `;
+
+                eventElement.addEventListener('click', () => {
+                    alert(`${event.title}\nLocation: ${roomInfo}\nTime: ${formatDate(event.startTime)} ${formatTime(event.startTime)} - ${formatTime(event.endTime)}\nLecturer: ${event.lecturer || 'N/A'}`);
+                });
+
+                timetable.appendChild(eventElement);
+            });
+
+            // Add print button
+            const printButton = document.createElement('button');
+            printButton.className = 'print-button';
+            printButton.textContent = '🖨️ Print Timetable';
+            printButton.addEventListener('click', () => {
+                window.print();
+            });
+            timetable.appendChild(printButton);
+        }
+
+        // Initialize when the page loads
+        document.addEventListener('DOMContentLoaded', renderTimetable);
+    </script>
+</body>
+
+</html>

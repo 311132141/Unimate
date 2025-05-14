@@ -67,7 +67,7 @@ DATABASES = {
     }
 }
 
-# Channel layers
+# Channel layers - always use InMemory for testing
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',

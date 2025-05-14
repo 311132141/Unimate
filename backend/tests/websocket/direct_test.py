@@ -122,8 +122,8 @@ async def main():
     heartbeat_task = asyncio.create_task(heartbeat())
     
     # Start the WebSocket server
-    async with websockets.serve(handle_connection, "0.0.0.0", 8765):
-        logger.info("WebSocket server running on ws://0.0.0.0:8765")
+    async with websockets.serve(handle_connection, "0.0.0.0", 8766):
+        logger.info("WebSocket server running on ws://0.0.0.0:8766")
         await asyncio.Future()  # Run forever
 
 if __name__ == "__main__":

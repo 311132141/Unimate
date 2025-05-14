@@ -191,10 +191,43 @@
             border-radius: 4px;
             cursor: pointer;
             font-weight: 500;
+            margin-bottom: 1rem;
         }
 
         .login-form button:hover {
             background-color: #435ecc;
+        }
+
+        .card-scan-note {
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            border-top: 1px solid #444;
+            padding-top: 1rem;
+        }
+
+        .card-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23888888"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4V6h16v12zM4 0h16v2H4zm0 22h16v2H4zm8-10c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm4 3.43c0-.81-.48-1.53-1.22-1.85-.85-.37-1.79-.58-2.78-.58-.99 0-1.93.21-2.78.58C8.48 11.9 8 12.62 8 13.43V14h8v-.57z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+
+        .error-message {
+            color: #ff5555;
+            margin-bottom: 1rem;
+            text-align: center;
+            display: none;
+        }
+
+        .urgent-event {
+            background-color: rgba(255, 50, 50, 0.1);
+            border-left: 3px solid #ff5555;
         }
     </style>
 </head>
@@ -222,11 +255,11 @@
                         </div>
                         <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
                     </div>
-                    <div class="event-item">
+                    <div class="event-item urgent-event">
                         <div class="event-content">
                             <div class="event-meta">Tech Events</div>
-                            <div class="event-title">Whatever event name bro</div>
-                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                            <div class="event-title">URGENT: System Maintenance</div>
+                            <div class="event-meta">2 hours ago · By IT Services</div>
                         </div>
                         <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
                     </div>
@@ -288,14 +321,72 @@
 
     <div class="login-modal" id="loginModal">
         <h2>Login</h2>
+        <div class="error-message" id="loginError"></div>
         <form class="login-form" id="loginForm">
             <input type="text" placeholder="Username" id="username" required>
             <input type="password" placeholder="Password" id="password" required>
             <button type="submit">Login</button>
+            <div class="card-scan-note">
+                <span class="card-icon"></span>
+                <span>Tap your student ID card to log in instantly</span>
+            </div>
         </form>
     </div>
 
     <script>
+        // Initialize WebSocket for card scanning notifications
+        let ws = null;
+        
+        function connectWebSocket() {
+            // Connect to the WebSocket server for kiosk notifications
+            const kioskId = "kiosk-" + Math.floor(Math.random() * 1000);
+            ws = new WebSocket(`ws://localhost:8000/ws/kiosk/${kioskId}/`);
+            
+            ws.onopen = function() {
+                console.log("WebSocket connection established");
+            };
+            
+            ws.onmessage = function(event) {
+                console.log("WebSocket message received:", event.data);
+                const data = JSON.parse(event.data);
+                
+                // Handle login event from card scan
+                if (data.type === "user.login") {
+                    handleUserLogin(data.message);
+                }
+            };
+            
+            ws.onerror = function(error) {
+                console.error("WebSocket error:", error);
+            };
+            
+            ws.onclose = function() {
+                console.log("WebSocket connection closed");
+                // Try to reconnect after a delay
+                setTimeout(connectWebSocket, 5000);
+            };
+        }
+        
+        // Handle user login (both from form and card scan)
+        function handleUserLogin(userData) {
+            // Store authentication data
+            if (userData.access) {
+                localStorage.setItem('access_token', userData.access);
+            }
+            if (userData.refresh) {
+                localStorage.setItem('refresh_token', userData.refresh);
+            }
+            if (userData.user && userData.user.username) {
+                localStorage.setItem('username', userData.user.username);
+            }
+            
+            // Hide the modal if it's open
+            document.getElementById('loginModal').style.display = 'none';
+            
+            // Redirect to dashboard
+            window.location.href = 'dashboard.html';
+        }
+
         // Initialize Map (placeholder for now)
         function initMap() {
             const mapContainer = document.getElementById('map-container');
@@ -314,35 +405,31 @@
         // Show login modal
         document.getElementById('showLogin').addEventListener('click', function() {
             document.getElementById('loginModal').style.display = 'block';
+            document.getElementById('loginError').style.display = 'none';
         });
 
         // Handle login form submission
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const errorElement = document.getElementById('loginError');
             
-            // Placeholder for authentication logic
-            console.log('Login attempt with:', username);
-            
-            // Here you would typically call your authentication API
-            // For demo purposes, simulate a successful login with mock data
-            const mockLoginResponse = {
-                access: "mock_access_token_" + Math.random(),
-                refresh: "mock_refresh_token_" + Math.random(),
-                user: { username: username }
-            };
-            
-            // Store authentication data
-            localStorage.setItem('access_token', mockLoginResponse.access);
-            localStorage.setItem('refresh_token', mockLoginResponse.refresh);
-            localStorage.setItem('username', username);
-            
-            // Hide the modal
-            document.getElementById('loginModal').style.display = 'none';
-            
-            // Redirect to dashboard
-            window.location.href = 'dashboard.html';
+            try {
+                const response = await axios.post('/api/login/', {
+                    username: username,
+                    password: password
+                });
+                
+                // Handle successful login
+                handleUserLogin(response.data);
+            } catch (error) {
+                console.error('Login error:', error);
+                
+                // Display error message
+                errorElement.textContent = error.response?.data?.error || 'Invalid credentials';
+                errorElement.style.display = 'block';
+            }
         });
 
         // Close modal when clicking outside
@@ -353,8 +440,18 @@
             }
         });
 
-        // Initialize map when page loads
-        window.addEventListener('load', initMap);
+        // Initialize when page loads
+        window.addEventListener('load', function() {
+            initMap();
+            connectWebSocket();
+            
+            // Check if user is already logged in
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                // Redirect to dashboard if already logged in
+                window.location.href = 'dashboard.html';
+            }
+        });
     </script>
 </body>
 

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+        }
+        .test-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: white;
+        }
+        .connection-status {
+            font-weight: bold;
+        }
+        .connected {
+            color: green;
+        }
+        .disconnected {
+            color: red;
+        }
+        .error {
+            color: red;
+        }
+        .log-container {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 1rem;
+            margin-top: 1rem;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .log-entry {
+            margin: 0;
+            padding: 2px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        .log-entry.sent {
+            color: blue;
+        }
+        .log-entry.received {
+            color: green;
+        }
+        .log-entry.error {
+            color: red;
+        }
+        button {
+            padding: 0.5rem 1rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Connection Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Standalone WebSocket Server (Port 8765)</h2>
+        <div>Status: <span id="status-standalone" class="connection-status disconnected">Disconnected</span></div>
+        <div>
+            <button id="connect-standalone">Connect</button>
+            <button id="disconnect-standalone" disabled>Disconnect</button>
+            <button id="send-standalone" disabled>Send Test Message</button>
+        </div>
+        <div class="log-container" id="log-standalone"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Django Channels WebSocket (Main)</h2>
+        <div>Status: <span id="status-django" class="connection-status disconnected">Disconnected</span></div>
+        <div>
+            <button id="connect-django">Connect</button>
+            <button id="disconnect-django" disabled>Disconnect</button>
+            <button id="send-django" disabled>Send Test Message</button>
+        </div>
+        <div class="log-container" id="log-django"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Django Channels WebSocket (Kiosk)</h2>
+        <div>Status: <span id="status-kiosk" class="connection-status disconnected">Disconnected</span></div>
+        <div>
+            <button id="connect-kiosk">Connect</button>
+            <button id="disconnect-kiosk" disabled>Disconnect</button>
+            <button id="send-kiosk" disabled>Send Test Message</button>
+        </div>
+        <div class="log-container" id="log-kiosk"></div>
+    </div>
+
+    <script>
+        // WebSocket connection objects
+        let wsStandalone = null;
+        let wsDjango = null;
+        let wsKiosk = null;
+        
+        // Helper function to log messages
+        function log(containerId, message, type = '') {
+            const container = document.getElementById(containerId);
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+            container.appendChild(entry);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        // Standalone WebSocket Server (Port 8765)
+        document.getElementById('connect-standalone').addEventListener('click', () => {
+            try {
+                wsStandalone = new WebSocket('ws://localhost:8765');
+                
+                wsStandalone.onopen = () => {
+                    log('log-standalone', 'Connected to standalone server', 'received');
+                    document.getElementById('status-standalone').textContent = 'Connected';
+                    document.getElementById('status-standalone').className = 'connection-status connected';
+                    document.getElementById('connect-standalone').disabled = true;
+                    document.getElementById('disconnect-standalone').disabled = false;
+                    document.getElementById('send-standalone').disabled = false;
+                };
+                
+                wsStandalone.onmessage = (event) => {
+                    log('log-standalone', `Received: ${event.data}`, 'received');
+                };
+                
+                wsStandalone.onclose = () => {
+                    log('log-standalone', 'Disconnected from standalone server');
+                    document.getElementById('status-standalone').textContent = 'Disconnected';
+                    document.getElementById('status-standalone').className = 'connection-status disconnected';
+                    document.getElementById('connect-standalone').disabled = false;
+                    document.getElementById('disconnect-standalone').disabled = true;
+                    document.getElementById('send-standalone').disabled = true;
+                    wsStandalone = null;
+                };
+                
+                wsStandalone.onerror = (error) => {
+                    log('log-standalone', `Error: ${error}`, 'error');
+                };
+            } catch (error) {
+                log('log-standalone', `Connection error: ${error}`, 'error');
+            }
+        });
+        
+        document.getElementById('disconnect-standalone').addEventListener('click', () => {
+            if (wsStandalone) {
+                wsStandalone.close();
+            }
+        });
+        
+        document.getElementById('send-standalone').addEventListener('click', () => {
+            if (wsStandalone && wsStandalone.readyState === WebSocket.OPEN) {
+                const message = JSON.stringify({
+                    type: 'test',
+                    message: 'Hello from browser test!',
+                    timestamp: new Date().toISOString()
+                });
+                wsStandalone.send(message);
+                log('log-standalone', `Sent: ${message}`, 'sent');
+            } else {
+                log('log-standalone', 'Cannot send message: not connected', 'error');
+            }
+        });
+        
+        // Django Channels WebSocket (Main)
+        document.getElementById('connect-django').addEventListener('click', () => {
+            try {
+                wsDjango = new WebSocket('ws://localhost:8000/ws/unimate/');
+                
+                wsDjango.onopen = () => {
+                    log('log-django', 'Connected to Django Channels (main endpoint)', 'received');
+                    document.getElementById('status-django').textContent = 'Connected';
+                    document.getElementById('status-django').className = 'connection-status connected';
+                    document.getElementById('connect-django').disabled = true;
+                    document.getElementById('disconnect-django').disabled = false;
+                    document.getElementById('send-django').disabled = false;
+                };
+                
+                wsDjango.onmessage = (event) => {
+                    log('log-django', `Received: ${event.data}`, 'received');
+                };
+                
+                wsDjango.onclose = () => {
+                    log('log-django', 'Disconnected from Django Channels (main endpoint)');
+                    document.getElementById('status-django').textContent = 'Disconnected';
+                    document.getElementById('status-django').className = 'connection-status disconnected';
+                    document.getElementById('connect-django').disabled = false;
+                    document.getElementById('disconnect-django').disabled = true;
+                    document.getElementById('send-django').disabled = true;
+                    wsDjango = null;
+                };
+                
+                wsDjango.onerror = (error) => {
+                    log('log-django', `Error: ${error}`, 'error');
+                };
+            } catch (error) {
+                log('log-django', `Connection error: ${error}`, 'error');
+            }
+        });
+        
+        document.getElementById('disconnect-django').addEventListener('click', () => {
+            if (wsDjango) {
+                wsDjango.close();
+            }
+        });
+        
+        document.getElementById('send-django').addEventListener('click', () => {
+            if (wsDjango && wsDjango.readyState === WebSocket.OPEN) {
+                const message = JSON.stringify({
+                    type: 'test',
+                    message: 'Hello from browser test!',
+                    timestamp: new Date().toISOString()
+                });
+                wsDjango.send(message);
+                log('log-django', `Sent: ${message}`, 'sent');
+            } else {
+                log('log-django', 'Cannot send message: not connected', 'error');
+            }
+        });
+        
+        // Django Channels WebSocket (Kiosk)
+        document.getElementById('connect-kiosk').addEventListener('click', () => {
+            try {
+                const kioskId = 'test-kiosk-' + Math.floor(Math.random() * 1000);
+                wsKiosk = new WebSocket(`ws://localhost:8000/ws/kiosk/${kioskId}/`);
+                
+                wsKiosk.onopen = () => {
+                    log('log-kiosk', `Connected to Django Channels (kiosk endpoint: ${kioskId})`, 'received');
+                    document.getElementById('status-kiosk').textContent = 'Connected';
+                    document.getElementById('status-kiosk').className = 'connection-status connected';
+                    document.getElementById('connect-kiosk').disabled = true;
+                    document.getElementById('disconnect-kiosk').disabled = false;
+                    document.getElementById('send-kiosk').disabled = false;
+                };
+                
+                wsKiosk.onmessage = (event) => {
+                    log('log-kiosk', `Received: ${event.data}`, 'received');
+                };
+                
+                wsKiosk.onclose = () => {
+                    log('log-kiosk', 'Disconnected from Django Channels (kiosk endpoint)');
+                    document.getElementById('status-kiosk').textContent = 'Disconnected';
+                    document.getElementById('status-kiosk').className = 'connection-status disconnected';
+                    document.getElementById('connect-kiosk').disabled = false;
+                    document.getElementById('disconnect-kiosk').disabled = true;
+                    document.getElementById('send-kiosk').disabled = true;
+                    wsKiosk = null;
+                };
+                
+                wsKiosk.onerror = (error) => {
+                    log('log-kiosk', `Error: ${error}`, 'error');
+                };
+            } catch (error) {
+                log('log-kiosk', `Connection error: ${error}`, 'error');
+            }
+        });
+        
+        document.getElementById('disconnect-kiosk').addEventListener('click', () => {
+            if (wsKiosk) {
+                wsKiosk.close();
+            }
+        });
+        
+        document.getElementById('send-kiosk').addEventListener('click', () => {
+            if (wsKiosk && wsKiosk.readyState === WebSocket.OPEN) {
+                const message = JSON.stringify({
+                    type: 'kiosk_status',
+                    status: 'active',
+                    timestamp: new Date().toISOString()
+                });
+                wsKiosk.send(message);
+                log('log-kiosk', `Sent: ${message}`, 'sent');
+            } else {
+                log('log-kiosk', 'Cannot send message: not connected', 'error');
+            }
+        });
+    </script>
+</body>
+</html> 

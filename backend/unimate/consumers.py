@@ -28,6 +28,14 @@ class UnimateConsumer(AsyncWebsocketConsumer):
                     'message': text_data_json.get('message')
                 }
             )
+        elif message_type == 'test':
+            # Echo back test messages
+            logger.info("UnimateConsumer: Received test message, echoing back")
+            await self.send(text_data=json.dumps({
+                'type': 'test_response',
+                'message': 'Server received: ' + text_data_json.get('message', 'No message'),
+                'timestamp': text_data_json.get('timestamp')
+            }))
 
     async def user_login(self, event):
         await self.send(text_data=json.dumps({

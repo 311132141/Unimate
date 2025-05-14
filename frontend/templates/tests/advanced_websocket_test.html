@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced WebSocket Tester</title>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --dark-bg: #1f2937;
+            --light-bg: #f3f4f6;
+            --dark-text: #111827;
+            --light-text: #f9fafb;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 1rem;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 2rem);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            margin-bottom: 1rem;
+        }
+        
+        h1, h2, h3 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            flex-grow: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .console {
+            height: 500px;
+            overflow-y: auto;
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', monospace;
+            margin-top: 0.5rem;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .controls button {
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .controls button:hover {
+            opacity: 0.9;
+        }
+        
+        .controls button:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+        }
+        
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            margin-left: 0.5rem;
+        }
+        
+        .connection-status.connected {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+        
+        .connection-status.disconnected {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+        }
+        
+        .connection-status.connecting {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+        }
+        
+        .connection-status::before {
+            content: "";
+            display: block;
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background-color: currentColor;
+        }
+        
+        .message-input {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .message-input input, .message-input select, .message-input textarea {
+            flex-grow: 1;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            font-family: inherit;
+            font-size: inherit;
+        }
+        
+        .message-input button {
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #d1d5db;
+            margin-bottom: 1rem;
+        }
+        
+        .tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .log {
+            margin: 0.25rem 0;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            word-break: break-word;
+        }
+        
+        .log .timestamp {
+            color: #9ca3af;
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+        }
+        
+        .info { color: #93c5fd; }
+        .success { color: #6ee7b7; }
+        .warning { color: #fcd34d; }
+        .error { color: #fca5a5; }
+        .sent { color: #d8b4fe; }
+        .received { color: #a5b4fc; }
+        
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .preset-buttons button {
+            background-color: #e5e7eb;
+            color: var(--dark-text);
+            border: none;
+            border-radius: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+        
+        .preset-buttons button:hover {
+            background-color: #d1d5db;
+        }
+        
+        .json-editor {
+            font-family: 'Courier New', monospace;
+            width: 100%;
+            height: 200px;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Advanced WebSocket Tester</h1>
+        <div id="connection-status" class="connection-status disconnected">Disconnected</div>
+    </header>
+    
+    <div class="container">
+        <div class="panel">
+            <h2>Connection</h2>
+            <div class="tabs">
+                <div class="tab active" data-tab="direct-ws">Direct WebSocket</div>
+                <div class="tab" data-tab="django-ws">Django Channels</div>
+                <div class="tab" data-tab="custom-ws">Custom URL</div>
+            </div>
+            
+            <div class="tab-content active" id="direct-ws-content">
+                <p>Connect to standalone WebSocket server on port 8765</p>
+                <div class="controls">
+                    <button id="direct-connect">Connect</button>
+                    <button id="direct-disconnect" disabled>Disconnect</button>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="django-ws-content">
+                <p>Connect to Django Channels WebSocket endpoint</p>
+                <div class="controls">
+                    <button id="django-connect">Connect</button>
+                    <button id="django-disconnect" disabled>Disconnect</button>
+                </div>
+                <div>
+                    <label for="channel-select">Select Channel:</label>
+                    <select id="channel-select" class="form-control">
+                        <option value="ws/unimate/">Unimate (ws/unimate/)</option>
+                        <option value="ws/kiosk/test-kiosk-1/">Kiosk (test-kiosk-1)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="custom-ws-content">
+                <p>Connect to custom WebSocket URL</p>
+                <div class="message-input">
+                    <input type="text" id="custom-url" placeholder="ws://localhost:8000/ws/custom/" value="ws://localhost:8000/ws/unimate/">
+                </div>
+                <div class="controls">
+                    <button id="custom-connect">Connect</button>
+                    <button id="custom-disconnect" disabled>Disconnect</button>
+                </div>
+            </div>
+            
+            <h2>Send Message</h2>
+            <div class="preset-buttons">
+                <button class="preset" data-message='{"type": "test", "message": "Hello from test client!"}'>Test Message</button>
+                <button class="preset" data-message='{"type": "ping", "timestamp": 0}'>Ping</button>
+                <button class="preset" data-message='{"type": "subscribe", "channel": "notifications"}'>Subscribe</button>
+                <button class="preset" data-message='{"type": "register_kiosk", "id": "test-kiosk-1"}'>Register Kiosk</button>
+                <button class="preset" data-message='{"type": "scan", "card_id": "0123456789", "kiosk_id": "test-kiosk-1"}'>RFID Scan</button>
+            </div>
+            <textarea id="json-message" class="json-editor">{
+  "type": "test",
+  "message": "Hello from test client!",
+  "timestamp": 0
+}</textarea>
+            <div class="message-input">
+                <button id="send-message">Send Message</button>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Console</h2>
+            <div class="controls">
+                <button id="clear-console">Clear Console</button>
+            </div>
+            <div id="console" class="console"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let socket = null;
+        let activeTab = 'direct-ws';
+        const consoleEl = document.getElementById('console');
+        const statusEl = document.getElementById('connection-status');
+        let reconnectAttempts = 0;
+        let reconnectTimeout = null;
+        
+        // Helper function to log to console
+        function log(message, type = 'info') {
+            const logEl = document.createElement('div');
+            logEl.className = `log ${type}`;
+            
+            const timestamp = document.createElement('span');
+            timestamp.className = 'timestamp';
+            timestamp.textContent = new Date().toLocaleTimeString();
+            
+            logEl.appendChild(timestamp);
+            logEl.appendChild(document.createTextNode(message));
+            
+            consoleEl.appendChild(logEl);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+        
+        // Helper function to update connection status
+        function updateStatus(status) {
+            statusEl.className = `connection-status ${status}`;
+            statusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            
+            // Update button states
+            document.getElementById('direct-connect').disabled = status === 'connected' && activeTab === 'direct-ws';
+            document.getElementById('direct-disconnect').disabled = status !== 'connected' || activeTab !== 'direct-ws';
+            
+            document.getElementById('django-connect').disabled = status === 'connected' && activeTab === 'django-ws';
+            document.getElementById('django-disconnect').disabled = status !== 'connected' || activeTab !== 'django-ws';
+            
+            document.getElementById('custom-connect').disabled = status === 'connected' && activeTab === 'custom-ws';
+            document.getElementById('custom-disconnect').disabled = status !== 'connected' || activeTab !== 'custom-ws';
+        }
+        
+        // Connect to WebSocket based on active tab
+        function connect() {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                log('Already connected, disconnect first', 'warning');
+                return;
+            }
+            
+            updateStatus('connecting');
+            let wsUrl;
+            
+            if (activeTab === 'direct-ws') {
+                wsUrl = 'ws://localhost:8765';
+                log(`Connecting to direct WebSocket: ${wsUrl}`, 'info');
+            } else if (activeTab === 'django-ws') {
+                const channel = document.getElementById('channel-select').value;
+                wsUrl = `ws://localhost:8000/${channel}`;
+                log(`Connecting to Django Channels: ${wsUrl}`, 'info');
+            } else if (activeTab === 'custom-ws') {
+                wsUrl = document.getElementById('custom-url').value;
+                log(`Connecting to custom WebSocket: ${wsUrl}`, 'info');
+            }
+            
+            try {
+                socket = new WebSocket(wsUrl);
+                
+                socket.onopen = (event) => {
+                    log('Connection established', 'success');
+                    updateStatus('connected');
+                    reconnectAttempts = 0;
+                    
+                    // Update message timestamp
+                    const messageObj = JSON.parse(document.getElementById('json-message').value);
+                    if (messageObj.timestamp !== undefined) {
+                        messageObj.timestamp = performance.now();
+                        document.getElementById('json-message').value = JSON.stringify(messageObj, null, 2);
+                    }
+                };
+                
+                socket.onmessage = (event) => {
+                    log(`← Received: ${event.data}`, 'received');
+                    try {
+                        // Check if it's JSON and calculate roundtrip time if it has a timestamp
+                        const data = JSON.parse(event.data);
+                        if (data.timestamp) {
+                            const roundtrip = performance.now() - data.timestamp;
+                            log(`Round-trip time: ${roundtrip.toFixed(2)}ms`, 'info');
+                        }
+                    } catch (e) {
+                        // Not JSON or doesn't have timestamp, that's OK
+                    }
+                };
+                
+                socket.onclose = (event) => {
+                    if (event.wasClean) {
+                        log(`Connection closed cleanly, code=${event.code} reason=${event.reason}`, 'info');
+                    } else {
+                        log('Connection died', 'error');
+                        
+                        // Only attempt to reconnect if we're not manually disconnecting
+                        if (activeTab === 'direct-ws' && reconnectAttempts < 3) {
+                            reconnectAttempts++;
+                            log(`Attempting to reconnect (${reconnectAttempts}/3)...`, 'warning');
+                            clearTimeout(reconnectTimeout);
+                            reconnectTimeout = setTimeout(connect, 2000);
+                        }
+                    }
+                    
+                    socket = null;
+                    updateStatus('disconnected');
+                };
+                
+                socket.onerror = (error) => {
+                    log(`WebSocket Error: ${error}`, 'error');
+                };
+            } catch (err) {
+                log(`Failed to connect: ${err.message}`, 'error');
+                updateStatus('disconnected');
+            }
+        }
+        
+        // Disconnect from WebSocket
+        function disconnect() {
+            if (socket) {
+                log('Disconnecting...', 'info');
+                socket.close(1000, "User requested disconnect");
+                updateStatus('disconnected');
+            } else {
+                log('Not connected', 'warning');
+            }
+        }
+        
+        // Send a message over the WebSocket
+        function sendMessage() {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                log('Not connected, cannot send message', 'error');
+                return;
+            }
+            
+            try {
+                const jsonEditor = document.getElementById('json-message');
+                const messageObj = JSON.parse(jsonEditor.value);
+                
+                // Update timestamp if it exists
+                if (messageObj.timestamp !== undefined) {
+                    messageObj.timestamp = performance.now();
+                    jsonEditor.value = JSON.stringify(messageObj, null, 2);
+                }
+                
+                const message = JSON.stringify(messageObj);
+                socket.send(message);
+                log(`→ Sent: ${message}`, 'sent');
+            } catch (err) {
+                log(`Failed to send message: ${err.message}`, 'error');
+            }
+        }
+        
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                
+                // Do nothing if already active
+                if (tabId === activeTab) return;
+                
+                // Update active tab
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                document.getElementById(`${tabId}-content`).classList.add('active');
+                
+                // Update active tab variable
+                activeTab = tabId;
+                
+                // Update button states based on connection status
+                updateStatus(socket && socket.readyState === WebSocket.OPEN ? 'connected' : 'disconnected');
+                
+                log(`Switched to ${tabId} tab`, 'info');
+            });
+        });
+        
+        // Button event listeners
+        document.getElementById('direct-connect').addEventListener('click', connect);
+        document.getElementById('direct-disconnect').addEventListener('click', disconnect);
+        document.getElementById('django-connect').addEventListener('click', connect);
+        document.getElementById('django-disconnect').addEventListener('click', disconnect);
+        document.getElementById('custom-connect').addEventListener('click', connect);
+        document.getElementById('custom-disconnect').addEventListener('click', disconnect);
+        document.getElementById('send-message').addEventListener('click', sendMessage);
+        document.getElementById('clear-console').addEventListener('click', () => {
+            consoleEl.innerHTML = '';
+            log('Console cleared', 'info');
+        });
+        
+        // Preset message buttons
+        document.querySelectorAll('.preset').forEach(button => {
+            button.addEventListener('click', function() {
+                const messageObj = JSON.parse(this.getAttribute('data-message'));
+                if (messageObj.timestamp !== undefined) {
+                    messageObj.timestamp = performance.now();
+                }
+                document.getElementById('json-message').value = JSON.stringify(messageObj, null, 2);
+                log('Preset message loaded', 'info');
+            });
+        });
+        
+        // Auto-update timestamp in editor when it's focused
+        document.getElementById('json-message').addEventListener('focus', function() {
+            try {
+                const messageObj = JSON.parse(this.value);
+                if (messageObj.timestamp !== undefined) {
+                    messageObj.timestamp = performance.now();
+                    this.value = JSON.stringify(messageObj, null, 2);
+                }
+            } catch (e) {
+                // Ignore parsing errors while editing
+            }
+        });
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            log('WebSocket tester initialized', 'info');
+            updateStatus('disconnected');
+            
+            // Auto-connect on load (optional)
+            // connect();
+        });
+    </script>
+</body>
+</html> 

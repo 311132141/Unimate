@@ -36,7 +36,7 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         # Special handling for root path
         if self.path == '/' or self.path == '':
-            self.path = '/connected.html'
+            self.path = '/components/connected.html'
         
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
     
@@ -67,7 +67,7 @@ class ProxyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             
             # Special handling for root path after super().do_GET()
             if (self.path == '/' or self.path == '') and hasattr(self, 'path_handled') and not self.path_handled:
-                self.path = '/connected.html'
+                self.path = '/components/connected.html'
                 super().do_GET()
     
     def do_POST(self):
@@ -169,7 +169,7 @@ def start_server(use_proxy=False):
     
     try:
         with socketserver.TCPServer(("", port), Handler) as httpd:
-            url = f"http://localhost:{port}/connected.html"
+            url = f"http://localhost:{port}/components/connected.html"
             print(f"Server running at {url}")
             
             # Open the browser

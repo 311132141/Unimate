@@ -35,13 +35,13 @@ urlpatterns = [
     path('api/login/', login),
     path('api/route/', route),
     # Serve index.html for the root path and any other non-api path
-    re_path(r'^(?!api/).*$', TemplateView.as_view(template_name='index.html')),
+    re_path(r'^(?!api/).*$', TemplateView.as_view(template_name='views/index.html')),
     
     # Custom frontend file serving
     path('app/<str:filename>', serve_frontend_file, name='serve_frontend_file'),
     
     # Serve the connected.html as the root URL for convenience
-    path('', lambda request: serve_frontend_file(request, 'connected.html'), name='index'),
+    path('', lambda request: serve_frontend_file(request, 'components/connected.html'), name='index'),
 ] 
 
 # Serve static files during development

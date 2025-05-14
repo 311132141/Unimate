@@ -21,8 +21,8 @@ WebSocket Integration:
     - Test endpoint:     ws://localhost:8765 (direct standalone server)
   
   Test WebSocket functionality with:
-    - Browser:           http://localhost:8080/templates/websocket_test.html
-    - Python:            python backend/tests/websocket/full_test.py
+    - Browser:           http://localhost:8080/frontend/templates/tests/websocket_test.html
+    - Python:            python tests/unimate_system_test.py --websocket
 """
 
 import os

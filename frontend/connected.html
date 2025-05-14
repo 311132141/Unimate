@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unimate - Kiosk</title>
-    <!-- Three.js is not used by default in this merged version, can be added if 3D map is re-integrated -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
+    <link href="static/site.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
         integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
         /* Base styles from map_offline.html */
         body {
@@ -353,400 +353,157 @@
         <div class="search-container">
             <input type="text" class="search-input" placeholder="Find place">
         </div>
-        <div class="header-controls">
-            <span id="username-display" class="username-display hidden"></span>
-            <button id="main-login-button" class="action-button">Log in</button>
-        </div>
+        <button class="login-button" id="login-button">Log in</button>
     </header>
 
     <div class="main-container">
-        <aside class="sidebar">
-            <!-- This section will be dynamically populated with Timetable or generic Events -->
-            <section id="timetable-section" class="sidebar-section">
-                <h2 id="sidebar-title">Events</h2>
-                <div id="event-list-content" class="event-list">
-                    <!-- Placeholder for events/timetable -->
-                    <div class="event-item">
-                        <img src="https://via.placeholder.com/60" alt="Event thumbnail" class="event-thumbnail">
-                        <div class="event-title">Placeholder Event 1</div>
-                        <div class="event-meta">
-                            <span class="event-time">10:00 AM - 11:00 AM</span>
-                            <span class="event-organizer">By Campus Activities</span>
-                        </div>
-                    </div>
-                    <div class="event-item">
-                         <img src="https://via.placeholder.com/60" alt="Event thumbnail" class="event-thumbnail">
-                        <div class="event-title">Placeholder News Item</div>
-                        <div class="event-meta">
-                            <span class="event-time">2 hours ago</span>
-                            <span class="event-organizer">By University News</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-             <section id="actions-section" class="sidebar-section hidden">
-                <h2 style="margin-top:1rem;">Actions</h2>
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h2>Tech Events</h2>
                 <div class="event-list">
-                     <div class="event-item" id="print-button-container" style="padding:0;">
-                        <button id="print-timetable-button" class="modal-button modal-button-secondary" style="width: calc(100% - 2rem); margin: 1rem;">🖨️ Print Timetable</button>
+                    <!-- Tech Events -->
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Whatever event name bro</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
                     </div>
-                     <div class="event-item" id="refresh-button-container" style="padding:0;">
-                        <button id="refresh-data-button" class="modal-button modal-button-secondary" style="width: calc(100% - 2rem); margin: 1rem;">🔄 Refresh Data</button>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Whatever event name bro</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Whatever event name bro</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Whatever event name bro</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
                     </div>
                 </div>
-            </section>
-        </aside>
-
-        <div id="map-container-wrapper">
-            <div class="offline-map">
-                <div class="road highway-h"></div>
-                <div class="road highway-v"></div>
-                <div class="road road-1"></div>
-                <div class="road road-2"></div>
-                <div class="park-area"></div>
-                <div class="map-marker" style="top: 40%; left: 50%;" title="University Hub"></div>
-                <div class="map-marker restaurant" style="top: 35%; left: 48%;" title="Cafeteria"></div>
-                <div class="map-marker school" style="top: 45%; left: 45%;" title="Library"></div>
-                <div class="map-marker park" style="top: 38%; left: 55%;" title="Campus Green"></div>
             </div>
+
+            <div class="sidebar-section">
+                <h2>Tech News</h2>
+                <div class="event-list">
+                    <!-- Tech News -->
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Whatever event name bro</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Whatever event name bro</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Whatever event name bro</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="map-container">
+            <!-- Map will be loaded here -->
         </div>
     </div>
 
-    <!-- Login Modal -->
-    <div id="login-modal-overlay" class="modal-overlay hidden">
-        <div class="login-container">
-            <button id="close-login-modal-button" class="modal-close-button">&times;</button>
-            <h1 class="login-title">Unimate Login</h1>
-            <p class="login-subtitle">Tap your ID card or login with credentials</p>
-            <div id="login-status" class="status-message hidden"></div>
-            <form id="login-form">
-                <div class="form-group">
-                    <input type="text" id="username" class="form-input" placeholder="Username" required>
-                </div>
-                <div class="form-group">
-                    <input type="password" id="password" class="form-input" placeholder="Password" required>
-                </div>
-                <button type="submit" class="modal-button modal-button-primary">Login</button>
-            </form>
-            <button id="demo-mode-btn" class="modal-button modal-button-secondary" style="margin-top: 0.5rem;">
-                Try Demo Mode
-            </button>
-        </div>
+    <div class="login-modal" id="login-modal">
+        <h2>Login</h2>
+        <form class="login-form" id="login-form">
+            <input type="text" placeholder="Username" id="username" required>
+            <input type="password" placeholder="Password" id="password" required>
+            <button type="submit">Login</button>
+        </form>
     </div>
 
     <script>
-        // Global variables
-        let isConnectedMode = false;
-        let authToken = null;
-        let currentUsername = '';
-        // const mapScene, mapCamera, mapRenderer, currentRoute are not used for the offline map by default.
-        // They can be re-introduced if 3D map functionality is added back.
+        // Initialize Map (placeholder for now)
+        function initMap() {
+            const mapContainer = document.getElementById('map-container');
+            
+            // Use an iframe to show a Google Maps view for now
+            // This is just for demonstration. In production, use the Three.js map or Google Maps API
+            const iframe = document.createElement('iframe');
+            iframe.src = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5587.867820291437!2d174.76568619358058!3d-36.85292772229561!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6d0d47fb5a9ce6fb%3A0x500ef6143a29917!2sThe%20University%20of%20Auckland!5e0!3m2!1sen!2snz!4v1593482149224!5m2!1sen!2snz';
+            iframe.width = '100%';
+            iframe.height = '100%';
+            iframe.style.border = '0';
+            iframe.allowFullscreen = true;
+            mapContainer.appendChild(iframe);
+        }
 
-        // DOM Elements
-        const mainLoginButton = document.getElementById('main-login-button');
-        const loginModalOverlay = document.getElementById('login-modal-overlay');
-        const closeLoginModalButton = document.getElementById('close-login-modal-button');
-        const loginForm = document.getElementById('login-form');
-        const demoModeButton = document.getElementById('demo-mode-btn');
-        const usernameDisplay = document.getElementById('username-display');
-        const loginStatusEl = document.getElementById('login-status');
-        const eventListContent = document.getElementById('event-list-content');
-        const sidebarTitle = document.getElementById('sidebar-title');
-        const actionsSection = document.getElementById('actions-section');
-        const printTimetableButton = document.getElementById('print-timetable-button');
-        const refreshDataButton = document.getElementById('refresh-data-button');
-
-
-        // Sample demo event data (adapted for new display)
-        const demoEvents = [
-            {
-                id: 1, title: "ENGGEN705 Project Mtg", event_type: "class",
-                course: { code: "ENGGEN705", name: "Final Year Project" }, room: { building: "ENG", number: "Design Studio 1" },
-                start_time: new Date(Date.now() + 3600000).toISOString(), end_time: new Date(Date.now() + 7200000).toISOString(),
-                lecturer: "Dr. Project Lead", is_urgent: false, thumbnail: "https://via.placeholder.com/60/5473e8/fff?text=P"
-            },
-            {
-                id: 2, title: "Guest Lecture: AI Ethics", event_type: "event", // Changed to generic event
-                course: { code: "COMP invitado", name: "Special Event" }, room: { building: "OGGB", number: "Lecture Theatre 4" },
-                start_time: new Date(Date.now() + 86400000).toISOString(), end_time: new Date(Date.now() + 86400000 + 5400000).toISOString(),
-                lecturer: "Prof. Ethica", is_urgent: true, thumbnail: "https://via.placeholder.com/60/ef4444/fff?text=A"
-            },
-            {
-                id: 3, title: "Library Study Session", event_type: "class",
-                course: { code: "SELFSTUDY", name: "Quiet Study" }, room: { building: "LIB", number: "Floor 3 Quiet Zone" },
-                start_time: new Date(Date.now() + 2 * 3600000).toISOString(), end_time: new Date(Date.now() + 2 * 3600000 + 7200000).toISOString(),
-                lecturer: "N/A", is_urgent: false, thumbnail: "https://via.placeholder.com/60/34d399/fff?text=S"
-            }
-        ];
-        
-        const genericEvents = [
-             {
-                id: 101, title: "Campus Coffee Morning", event_type: "event",
-                course: { code: "SOCIAL", name: "Community Event" }, room: { building: "Student Hub", number: "Cafe" },
-                start_time: new Date(Date.now() + 4 * 3600000).toISOString(), end_time: new Date(Date.now() + 4 * 3600000 + 3600000).toISOString(),
-                lecturer: "Student Association", is_urgent: false, thumbnail: "https://via.placeholder.com/60/f59e0b/fff?text=C"
-            },
-            {
-                id: 102, title: "University Art Exhibition", event_type: "event",
-                course: { code: "ARTS", name: "Cultural Event" }, room: { building: "Fine Arts", number: "Gallery" },
-                start_time: new Date(Date.now() + 1.5 * 86400000).toISOString(), end_time: new Date(Date.now() + 1.5 * 86400000 + 10800000).toISOString(),
-                lecturer: "Arts Department", is_urgent: false, thumbnail: "https://via.placeholder.com/60/8b5cf6/fff?text=E"
-            }
-        ];
-
-
-        // --- Event Handlers ---
-        mainLoginButton.addEventListener('click', () => {
-            if (authToken) { // If logged in, this button is "Logout"
-                logout();
-            } else { // If not logged in, this button is "Log in"
-                loginModalOverlay.classList.remove('hidden');
-            }
+        // Show login modal
+        document.getElementById('login-button').addEventListener('click', function() {
+            document.getElementById('login-modal').style.display = 'block';
         });
 
-        closeLoginModalButton.addEventListener('click', () => {
-            loginModalOverlay.classList.add('hidden');
-            hideStatus();
-        });
-
-        loginModalOverlay.addEventListener('click', (e) => { // Close if clicked outside modal content
-            if (e.target === loginModalOverlay) {
-                loginModalOverlay.classList.add('hidden');
-                hideStatus();
-            }
-        });
-
-        loginForm.addEventListener('submit', async function (e) {
+        // Handle login form submission
+        document.getElementById('login-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            try {
-                showStatus('Logging in...', false, true); // true for modal status
-                // **MOCK API CALL FOR NOW**
-                // const response = await fetch('/api/login/', { /* ... */ });
-                // Simulate API delay and response
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                if (username === "test" && password === "test") {
-                    const fakeData = { access: "fake_jwt_token_12345", user: { username: username, events: demoEvents } };
-                    handleLoginSuccess(fakeData, username);
-                } else if (username === "user" && password === "pass") {
-                     const altEvents = [
-                        { id: 4, title: "Physics Lab Practical", event_type: "class", course: { code: "PHY101", name: "Physics I" }, room: { building: "SCI", number: "Lab 3B" }, start_time: new Date().toISOString(), end_time: new Date(Date.now() + 7200000).toISOString(), lecturer: "Dr. Quark", is_urgent: true, thumbnail: "https://via.placeholder.com/60/ec4899/fff?text=P" }
-                     ];
-                    const fakeData = { access: "another_fake_token", user: { username: username, events: altEvents } };
-                    handleLoginSuccess(fakeData, username);
-                }
-                else {
-                    throw new Error('Invalid credentials');
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                showStatus('Login failed: ' + error.message, true, true); // true for modal status, true for error
-            }
-        });
-
-        demoModeButton.addEventListener('click', () => {
-            isConnectedMode = false;
-            currentUsername = 'Demo User';
-            authToken = null; // No token in demo mode
-            localStorage.removeItem('unimate_token');
-            localStorage.removeItem('unimate_username');
             
-            showStatus('Demo Mode Activated!', false, true);
-            setTimeout(() => {
-                loginModalOverlay.classList.add('hidden');
-                hideStatus(); // Hide status after a delay
-                updateHeaderUI(true); // Update header for demo user
-                renderSidebarContent(demoEvents, "Your Demo Timetable");
-                actionsSection.classList.remove('hidden');
-            }, 1000);
-        });
-        
-        printTimetableButton.addEventListener('click', () => window.print());
-        refreshDataButton.addEventListener('click', () => {
-            if (isConnectedMode && authToken) {
-                fetchEvents();
-            } else if (!isConnectedMode && currentUsername === 'Demo User'){
-                 showStatus('Displaying demo data.', false);
-                 renderSidebarContent(demoEvents, "Your Demo Timetable");
-            } else {
-                 showStatus('Not logged in. Displaying generic events.', true);
-                 renderSidebarContent(genericEvents, "Upcoming Events");
-            }
-        });
-
-        // --- UI Update Functions ---
-        function updateHeaderUI(loggedIn, username = '') {
-            if (loggedIn) {
-                usernameDisplay.textContent = username || currentUsername;
-                usernameDisplay.classList.remove('hidden');
-                mainLoginButton.textContent = 'Log out';
-            } else {
-                usernameDisplay.classList.add('hidden');
-                mainLoginButton.textContent = 'Log in';
-            }
-        }
-
-        function handleLoginSuccess(data, username) {
-            authToken = data.access;
-            currentUsername = username; // Use the username from param, not data.user.username for mock
-            isConnectedMode = true;
-
-            localStorage.setItem('unimate_token', authToken);
-            localStorage.setItem('unimate_username', currentUsername);
-
-            showStatus('Login successful!', false, true); // Modal status
-            setTimeout(() => {
-                loginModalOverlay.classList.add('hidden');
-                hideStatus();
-                updateHeaderUI(true);
-                fetchEvents(); // Fetch real events or use data.user.events if provided
-                actionsSection.classList.remove('hidden');
-            }, 1000);
-        }
-        
-        function logout() {
-            authToken = null;
-            currentUsername = '';
-            isConnectedMode = false;
-            localStorage.removeItem('unimate_token');
-            localStorage.removeItem('unimate_username');
+            // Placeholder for authentication logic
+            console.log('Login attempt with:', username);
             
-            updateHeaderUI(false);
-            renderSidebarContent(genericEvents, "Upcoming Events"); // Show generic events after logout
-            actionsSection.classList.add('hidden');
-            // Optionally, clear form fields if needed, but modal is usually closed
-        }
-
-        function showStatus(message, isError = false, isModal = false) {
-            const el = isModal ? loginStatusEl : document.getElementById('global-status'); // Assuming a global status el if not modal
-            if (el) {
-                el.textContent = message;
-                el.className = isError ? 'status-message status-error' : 'status-message status-success';
-                el.classList.remove('hidden');
-            }
-        }
-
-        function hideStatus(isModal = false) {
-            const el = isModal ? loginStatusEl : document.getElementById('global-status');
-            if (el) el.classList.add('hidden');
-        }
-        
-        // --- Data Handling and Rendering ---
-        function formatDate(dateStr) {
-            if (!dateStr) return 'N/A';
-            const options = { weekday: 'short', month: 'short', day: 'numeric' };
-            try {
-                return new Date(dateStr).toLocaleDateString(undefined, options);
-            } catch (e) { return 'Invalid Date'; }
-        }
-
-        function formatTime(dateStr) {
-            if (!dateStr) return '';
-            const options = { hour: '2-digit', minute: '2-digit', hour12: true };
-             try {
-                return new Date(dateStr).toLocaleTimeString(undefined, options);
-            } catch (e) { return 'Invalid Time'; }
-        }
-
-        async function fetchEvents() {
-            if (!authToken) {
-                console.warn('No auth token. Cannot fetch events.');
-                showStatus('Authentication required to fetch events.', true);
-                renderSidebarContent(genericEvents, "Upcoming Events"); // Fallback to generic if not authenticated
-                return;
-            }
-            showStatus('Fetching your events...', false);
-            try {
-                // const response = await fetch('/api/events/', { headers: { 'Authorization': `Bearer ${authToken}` } });
-                // if (!response.ok) throw new Error(`API Error: ${response.status}`);
-                // const events = await response.json();
-                
-                // MOCK API call
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                const events = currentUsername === "test" ? demoEvents : [ // Simulate different events for different users
-                    { id: 4, title: "Advanced Algo Lecture", event_type: "class", course: { code: "CS301", name: "Algorithms" }, room: { building: "COMP", number: "LT101" }, start_time: new Date(Date.now() + 2*3600000).toISOString(), end_time: new Date(Date.now() + 9200000).toISOString(), lecturer: "Prof. Dijkstra", is_urgent: false, thumbnail: "https://via.placeholder.com/60/10b981/fff?text=A" },
-                    { id: 5, title: "Mid-Semester Exam: CS301", event_type: "exam", course: { code: "CS301", name: "Algorithms" }, room: { building: "EXAMHALL", number: "Hall A" }, start_time: new Date(Date.now() + 3 * 86400000).toISOString(), end_time: new Date(Date.now() + 3 * 86400000 + 7200000).toISOString(), lecturer: "N/A", is_urgent: true, thumbnail: "https://via.placeholder.com/60/ef4444/fff?text=E" }
-                ];
-
-                renderSidebarContent(events, "Your Timetable");
-                hideStatus();
-            } catch (error) {
-                console.error('Error fetching events:', error);
-                showStatus(`Error fetching events: ${error.message}`, true);
-                renderSidebarContent(demoEvents, "Your Timetable (Demo Fallback)"); // Fallback to demo on error
-            }
-        }
-
-        function renderSidebarContent(events, title = "Events") {
-            sidebarTitle.textContent = title;
-            eventListContent.innerHTML = ''; // Clear previous events
-
-            if (!events || events.length === 0) {
-                eventListContent.innerHTML = '<div class="event-item" style="text-align:center; color:#888;">No events to display.</div>';
-                return;
-            }
-
-            const sortedEvents = [...events].sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
-
-            sortedEvents.forEach((event, index) => {
-                const eventElement = document.createElement('div');
-                eventElement.className = 'event-item';
-                
-                const thumb = event.thumbnail || `https://via.placeholder.com/60/${event.event_type === 'exam' ? 'ef4444' : '5473e8'}/fff?text=${(event.course?.code || 'E').substring(0,1)}`;
-
-                let eventTypeLabel = event.event_type || 'event';
-                let eventTypeClass = `event-type-${eventTypeLabel.toLowerCase()}`;
-                 if (eventTypeLabel.toLowerCase() !== 'class' && eventTypeLabel.toLowerCase() !== 'exam') {
-                    eventTypeClass = 'event-type-generic'; // Fallback style for other event types
-                 }
-
-
-                eventElement.innerHTML = `
-                    <img src="${thumb}" alt="Thumb" class="event-thumbnail">
-                    <div class="event-title">
-                        ${currentUsername && isConnectedMode ? (index + 1) + '. ' : ''}${event.title || 'Untitled Event'}
-                        <span class="event-type-badge ${eventTypeClass}">${eventTypeLabel.toUpperCase()}</span>
-                    </div>
-                    <div class="event-meta">
-                        <span>Course: ${event.course?.code || 'N/A'} - ${event.course?.name || 'N/A'}</span>
-                        <span>Location: ${event.room?.building || ''} ${event.room?.number || 'TBA'}</span>
-                        <span>Time: ${formatDate(event.start_time)} &bull; ${formatTime(event.start_time)} - ${formatTime(event.end_time)}</span>
-                        ${event.lecturer ? `<span>Lecturer: ${event.lecturer}</span>` : ''}
-                    </div>
-                    ${event.is_urgent ? '<div class="event-urgent-badge">Urgent</div>' : ''}
-                `;
-                eventElement.addEventListener('click', () => {
-                    // Placeholder for event click action (e.g., show details on map, or modal)
-                    alert(`Event: ${event.title}\nLocation: ${event.room?.building} ${event.room?.number}`);
-                });
-                eventListContent.appendChild(eventElement);
-            });
-        }
-
-        // --- Initialization ---
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log("Unimate Kiosk UI Initialized");
-            const storedToken = localStorage.getItem('unimate_token');
-            const storedUsername = localStorage.getItem('unimate_username');
-
-            if (storedToken && storedUsername) {
-                authToken = storedToken;
-                currentUsername = storedUsername;
-                isConnectedMode = true;
-                updateHeaderUI(true);
-                fetchEvents(); // Fetch events for logged-in user
-                actionsSection.classList.remove('hidden');
-            } else {
-                updateHeaderUI(false);
-                renderSidebarContent(genericEvents, "Upcoming Events"); // Show generic events if not logged in
-                actionsSection.classList.add('hidden');
-            }
-            // Three.js map initialization (initMap()) would go here if re-enabled.
-            // For now, the offline map is purely CSS/HTML.
+            // Here you would typically call your authentication API
+            // For demo purposes, simulate a successful login with mock data
+            const mockLoginResponse = {
+                access: "mock_access_token_" + Math.random(),
+                refresh: "mock_refresh_token_" + Math.random(),
+                user: { username: username }
+            };
+            
+            // Store authentication data
+            localStorage.setItem('access_token', mockLoginResponse.access);
+            localStorage.setItem('refresh_token', mockLoginResponse.refresh);
+            localStorage.setItem('username', username);
+            
+            // Hide the modal
+            document.getElementById('login-modal').style.display = 'none';
+            
+            // Redirect to dashboard
+            window.location.href = 'dashboard.html';
         });
 
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            const modal = document.getElementById('login-modal');
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Initialize map when page loads
+        window.addEventListener('load', initMap);
     </script>
 </body>
+
 </html>

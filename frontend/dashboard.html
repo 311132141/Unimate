@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unimate - Dashboard</title>
+    <link href="static/site.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        .dashboard-container {
+            display: flex;
+            padding: 1rem;
+            gap: 1rem;
+            flex: 1;
+            overflow: auto;
+        }
+
+        .dashboard-panel {
+            background-color: #222;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.2rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .timetable-panel {
+            flex: 1;
+        }
+
+        .map-panel {
+            flex: 2;
+        }
+
+        #timetable {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .timetable-item {
+            background-color: #1a1a1a;
+            border-radius: 4px;
+            padding: 0.75rem;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .timetable-item.exam {
+            border-left-color: #f97316;
+        }
+
+        .timetable-item.urgent {
+            border: 1px solid #ef4444;
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .timetable-title {
+            font-weight: 500;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .timetable-info {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        #map-container {
+            width: 100%;
+            height: 500px;
+            background-color: #1a1a1a;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        #user-name {
+            font-weight: 500;
+            color: #ccc;
+        }
+
+        .active {
+            background-color: #2a2a2a;
+        }
+
+        .loading-indicator {
+            color: #888;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+        }
+
+        /* Status message styles */
+        #status-message {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            background-color: #065f46;
+            color: white;
+            z-index: 1000;
+            display: none;
+            animation: fadeIn 0.3s, fadeOut 0.3s 2.5s;
+            opacity: 0;
+        }
+
+        #status-message.error {
+            background-color: #7f1d1d;
+        }
+
+        #status-message.show {
+            display: block;
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Add styles for the different views */
+        .view-container {
+            flex: 1;
+            display: none; /* Hide all views by default */
+        }
+
+        .view-container.active {
+            display: flex; /* Show only the active view */
+        }
+
+        #dashboard-view {
+            flex-direction: row;
+            gap: 1rem;
+        }
+
+        #timetable-view, #map-view, #events-view, #settings-view {
+            flex-direction: column;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Unimate</h1>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Search for places, events or people">
+        </div>
+        <div class="user-profile">
+            <span id="user-name">User</span>
+            <button class="login-button" id="logout-button">Log out</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h2>Navigation</h2>
+                <div class="event-list">
+                    <div class="event-item active" data-view="dashboard-view">
+                        <div class="event-content">
+                            <div class="event-title">Dashboard</div>
+                        </div>
+                    </div>
+                    <div class="event-item" data-view="timetable-view">
+                        <div class="event-content">
+                            <div class="event-title">Timetable</div>
+                        </div>
+                    </div>
+                    <div class="event-item" data-view="map-view">
+                        <div class="event-content">
+                            <div class="event-title">Map</div>
+                        </div>
+                    </div>
+                    <div class="event-item" data-view="events-view">
+                        <div class="event-content">
+                            <div class="event-title">Events</div>
+                        </div>
+                    </div>
+                    <div class="event-item" data-view="settings-view">
+                        <div class="event-content">
+                            <div class="event-title">Settings</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Different view containers -->
+        <div id="dashboard-view" class="view-container active">
+            <div class="dashboard-panel timetable-panel">
+                <h2 class="panel-title">Your Timetable</h2>
+                <div id="timetable">
+                    <!-- Timetable will be rendered here by app.js -->
+                    <div class="loading-indicator">Loading your timetable...</div>
+                </div>
+            </div>
+            <div class="dashboard-panel map-panel">
+                <h2 class="panel-title">Campus Map</h2>
+                <div id="map-container">
+                    <!-- 3D Map will be rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <div id="timetable-view" class="view-container">
+            <div class="dashboard-panel" style="flex:1;">
+                <h2 class="panel-title">Full Timetable</h2>
+                <div id="full-timetable">
+                    <div class="loading-indicator">Loading your complete timetable...</div>
+                    <!-- Will be populated with the same data as the dashboard timetable -->
+                </div>
+            </div>
+        </div>
+
+        <div id="map-view" class="view-container">
+            <div class="dashboard-panel" style="flex:1;">
+                <h2 class="panel-title">Campus Map</h2>
+                <div id="fullscreen-map-container" style="width:100%; height:80vh;">
+                    <!-- Will be initialized with a copy of the dashboard map -->
+                </div>
+                <div class="map-controls" style="margin-top:1rem;">
+                    <button class="login-button" id="reset-view-button">Reset View</button>
+                    <div style="margin-top:0.5rem;">Click and drag to rotate the map view</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="events-view" class="view-container">
+            <div class="dashboard-panel" style="flex:1;">
+                <h2 class="panel-title">Campus Events</h2>
+                <div id="events-list">
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-title">Tech Week Exhibition</div>
+                            <div class="event-meta">Tomorrow at 10:00 AM · Engineering Building</div>
+                            <div class="event-meta">Join us for demonstrations of student projects</div>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-title">Guest Lecture: AI Ethics</div>
+                            <div class="event-meta">May 20 at 2:00 PM · Lecture Hall 4</div>
+                            <div class="event-meta">Prof. Maria Johnson from Stanford University</div>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-title">Career Fair 2025</div>
+                            <div class="event-meta">June 5 at 9:00 AM · Student Center</div>
+                            <div class="event-meta">Over 50 companies will be present</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="settings-view" class="view-container">
+            <div class="dashboard-panel" style="flex:1;">
+                <h2 class="panel-title">Settings</h2>
+                <div style="padding:1rem;">
+                    <div style="margin-bottom:1.5rem;">
+                        <h3 style="margin-top:0;">User Settings</h3>
+                        <div style="margin-bottom:1rem;">
+                            <label style="display:block; margin-bottom:0.5rem;">Display Name</label>
+                            <input type="text" class="search-input" style="max-width:300px;" value="John Doe">
+                        </div>
+                        <div style="margin-bottom:1rem;">
+                            <label style="display:block; margin-bottom:0.5rem;">Email Notifications</label>
+                            <label style="display:flex; align-items:center; gap:0.5rem;">
+                                <input type="checkbox" checked> Receive notifications about timetable changes
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <h3>Application Settings</h3>
+                        <div style="margin-bottom:1rem;">
+                            <label style="display:block; margin-bottom:0.5rem;">Theme</label>
+                            <select class="search-input" style="max-width:300px;">
+                                <option selected>Dark Theme</option>
+                                <option>Light Theme</option>
+                                <option>System Default</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button class="login-button">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="status-message"></div>
+
+    <script>
+        // Global variables for map
+        let mapScene, mapCamera, mapRenderer;
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let cameraRotation = { x: 0, y: 0 };
+        
+        // Variables for fullscreen map
+        let fullscreenMapScene, fullscreenMapCamera, fullscreenMapRenderer;
+        let fullscreenCameraRotation = { x: 0, y: 0 };
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const token = localStorage.getItem('access_token');
+            const username = localStorage.getItem('username');
+            
+            if (token) {
+                // Update UI for logged-in user
+                if (username) {
+                    document.getElementById('user-name').textContent = username;
+                }
+                
+                // Initialize 3D map
+                initDashboardMap();
+                
+                // Fetch and load timetable data
+                fetchTimetableData();
+                
+                // Setup navigation
+                setupNavigation();
+            } else {
+                // Redirect to login page if not authenticated
+                window.location.href = 'index.html';
+            }
+            
+            // Set up logout functionality
+            document.getElementById('logout-button').addEventListener('click', function() {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                localStorage.removeItem('username');
+                window.location.href = 'index.html';
+            });
+        });
+        
+        function initDashboardMap() {
+            const container = document.getElementById('map-container');
+            
+            // Create scene
+            mapScene = new THREE.Scene();
+            mapScene.background = new THREE.Color(0x1a1a1a);
+            
+            // Create camera
+            mapCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            mapCamera.position.set(5, 5, 5);
+            mapCamera.lookAt(0, 0, 0);
+            
+            // Create renderer
+            mapRenderer = new THREE.WebGLRenderer({ antialias: true });
+            mapRenderer.setSize(container.clientWidth, container.clientHeight);
+            mapRenderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(mapRenderer.domElement);
+            
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            mapScene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(1, 2, 1);
+            mapScene.add(directionalLight);
+            
+            // Create campus model (simplified for demo)
+            createCampusModel();
+            
+            // Add event listeners for map interaction
+            container.addEventListener('mousedown', onMapMouseDown);
+            document.addEventListener('mousemove', onMapMouseMove);
+            document.addEventListener('mouseup', onMapMouseUp);
+            window.addEventListener('resize', onWindowResize);
+            
+            // Start animation loop
+            animateMap();
+            
+            // Show success message
+            showStatusMessage('3D map loaded successfully');
+        }
+        
+        function createCampusModel() {
+            // Floor/ground
+            const floorGeometry = new THREE.PlaneGeometry(20, 20);
+            const floorMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1a5e1a,
+                roughness: 0.8
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -0.1;
+            mapScene.add(floor);
+            
+            // Buildings
+            createBuilding(0, 0, 3, 2, 2, 0x333333, "Main Building");
+            createBuilding(-5, 0, 2, 2, 1.5, 0x555555, "Library");
+            createBuilding(4, -3, 2.5, 1.5, 1, 0x444444, "Science Block");
+            createBuilding(-3, 4, 1.5, 3, 1.2, 0x666666, "Engineering");
+            createBuilding(5, 4, 1, 1, 3, 0x777777, "Tower");
+            
+            // Roads
+            const roadMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
+            
+            // Horizontal road
+            const horizontalRoadGeo = new THREE.PlaneGeometry(18, 1);
+            const horizontalRoad = new THREE.Mesh(horizontalRoadGeo, roadMaterial);
+            horizontalRoad.rotation.x = -Math.PI / 2;
+            horizontalRoad.position.y = -0.05;
+            horizontalRoad.position.z = 2;
+            mapScene.add(horizontalRoad);
+            
+            // Vertical road
+            const verticalRoadGeo = new THREE.PlaneGeometry(1, 18);
+            const verticalRoad = new THREE.Mesh(verticalRoadGeo, roadMaterial);
+            verticalRoad.rotation.x = -Math.PI / 2;
+            verticalRoad.position.y = -0.05;
+            verticalRoad.position.x = -2;
+            mapScene.add(verticalRoad);
+        }
+        
+        function createBuilding(x, z, width, depth, height, color, name) {
+            const geometry = new THREE.BoxGeometry(width, height, depth);
+            const material = new THREE.MeshStandardMaterial({ color: color });
+            const building = new THREE.Mesh(geometry, material);
+            
+            // Position the building with bottom at y=0
+            building.position.set(x, height/2, z);
+            
+            // Add to scene
+            mapScene.add(building);
+            
+            // Add building label
+            /*
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 256;
+            canvas.height = 64;
+            context.fillStyle = '#ffffff';
+            context.font = '24px Arial';
+            context.fillText(name, 10, 40);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const labelMaterial = new THREE.SpriteMaterial({ map: texture });
+            const label = new THREE.Sprite(labelMaterial);
+            label.position.set(x, height + 0.5, z);
+            label.scale.set(2, 0.5, 1);
+            mapScene.add(label);
+            */
+        }
+        
+        function animateMap() {
+            requestAnimationFrame(animateMap);
+            mapRenderer.render(mapScene, mapCamera);
+        }
+        
+        function onMapMouseDown(event) {
+            isDragging = true;
+            previousMousePosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
+        }
+        
+        function onMapMouseMove(event) {
+            if (!isDragging) return;
+            
+            const deltaMove = {
+                x: event.clientX - previousMousePosition.x,
+                y: event.clientY - previousMousePosition.y
+            };
+            
+            // Rotate camera based on mouse movement
+            cameraRotation.y += deltaMove.x * 0.01;
+            cameraRotation.x += deltaMove.y * 0.01;
+            
+            // Limit vertical rotation
+            cameraRotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraRotation.x));
+            
+            // Calculate camera position
+            const distance = mapCamera.position.length();
+            mapCamera.position.x = distance * Math.sin(cameraRotation.y) * Math.cos(cameraRotation.x);
+            mapCamera.position.z = distance * Math.cos(cameraRotation.y) * Math.cos(cameraRotation.x);
+            mapCamera.position.y = distance * Math.sin(cameraRotation.x);
+            
+            mapCamera.lookAt(0, 0, 0);
+            
+            previousMousePosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
+        }
+        
+        function onMapMouseUp() {
+            isDragging = false;
+        }
+        
+        function onWindowResize() {
+            const container = document.getElementById('map-container');
+            mapCamera.aspect = container.clientWidth / container.clientHeight;
+            mapCamera.updateProjectionMatrix();
+            mapRenderer.setSize(container.clientWidth, container.clientHeight);
+        }
+        
+        function fetchTimetableData() {
+            const token = localStorage.getItem('access_token');
+            
+            // Demo data for testing
+            const demoEvents = [
+                {
+                    "id": 1,
+                    "title": "ENGGEN205 Lecture",
+                    "event_type": "class",
+                    "course": { "code": "ENGGEN205", "name": "Engineering Mechanics" },
+                    "room": { "building": "ENG", "number": "340" },
+                    "start_time": new Date().toISOString(),
+                    "end_time": new Date(Date.now() + 3600000).toISOString(),
+                    "lecturer": "Dr. Smith",
+                    "is_urgent": false
+                },
+                {
+                    "id": 2,
+                    "title": "STATS100 Mid-term Exam",
+                    "event_type": "exam",
+                    "course": { "code": "STATS100", "name": "Statistics" },
+                    "room": { "building": "ENG", "number": "401" },
+                    "start_time": new Date(Date.now() + 86400000).toISOString(),
+                    "end_time": new Date(Date.now() + 86400000 + 7200000).toISOString(),
+                    "lecturer": "N/A",
+                    "is_urgent": true
+                }
+            ];
+            
+            // For demo purposes, use the demo events directly
+            renderFallbackTimetable(demoEvents);
+        }
+        
+        function renderFallbackTimetable(events) {
+            const timetable = document.getElementById('timetable');
+            timetable.innerHTML = '';
+            
+            if (!events || events.length === 0) {
+                timetable.innerHTML = '<div class="empty-state">No events scheduled.</div>';
+                return;
+            }
+            
+            events.forEach(event => {
+                const item = document.createElement('div');
+                item.className = `timetable-item ${event.event_type === 'exam' ? 'exam' : ''}`;
+                if (event.is_urgent) {
+                    item.classList.add('urgent');
+                }
+                
+                const startTime = new Date(event.start_time);
+                const endTime = new Date(event.end_time);
+                
+                item.innerHTML = `
+                    <div class="timetable-title">${event.title}</div>
+                    <div class="timetable-info">
+                        <div>${event.course ? event.course.code : 'N/A'} - ${event.room ? `${event.room.building} ${event.room.number}` : 'TBA'}</div>
+                        <div>${startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${endTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                    </div>
+                `;
+                
+                timetable.appendChild(item);
+            });
+        }
+        
+        function showStatusMessage(message, isError = false) {
+            const statusEl = document.getElementById('status-message');
+            statusEl.textContent = message;
+            statusEl.classList.toggle('error', isError);
+            statusEl.classList.add('show');
+            
+            setTimeout(() => {
+                statusEl.classList.remove('show');
+            }, 3000);
+        }
+
+        function setupNavigation() {
+            // Get all navigation items
+            const navItems = document.querySelectorAll('.event-item[data-view]');
+            
+            // Add click event to each item
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    navItems.forEach(navItem => navItem.classList.remove('active'));
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Get the view to show
+                    const viewId = this.getAttribute('data-view');
+                    
+                    // Hide all views
+                    const views = document.querySelectorAll('.view-container');
+                    views.forEach(view => view.classList.remove('active'));
+                    
+                    // Show selected view
+                    document.getElementById(viewId).classList.add('active');
+                    
+                    // Special handling for map view
+                    if (viewId === 'map-view') {
+                        // Initialize fullscreen map if not already done
+                        if (!document.querySelector('#fullscreen-map-container canvas')) {
+                            initFullscreenMap();
+                        }
+                    }
+                    
+                    // Special handling for timetable view
+                    if (viewId === 'timetable-view') {
+                        // Copy timetable data to full timetable view
+                        const fullTimetable = document.getElementById('full-timetable');
+                        const timetable = document.getElementById('timetable');
+                        
+                        // Only copy if the source timetable has content
+                        if (timetable.children.length > 0 && !timetable.querySelector('.loading-indicator')) {
+                            fullTimetable.innerHTML = timetable.innerHTML;
+                        } else {
+                            // If no data yet, show loading and fetch data again
+                            renderFallbackTimetable(demoEvents);
+                        }
+                    }
+                });
+            });
+            
+            // Initialize reset view button for the map
+            const resetViewButton = document.getElementById('reset-view-button');
+            if (resetViewButton) {
+                resetViewButton.addEventListener('click', function() {
+                    // Reset camera position
+                    if (fullscreenMapCamera) {
+                        fullscreenMapCamera.position.set(5, 5, 5);
+                        fullscreenMapCamera.lookAt(0, 0, 0);
+                        fullscreenCameraRotation = { x: 0, y: 0 };
+                    }
+                });
+            }
+        }
+
+        function initFullscreenMap() {
+            const container = document.getElementById('fullscreen-map-container');
+            
+            // Create scene
+            fullscreenMapScene = new THREE.Scene();
+            fullscreenMapScene.background = new THREE.Color(0x1a1a1a);
+            
+            // Create camera
+            fullscreenMapCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            fullscreenMapCamera.position.set(5, 5, 5);
+            fullscreenMapCamera.lookAt(0, 0, 0);
+            
+            // Create renderer
+            fullscreenMapRenderer = new THREE.WebGLRenderer({ antialias: true });
+            fullscreenMapRenderer.setSize(container.clientWidth, container.clientHeight);
+            fullscreenMapRenderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(fullscreenMapRenderer.domElement);
+            
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            fullscreenMapScene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(1, 2, 1);
+            fullscreenMapScene.add(directionalLight);
+            
+            // Create the same campus model
+            createFullscreenCampusModel();
+            
+            // Add event listeners
+            container.addEventListener('mousedown', onFullscreenMapMouseDown);
+            document.addEventListener('mousemove', onFullscreenMapMouseMove);
+            document.addEventListener('mouseup', onFullscreenMapMouseUp);
+            window.addEventListener('resize', onFullscreenWindowResize);
+            
+            // Start animation
+            animateFullscreenMap();
+        }
+
+        function createFullscreenCampusModel() {
+            // Floor/ground
+            const floorGeometry = new THREE.PlaneGeometry(20, 20);
+            const floorMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1a5e1a,
+                roughness: 0.8
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -0.1;
+            fullscreenMapScene.add(floor);
+            
+            // Buildings
+            createFullscreenBuilding(0, 0, 3, 2, 2, 0x333333, "Main Building");
+            createFullscreenBuilding(-5, 0, 2, 2, 1.5, 0x555555, "Library");
+            createFullscreenBuilding(4, -3, 2.5, 1.5, 1, 0x444444, "Science Block");
+            createFullscreenBuilding(-3, 4, 1.5, 3, 1.2, 0x666666, "Engineering");
+            createFullscreenBuilding(5, 4, 1, 1, 3, 0x777777, "Tower");
+            
+            // Roads
+            const roadMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
+            
+            // Horizontal road
+            const horizontalRoadGeo = new THREE.PlaneGeometry(18, 1);
+            const horizontalRoad = new THREE.Mesh(horizontalRoadGeo, roadMaterial);
+            horizontalRoad.rotation.x = -Math.PI / 2;
+            horizontalRoad.position.y = -0.05;
+            horizontalRoad.position.z = 2;
+            fullscreenMapScene.add(horizontalRoad);
+            
+            // Vertical road
+            const verticalRoadGeo = new THREE.PlaneGeometry(1, 18);
+            const verticalRoad = new THREE.Mesh(verticalRoadGeo, roadMaterial);
+            verticalRoad.rotation.x = -Math.PI / 2;
+            verticalRoad.position.y = -0.05;
+            verticalRoad.position.x = -2;
+            fullscreenMapScene.add(verticalRoad);
+        }
+
+        function createFullscreenBuilding(x, z, width, depth, height, color, name) {
+            const geometry = new THREE.BoxGeometry(width, height, depth);
+            const material = new THREE.MeshStandardMaterial({ color: color });
+            const building = new THREE.Mesh(geometry, material);
+            
+            // Position the building with bottom at y=0
+            building.position.set(x, height/2, z);
+            
+            // Add to scene
+            fullscreenMapScene.add(building);
+        }
+
+        // Fullscreen map interaction
+        let isFullscreenDragging = false;
+        let fullscreenPreviousMousePosition = { x: 0, y: 0 };
+
+        function onFullscreenMapMouseDown(event) {
+            isFullscreenDragging = true;
+            fullscreenPreviousMousePosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
+        }
+
+        function onFullscreenMapMouseMove(event) {
+            if (!isFullscreenDragging) return;
+            
+            const deltaMove = {
+                x: event.clientX - fullscreenPreviousMousePosition.x,
+                y: event.clientY - fullscreenPreviousMousePosition.y
+            };
+            
+            // Rotate camera based on mouse movement
+            fullscreenCameraRotation.y += deltaMove.x * 0.01;
+            fullscreenCameraRotation.x += deltaMove.y * 0.01;
+            
+            // Limit vertical rotation
+            fullscreenCameraRotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, fullscreenCameraRotation.x));
+            
+            // Calculate camera position
+            const distance = fullscreenMapCamera.position.length();
+            fullscreenMapCamera.position.x = distance * Math.sin(fullscreenCameraRotation.y) * Math.cos(fullscreenCameraRotation.x);
+            fullscreenMapCamera.position.z = distance * Math.cos(fullscreenCameraRotation.y) * Math.cos(fullscreenCameraRotation.x);
+            fullscreenMapCamera.position.y = distance * Math.sin(fullscreenCameraRotation.x);
+            
+            fullscreenMapCamera.lookAt(0, 0, 0);
+            
+            fullscreenPreviousMousePosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
+        }
+
+        function onFullscreenMapMouseUp() {
+            isFullscreenDragging = false;
+        }
+
+        function onFullscreenWindowResize() {
+            const container = document.getElementById('fullscreen-map-container');
+            fullscreenMapCamera.aspect = container.clientWidth / container.clientHeight;
+            fullscreenMapCamera.updateProjectionMatrix();
+            fullscreenMapRenderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        function animateFullscreenMap() {
+            requestAnimationFrame(animateFullscreenMap);
+            if (fullscreenMapRenderer) {
+                fullscreenMapRenderer.render(fullscreenMapScene, fullscreenMapCamera);
+            }
+        }
+    </script>
+</body>
+
+</html> 

@@ -5,116 +5,357 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unimate - University Wayfinding</title>
-    <!-- Try different paths for CSS to ensure it's loaded -->
-    <link href="/static/site.css" rel="stylesheet">
-    <link href="static/site.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-    <!-- Fallback inline styles to ensure timetable displays properly -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        /* Emergency fallback styles */
-        .event-exam {
-            border-left: 4px solid #f97316 !important;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #fff;
+            background-color: #1a1a1a;
         }
 
-        .event-class {
-            border-left: 4px solid #3b82f6 !important;
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #333;
+            position: relative;
+            z-index: 1000;
         }
 
-        .event-urgent {
-            border: 1px solid #ef4444 !important;
-            background-color: #fef2f2 !important;
+        header h1 {
+            font-size: 1.8rem;
+            margin: 0;
         }
 
-        @media print {
+        .search-container {
+            flex-grow: 1;
+            max-width: 600px;
+            margin: 0 1rem;
+        }
 
-            nav,
-            button,
-            #login-screen {
-                display: none !important;
-            }
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            border: none;
+            background-color: #333;
+            color: #fff;
+            padding-left: 2.5rem;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>');
+            background-repeat: no-repeat;
+            background-position: 0.75rem center;
+        }
 
-            #dashboard {
-                display: block !important;
-            }
+        .login-button {
+            background-color: #5473e8;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            white-space: nowrap;
+        }
 
-            #map-container,
-            .print-hide {
-                display: none !important;
-            }
+        .login-button:hover {
+            background-color: #435ecc;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: #1a1a1a;
+            overflow-y: auto;
+            border-right: 1px solid #333;
+            padding-bottom: 1rem;
+        }
+
+        .sidebar-section {
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-section h2 {
+            padding: 1rem;
+            margin: 0;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #333;
+            color: #eee;
+        }
+
+        .event-list {
+            padding: 0;
+        }
+
+        .event-item {
+            padding: 1rem;
+            border-bottom: 1px solid #222;
+            cursor: pointer;
+            color: #ccc;
+            display: flex;
+        }
+
+        .event-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-item:hover {
+            background-color: #252525;
+        }
+
+        .event-content {
+            flex: 1;
+        }
+
+        .event-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            color: #fff;
+        }
+
+        .event-meta {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 0.25rem;
+        }
+
+        .event-thumbnail {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-left: 10px;
+            border: 1px solid #333;
+        }
+
+        #map-container {
+            flex: 1;
+            height: 100%;
+            background-color: #222;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .login-modal {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(26, 26, 26, 0.9);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid #333;
+            width: 320px;
+            z-index: 2000;
+            display: none;
+        }
+
+        .login-modal h2 {
+            margin-top: 0;
+            color: #fff;
+            text-align: center;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .login-form input {
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background-color: #222;
+            color: #fff;
+        }
+
+        .login-form button {
+            background-color: #5473e8;
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .login-form button:hover {
+            background-color: #435ecc;
         }
     </style>
 </head>
 
-<body class="bg-gray-100">
-    <!-- Login Screen -->
-    <div id="login-screen" class="min-h-screen flex items-center justify-center">
-        <div class="bg-white p-8 rounded-lg shadow-lg w-96">
-            <h1 class="text-3xl font-bold text-center mb-8">Unimate</h1>
-            <div class="text-center mb-4">
-                <p class="text-gray-600">Tap your ID card or login with credentials</p>
+<body>
+    <header>
+        <h1>Map</h1>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Find place">
+        </div>
+        <button class="login-button" id="showLogin">Log in</button>
+    </header>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h2>Tech Events</h2>
+                <div class="event-list">
+                    <!-- Tech Events -->
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Whatever event name bro</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Whatever event name bro</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Whatever event name bro</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Whatever event name bro</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                </div>
             </div>
-            <form id="login-form" class="space-y-4">
-                <div>
-                    <input type="text" id="username" placeholder="Username"
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+
+            <div class="sidebar-section">
+                <h2>Tech News</h2>
+                <div class="event-list">
+                    <!-- Tech News -->
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Whatever event name bro</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Whatever event name bro</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Whatever event name bro</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
                 </div>
-                <div>
-                    <input type="password" id="password" placeholder="Password"
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
-                </div>
-                <button type="submit"
-                    class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                    Login
-                </button>
-            </form>
+            </div>
+        </div>
+
+        <div id="map-container">
+            <!-- Map will be loaded here -->
         </div>
     </div>
 
-    <!-- Dashboard -->
-    <div id="dashboard" class="hidden min-h-screen">
-        <nav class="bg-white shadow-lg">
-            <div class="max-w-7xl mx-auto px-4">
-                <div class="flex justify-between h-16">
-                    <div class="flex items-center">
-                        <h1 class="text-xl font-bold">Unimate</h1>
-                    </div>
-                    <div class="flex items-center">
-                        <span id="user-name" class="mr-4"></span>
-                        <button id="logout-btn" class="text-gray-600 hover:text-gray-800">Logout</button>
-                    </div>
-                </div>
-            </div>
-        </nav>
-
-        <div class="max-w-7xl mx-auto px-4 py-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Timetable -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h2 class="text-xl font-bold mb-4">Timetable</h2>
-                    <div id="timetable" class="space-y-4"></div>
-                </div>
-
-                <!-- 3D Map -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h2 class="text-xl font-bold mb-4">3D Map</h2>
-                    <div id="map-container" class="h-96"></div>
-                </div>
-            </div>
-
-            <!-- News Panel -->
-            <div class="mt-6 bg-white rounded-lg shadow p-6">
-                <h2 class="text-xl font-bold mb-4">News & Events</h2>
-                <div id="news-panel" class="space-y-4"></div>
-            </div>
-        </div>
+    <div class="login-modal" id="loginModal">
+        <h2>Login</h2>
+        <form class="login-form" id="loginForm">
+            <input type="text" placeholder="Username" id="username" required>
+            <input type="password" placeholder="Password" id="password" required>
+            <button type="submit">Login</button>
+        </form>
     </div>
 
-    <!-- Try different paths for JS to ensure it's loaded -->
-    <script src="/static/js/app.js"></script>
-    <script src="static/js/app.js"></script>
+    <script>
+        // Initialize Map (placeholder for now)
+        function initMap() {
+            const mapContainer = document.getElementById('map-container');
+            
+            // Use an iframe to show a Google Maps view for now
+            // This is just for demonstration. In production, use the Three.js map or Google Maps API
+            const iframe = document.createElement('iframe');
+            iframe.src = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5587.867820291437!2d174.76568619358058!3d-36.85292772229561!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6d0d47fb5a9ce6fb%3A0x500ef6143a29917!2sThe%20University%20of%20Auckland!5e0!3m2!1sen!2snz!4v1593482149224!5m2!1sen!2snz';
+            iframe.width = '100%';
+            iframe.height = '100%';
+            iframe.style.border = '0';
+            iframe.allowFullscreen = true;
+            mapContainer.appendChild(iframe);
+        }
+
+        // Show login modal
+        document.getElementById('showLogin').addEventListener('click', function() {
+            document.getElementById('loginModal').style.display = 'block';
+        });
+
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Placeholder for authentication logic
+            console.log('Login attempt with:', username);
+            
+            // Here you would typically call your authentication API
+            // For demo purposes, simulate a successful login with mock data
+            const mockLoginResponse = {
+                access: "mock_access_token_" + Math.random(),
+                refresh: "mock_refresh_token_" + Math.random(),
+                user: { username: username }
+            };
+            
+            // Store authentication data
+            localStorage.setItem('access_token', mockLoginResponse.access);
+            localStorage.setItem('refresh_token', mockLoginResponse.refresh);
+            localStorage.setItem('username', username);
+            
+            // Hide the modal
+            document.getElementById('loginModal').style.display = 'none';
+            
+            // Redirect to dashboard
+            window.location.href = 'dashboard.html';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            const modal = document.getElementById('loginModal');
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Initialize map when page loads
+        window.addEventListener('load', initMap);
+    </script>
 </body>
 
 </html>

@@ -4,232 +4,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unimate - Connected Mode</title>
-    <!-- Add Three.js library with integrity hash to avoid MIME issues -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
+    <title>Unimate - Kiosk</title>
+    <!-- Three.js is not used by default in this merged version, can be added if 3D map is re-integrated -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
         integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
     <style>
-        /* Inline all necessary styles */
+        /* Base styles from map_offline.html */
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f3f4f6;
             margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #fff;
+            background-color: #1a1a1a; /* Dark background */
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem; /* Reduced padding */
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #333;
+            position: relative;
+            z-index: 1000;
+        }
+
+        header h1 {
+            font-size: 1.5rem; /* Reduced font size */
+            margin: 0;
+        }
+
+        .search-container {
+            flex-grow: 1;
+            max-width: 600px;
+            margin: 0 1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            border: none;
+            background-color: #333;
+            color: #fff;
+            padding-left: 2.5rem;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>');
+            background-repeat: no-repeat;
+            background-position: 0.75rem center;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+        }
+
+        .username-display {
+            font-weight: 500;
+            color: #ccc; /* Lighter color for username */
+            margin-right: 1rem;
+        }
+
+        .action-button { /* Combined login/logout button style */
+            background-color: #5473e8;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .action-button:hover {
+            background-color: #435ecc;
+        }
+
+        /* Main content area */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden; /* Prevent scrollbars on main container */
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: #1a1a1a;
+            overflow-y: auto; /* Allow sidebar to scroll if content overflows */
+            border-right: 1px solid #333;
+            padding-bottom: 1rem; /* Space at the bottom of sidebar */
+        }
+
+        .sidebar-section {
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-section h2 {
+            padding: 1rem;
+            margin: 0;
+            font-size: 1.2rem; /* Slightly larger section titles */
+            border-bottom: 1px solid #333;
+            color: #eee;
+        }
+
+        .event-list { /* Used for timetable and generic events */
             padding: 0;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1.5rem;
-        }
-
-        .header {
-            background-color: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .header h1 {
-            font-size: 1.875rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            color: #111827;
-        }
-
-        .header p {
-            color: #6b7280;
-            margin-bottom: 1rem;
-        }
-
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-        }
-
-        @media (min-width: 768px) {
-            .content-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        .timetable-container,
-        .map-container {
-            background-color: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem;
-        }
-
-        .timetable-container h2,
-        .map-container h2 {
-            font-size: 1.25rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            color: #111827;
-        }
-
-        .timetable {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        #map-container {
-            height: 400px;
-            width: 100%;
-            background-color: #f9fafb;
-            border-radius: 0.375rem;
-            overflow: hidden;
-        }
-
-        .event {
+        .event-item { /* For individual events in sidebar */
             padding: 1rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.5rem;
+            border-bottom: 1px solid #222;
             cursor: pointer;
-            transition: background-color 0.2s;
-            margin-bottom: 0.75rem;
+            color: #ccc; /* Default text color for items */
+        }
+        .event-item:last-child {
+            border-bottom: none;
         }
 
-        .event:hover {
-            background-color: #f9fafb;
-        }
-
-        .event-class {
-            border-left: 4px solid #3b82f6;
-        }
-
-        .event-exam {
-            border-left: 4px solid #f97316;
-        }
-
-        .event-urgent {
-            border: 1px solid #ef4444;
-            background-color: #fef2f2;
-        }
-
-        .event-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .event-title-container {
-            flex: 1;
-        }
-
-        .event-title-row {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.25rem;
+        .event-item:hover {
+            background-color: #252525; /* Slightly darker hover */
         }
 
         .event-title {
-            font-weight: bold;
-            font-size: 1.125rem;
-            color: #111827;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            color: #fff; /* Brighter title */
         }
 
-        .event-type {
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .event-type-class {
-            background-color: #dbeafe;
-            color: #1e40af;
-        }
-
-        .event-type-exam {
-            background-color: #ffedd5;
-            color: #9a3412;
-        }
-
-        .event-course {
-            font-size: 0.875rem;
-            color: #4b5563;
+        .event-meta { /* For time, organizer, course, room */
+            font-size: 0.8rem;
+            color: #888;
             margin-bottom: 0.25rem;
         }
-
-        .event-time {
-            font-size: 0.875rem;
-            color: #6b7280;
+        .event-meta span, .event-meta div {
+             display: block; /* Stack meta info */
+             margin-bottom: 0.1rem;
         }
 
-        .event-right {
-            text-align: right;
+        .event-thumbnail {
+            width: 60px; /* Slightly smaller thumbnail */
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            float: right;
+            margin-left: 10px;
+            border: 1px solid #333;
         }
-
-        .event-lecturer {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #4b5563;
-        }
-
-        .event-urgent-badge {
-            display: inline-block;
-            background-color: #ef4444;
-            color: white;
-            font-size: 0.75rem;
-            padding: 0.125rem 0.5rem;
-            border-radius: 0.25rem;
-            margin-top: 0.25rem;
-        }
-
-        .button {
-            display: block;
-            width: 100%;
-            margin-top: 1rem;
-            padding: 0.5rem 1rem;
-            color: #1f2937;
+        
+        .event-type-badge {
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
             font-weight: 600;
-            border: none;
-            border-radius: 0.375rem;
-            cursor: pointer;
-            font-size: 0.875rem;
-            transition: background-color 0.2s;
-            text-align: center;
+            text-transform: uppercase;
+            margin-left: 0.5rem;
+            display: inline-block;
+        }
+        .event-type-class { background-color: #2563eb; color: white; }
+        .event-type-exam { background-color: #f97316; color: white; }
+        .event-urgent-badge {
+            background-color: #ef4444; color: white;
+            padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.7rem;
+            display: inline-block; margin-top: 0.3rem;
         }
 
-        .button-primary {
-            background-color: #3b82f6;
-            color: white;
-        }
 
-        .button-primary:hover {
-            background-color: #2563eb;
-        }
-
-        .button-secondary {
-            background-color: #f3f4f6;
-        }
-
-        .button-secondary:hover {
-            background-color: #e5e7eb;
-        }
-
-        /* Login screen styles */
-        .login-screen {
-            min-height: 100vh;
+        /* Map area from map_offline.html */
+        #map-container-wrapper { /* New wrapper for the map to control its display */
+            flex: 1;
+            height: 100%;
+            background-color: #222; /* Darker map background */
+            overflow: hidden;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
         }
+        
+        .offline-map {
+            width: 90%;
+            height: 90%;
+            position: relative;
+            background-image: 
+                linear-gradient(rgba(40, 120, 40, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(40, 120, 40, 0.3) 1px, transparent 1px),
+                linear-gradient(rgba(40, 120, 40, 0.1) 0.5px, transparent 0.5px),
+                linear-gradient(90deg, rgba(40, 120, 40, 0.1) 0.5px, transparent 0.5px);
+            background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+            border: 2px solid #444;
+        }
+        
+        .offline-map::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle, transparent 50%, #222 100%);
+            pointer-events: none;
+        }
+        
+        .road { position: absolute; background-color: rgba(150, 150, 150, 0.7); transform: translate(-50%, -50%); }
+        .highway-h { height: 15px; width: 70%; top: 50%; left: 50%; border-radius: 10px; }
+        .highway-v { width: 15px; height: 70%; top: 50%; left: 30%; border-radius: 10px; }
+        .road-1 { height: 8px; width: 40%; top: 30%; left: 60%; border-radius: 5px; }
+        .road-2 { width: 8px; height: 30%; top: 60%; left: 70%; border-radius: 5px; }
+        
+        .map-marker {
+            position: absolute; width: 20px; height: 20px;
+            background-color: #5473e8; border-radius: 50%;
+            transform: translate(-50%, -50%); border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 10;
+        }
+        .map-marker.restaurant { background-color: #ff7700; }
+        .map-marker.school { background-color: #8855ff; }
+        .map-marker.park { background-color: #44bb44; }
+        .park-area {
+            position: absolute; width: 200px; height: 150px;
+            background-color: rgba(40, 120, 40, 0.3); border-radius: 50%;
+            top: 35%; left: 60%; transform: translate(-50%, -50%);
+        }
 
-        .login-container {
-            background-color: white;
+        /* Login Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Darker overlay */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000; /* Ensure modal is on top */
+        }
+
+        .login-container { /* Re-styled for modal */
+            background-color: #2a2a2a; /* Dark modal background */
             padding: 2rem;
             border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
             width: 100%;
             max-width: 24rem;
+            color: #fff; /* Text color for modal */
         }
 
         .login-title {
@@ -237,12 +258,11 @@
             font-weight: bold;
             margin-bottom: 1.5rem;
             text-align: center;
-            color: #111827;
         }
 
         .login-subtitle {
             text-align: center;
-            color: #6b7280;
+            color: #aaa; /* Lighter subtitle color */
             margin-bottom: 1.5rem;
         }
 
@@ -253,104 +273,152 @@
         .form-input {
             display: block;
             width: 100%;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #d1d5db;
+            padding: 0.75rem; /* Increased padding */
+            border: 1px solid #444; /* Darker border */
             border-radius: 0.375rem;
             font-size: 0.875rem;
             box-sizing: border-box;
+            background-color: #333; /* Dark input background */
+            color: #fff; /* Light text color for input */
         }
 
         .form-input:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: #5473e8; /* Highlight color */
+            box-shadow: 0 0 0 3px rgba(84, 115, 232, 0.3);
         }
+        
+        .modal-button { /* For buttons inside modal */
+            display: block;
+            width: 100%;
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            color: white;
+            font-weight: 600;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.2s;
+            text-align: center;
+        }
+        .modal-button-primary { background-color: #5473e8; }
+        .modal-button-primary:hover { background-color: #435ecc; }
+        .modal-button-secondary { background-color: #444; } /* Darker secondary button */
+        .modal-button-secondary:hover { background-color: #555; }
+        .modal-close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
 
         .status-message {
             padding: 0.75rem;
             border-radius: 0.375rem;
             margin-bottom: 1rem;
             font-size: 0.875rem;
+            text-align: center;
         }
+        .status-error { background-color: #7f1d1d; color: #fecaca; border: 1px solid #b91c1c;} /* Darker error */
+        .status-success { background-color: #065f46; color: #d1fae5; border: 1px solid #047857;}
 
-        .status-error {
-            background-color: #fee2e2;
-            color: #b91c1c;
-        }
+        .hidden { display: none !important; }
 
-        .status-success {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .username-display {
-            font-weight: 500;
-            color: #4b5563;
-        }
-
-        .logout-link {
-            color: #6b7280;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .logout-link:hover {
-            color: #111827;
-        }
-
-        /* Utility classes */
-        .hidden {
-            display: none !important;
-        }
-
+        /* Print styles adapted for dark theme */
         @media print {
-            body {
-                background-color: white;
-            }
+            body { background-color: white !important; color: black !important; }
+            header, .sidebar, .main-container { background-color: white !important; border-color: #ccc !important; }
+            header h1, .sidebar-section h2, .event-title, .event-meta, .search-input, .username-display { color: black !important; }
+            .search-input { background-color: #eee !important; }
+            .event-item { border-color: #eee !important; background-color: white !important; }
+            .event-item:hover { background-color: #f9f9f9 !important; }
+            .action-button, #login-modal-overlay, #map-container-wrapper /* Hide map for printing timetable */ { display: none !important; }
+            .sidebar { width: 100% !important; border-right: none !important; }
+             .event-list { page-break-inside: auto; }
+            .event-item { page-break-inside: avoid; }
 
-            .container {
-                padding: 0;
-            }
-
-            .header {
-                box-shadow: none;
-                padding: 1rem 0;
-                margin-bottom: 1rem;
-            }
-
-            .timetable-container {
-                box-shadow: none;
-                padding: 0;
-            }
-
-            .event {
-                break-inside: avoid;
-                page-break-inside: avoid;
-            }
-
-            .button,
-            .navbar,
-            .map-container {
-                display: none;
-            }
         }
     </style>
 </head>
 
 <body>
-    <!-- Login Screen -->
-    <div id="login-screen" class="login-screen">
+    <header>
+        <h1>Map</h1>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Find place">
+        </div>
+        <div class="header-controls">
+            <span id="username-display" class="username-display hidden"></span>
+            <button id="main-login-button" class="action-button">Log in</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <!-- This section will be dynamically populated with Timetable or generic Events -->
+            <section id="timetable-section" class="sidebar-section">
+                <h2 id="sidebar-title">Events</h2>
+                <div id="event-list-content" class="event-list">
+                    <!-- Placeholder for events/timetable -->
+                    <div class="event-item">
+                        <img src="https://via.placeholder.com/60" alt="Event thumbnail" class="event-thumbnail">
+                        <div class="event-title">Placeholder Event 1</div>
+                        <div class="event-meta">
+                            <span class="event-time">10:00 AM - 11:00 AM</span>
+                            <span class="event-organizer">By Campus Activities</span>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                         <img src="https://via.placeholder.com/60" alt="Event thumbnail" class="event-thumbnail">
+                        <div class="event-title">Placeholder News Item</div>
+                        <div class="event-meta">
+                            <span class="event-time">2 hours ago</span>
+                            <span class="event-organizer">By University News</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+             <section id="actions-section" class="sidebar-section hidden">
+                <h2 style="margin-top:1rem;">Actions</h2>
+                <div class="event-list">
+                     <div class="event-item" id="print-button-container" style="padding:0;">
+                        <button id="print-timetable-button" class="modal-button modal-button-secondary" style="width: calc(100% - 2rem); margin: 1rem;">🖨️ Print Timetable</button>
+                    </div>
+                     <div class="event-item" id="refresh-button-container" style="padding:0;">
+                        <button id="refresh-data-button" class="modal-button modal-button-secondary" style="width: calc(100% - 2rem); margin: 1rem;">🔄 Refresh Data</button>
+                    </div>
+                </div>
+            </section>
+        </aside>
+
+        <div id="map-container-wrapper">
+            <div class="offline-map">
+                <div class="road highway-h"></div>
+                <div class="road highway-v"></div>
+                <div class="road road-1"></div>
+                <div class="road road-2"></div>
+                <div class="park-area"></div>
+                <div class="map-marker" style="top: 40%; left: 50%;" title="University Hub"></div>
+                <div class="map-marker restaurant" style="top: 35%; left: 48%;" title="Cafeteria"></div>
+                <div class="map-marker school" style="top: 45%; left: 45%;" title="Library"></div>
+                <div class="map-marker park" style="top: 38%; left: 55%;" title="Campus Green"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal-overlay" class="modal-overlay hidden">
         <div class="login-container">
-            <h1 class="login-title">Unimate</h1>
+            <button id="close-login-modal-button" class="modal-close-button">&times;</button>
+            <h1 class="login-title">Unimate Login</h1>
             <p class="login-subtitle">Tap your ID card or login with credentials</p>
-            <div id="login-status" class="hidden status-message"></div>
+            <div id="login-status" class="status-message hidden"></div>
             <form id="login-form">
                 <div class="form-group">
                     <input type="text" id="username" class="form-input" placeholder="Username" required>
@@ -358,43 +426,11 @@
                 <div class="form-group">
                     <input type="password" id="password" class="form-input" placeholder="Password" required>
                 </div>
-                <button type="submit" class="button button-primary">Login</button>
+                <button type="submit" class="modal-button modal-button-primary">Login</button>
             </form>
-            <button id="demo-mode-btn" class="button button-secondary" style="margin-top: 0.5rem;">
+            <button id="demo-mode-btn" class="modal-button modal-button-secondary" style="margin-top: 0.5rem;">
                 Try Demo Mode
             </button>
-        </div>
-    </div>
-
-    <!-- Dashboard Screen -->
-    <div id="dashboard" class="hidden">
-        <div class="container">
-            <div class="header">
-                <div class="navbar">
-                    <h1>Unimate</h1>
-                    <div>
-                        <span id="username-display" class="username-display"></span>
-                        <a id="logout-btn" class="logout-link" style="margin-left: 1rem;">Logout</a>
-                    </div>
-                </div>
-                <p id="connection-status">Connected to Unimate backend</p>
-            </div>
-
-            <div class="content-grid">
-                <!-- Timetable Section -->
-                <div class="timetable-container">
-                    <h2>Your Timetable</h2>
-                    <div id="timetable" class="space-y-4"></div>
-                </div>
-
-                <!-- 3D Map Section -->
-                <div class="map-container">
-                    <h2>3D Map</h2>
-                    <div id="map-container"></div>
-                    <p class="text-sm text-gray-500 mt-2">Click on a timetable event to show the route to your class.
-                    </p>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -403,773 +439,314 @@
         let isConnectedMode = false;
         let authToken = null;
         let currentUsername = '';
-        let mapScene = null;
-        let mapCamera = null;
-        let mapRenderer = null;
-        let currentRoute = null;
+        // const mapScene, mapCamera, mapRenderer, currentRoute are not used for the offline map by default.
+        // They can be re-introduced if 3D map functionality is added back.
 
-        // Sample demo event data
+        // DOM Elements
+        const mainLoginButton = document.getElementById('main-login-button');
+        const loginModalOverlay = document.getElementById('login-modal-overlay');
+        const closeLoginModalButton = document.getElementById('close-login-modal-button');
+        const loginForm = document.getElementById('login-form');
+        const demoModeButton = document.getElementById('demo-mode-btn');
+        const usernameDisplay = document.getElementById('username-display');
+        const loginStatusEl = document.getElementById('login-status');
+        const eventListContent = document.getElementById('event-list-content');
+        const sidebarTitle = document.getElementById('sidebar-title');
+        const actionsSection = document.getElementById('actions-section');
+        const printTimetableButton = document.getElementById('print-timetable-button');
+        const refreshDataButton = document.getElementById('refresh-data-button');
+
+
+        // Sample demo event data (adapted for new display)
         const demoEvents = [
             {
-                id: 1,
-                title: "ENGGEN205 Lecture",
-                event_type: "class",
-                course: { code: "ENGGEN205", name: "Engineering Mechanics" },
-                room: { building: "ENG", number: "340" },
-                start_time: new Date().toISOString(),
-                end_time: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
-                lecturer: "Dr. Smith",
-                is_urgent: false
+                id: 1, title: "ENGGEN705 Project Mtg", event_type: "class",
+                course: { code: "ENGGEN705", name: "Final Year Project" }, room: { building: "ENG", number: "Design Studio 1" },
+                start_time: new Date(Date.now() + 3600000).toISOString(), end_time: new Date(Date.now() + 7200000).toISOString(),
+                lecturer: "Dr. Project Lead", is_urgent: false, thumbnail: "https://via.placeholder.com/60/5473e8/fff?text=P"
             },
             {
-                id: 2,
-                title: "STATS100 Mid-term Exam",
-                event_type: "exam",
-                course: { code: "STATS100", name: "Statistics" },
-                room: { building: "ENG", number: "401" },
-                start_time: new Date(Date.now() + 86400000).toISOString(), // Tomorrow
-                end_time: new Date(Date.now() + 86400000 + 7200000).toISOString(), // Tomorrow + 2 hours
-                lecturer: "N/A",
-                is_urgent: true
+                id: 2, title: "Guest Lecture: AI Ethics", event_type: "event", // Changed to generic event
+                course: { code: "COMP invitado", name: "Special Event" }, room: { building: "OGGB", number: "Lecture Theatre 4" },
+                start_time: new Date(Date.now() + 86400000).toISOString(), end_time: new Date(Date.now() + 86400000 + 5400000).toISOString(),
+                lecturer: "Prof. Ethica", is_urgent: true, thumbnail: "https://via.placeholder.com/60/ef4444/fff?text=A"
             },
             {
-                id: 3,
-                title: "COMPSCI101 Lab",
-                event_type: "class",
-                course: { code: "COMPSCI101", name: "Computer Science" },
-                room: { building: "SCI", number: "201" },
-                start_time: new Date(Date.now() + 2 * 86400000).toISOString(), // 2 days from now
-                end_time: new Date(Date.now() + 2 * 86400000 + 5400000).toISOString(), // 2 days + 1.5 hours
-                lecturer: "Prof. Ada",
-                is_urgent: false
+                id: 3, title: "Library Study Session", event_type: "class",
+                course: { code: "SELFSTUDY", name: "Quiet Study" }, room: { building: "LIB", number: "Floor 3 Quiet Zone" },
+                start_time: new Date(Date.now() + 2 * 3600000).toISOString(), end_time: new Date(Date.now() + 2 * 3600000 + 7200000).toISOString(),
+                lecturer: "N/A", is_urgent: false, thumbnail: "https://via.placeholder.com/60/34d399/fff?text=S"
+            }
+        ];
+        
+        const genericEvents = [
+             {
+                id: 101, title: "Campus Coffee Morning", event_type: "event",
+                course: { code: "SOCIAL", name: "Community Event" }, room: { building: "Student Hub", number: "Cafe" },
+                start_time: new Date(Date.now() + 4 * 3600000).toISOString(), end_time: new Date(Date.now() + 4 * 3600000 + 3600000).toISOString(),
+                lecturer: "Student Association", is_urgent: false, thumbnail: "https://via.placeholder.com/60/f59e0b/fff?text=C"
+            },
+            {
+                id: 102, title: "University Art Exhibition", event_type: "event",
+                course: { code: "ARTS", name: "Cultural Event" }, room: { building: "Fine Arts", number: "Gallery" },
+                start_time: new Date(Date.now() + 1.5 * 86400000).toISOString(), end_time: new Date(Date.now() + 1.5 * 86400000 + 10800000).toISOString(),
+                lecturer: "Arts Department", is_urgent: false, thumbnail: "https://via.placeholder.com/60/8b5cf6/fff?text=E"
             }
         ];
 
-        // Sample route data for demo mode
-        const demoRoutes = {
-            "ENG340": [
-                [0, 0, 0],
-                [2, 0, 1],
-                [4, 0, 2],
-                [4, 1, 3],
-                [5, 1, 4]
-            ],
-            "ENG401": [
-                [0, 0, 0],
-                [2, 0, 1],
-                [4, 0, 2],
-                [4, 1, 3],
-                [4, 2, 4],
-                [6, 2, 5]
-            ],
-            "SCI201": [
-                [0, 0, 0],
-                [-2, 0, 1],
-                [-4, 0, 2],
-                [-4, 1, 3]
-            ]
-        };
 
-        // Format date to display
-        function formatDate(date) {
-            const options = { weekday: 'short', month: 'short', day: 'numeric' };
-            return new Date(date).toLocaleDateString(undefined, options);
-        }
-
-        // Format time to display
-        function formatTime(date) {
-            const options = { hour: '2-digit', minute: '2-digit' };
-            return new Date(date).toLocaleTimeString(undefined, options);
-        }
-
-        // Show status message
-        function showStatus(message, isError = false) {
-            const statusEl = document.getElementById('login-status');
-            statusEl.textContent = message;
-            statusEl.className = isError ? 'status-message status-error' : 'status-message status-success';
-            statusEl.classList.remove('hidden');
-        }
-
-        // Hide status message
-        function hideStatus() {
-            const statusEl = document.getElementById('login-status');
-            statusEl.classList.add('hidden');
-        }
-
-        // Initialize 3D Map
-        function initMap() {
-            console.log("Initializing 3D map");
-            const container = document.getElementById('map-container');
-            if (!container) {
-                console.error("Map container not found!");
-                return;
+        // --- Event Handlers ---
+        mainLoginButton.addEventListener('click', () => {
+            if (authToken) { // If logged in, this button is "Logout"
+                logout();
+            } else { // If not logged in, this button is "Log in"
+                loginModalOverlay.classList.remove('hidden');
             }
+        });
 
-            // Scene setup
-            mapScene = new THREE.Scene();
-            mapCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-            mapRenderer = new THREE.WebGLRenderer({ antialias: true });
-            mapRenderer.setSize(container.clientWidth, container.clientHeight);
-            mapRenderer.setClearColor(0xf9fafb); // Light gray background
-            container.innerHTML = '';
-            container.appendChild(mapRenderer.domElement);
+        closeLoginModalButton.addEventListener('click', () => {
+            loginModalOverlay.classList.add('hidden');
+            hideStatus();
+        });
 
-            // Add ambient light
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-            mapScene.add(ambientLight);
-
-            // Add directional light
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(5, 10, 7);
-            mapScene.add(directionalLight);
-
-            // Add a simple floor
-            const floorGeometry = new THREE.PlaneGeometry(20, 20, 10, 10);
-            const floorMaterial = new THREE.MeshStandardMaterial({
-                color: 0xe5e7eb,
-                wireframe: false,
-                flatShading: true
-            });
-            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-            floor.rotation.x = -Math.PI / 2;
-            floor.position.y = -0.1;
-            mapScene.add(floor);
-
-            // Add simple building representation
-            addSimpleBuilding("ENG", 2, 4, 0);
-            addSimpleBuilding("SCI", -4, 2, 0);
-            addSimpleBuilding("LIB", 0, 0, 0);
-
-            // Position camera
-            mapCamera.position.set(10, 10, 10);
-            mapCamera.lookAt(0, 0, 0);
-
-            // Handle window resize
-            window.addEventListener('resize', () => {
-                if (!mapRenderer || !mapCamera) return;
-                mapCamera.aspect = container.clientWidth / container.clientHeight;
-                mapCamera.updateProjectionMatrix();
-                mapRenderer.setSize(container.clientWidth, container.clientHeight);
-            });
-
-            // Animation loop
-            function animate() {
-                if (!mapRenderer) return;
-                requestAnimationFrame(animate);
-                mapRenderer.render(mapScene, mapCamera);
+        loginModalOverlay.addEventListener('click', (e) => { // Close if clicked outside modal content
+            if (e.target === loginModalOverlay) {
+                loginModalOverlay.classList.add('hidden');
+                hideStatus();
             }
-            animate();
-            console.log("3D map initialized successfully");
-        }
+        });
 
-        // Add a simple building to the map
-        function addSimpleBuilding(name, x, z, y = 0) {
-            const height = 4;
-            const width = 4;
-            const depth = 4;
-
-            // Building geometry and material
-            const geometry = new THREE.BoxGeometry(width, height, depth);
-            const material = new THREE.MeshStandardMaterial({
-                color: name === "ENG" ? 0x3b82f6 : name === "SCI" ? 0x10b981 : 0x93c5fd,
-                transparent: true,
-                opacity: 0.7
-            });
-
-            const building = new THREE.Mesh(geometry, material);
-            building.position.set(x, y + height / 2, z);
-            mapScene.add(building);
-
-            // Add text label
-            const canvas = document.createElement('canvas');
-            canvas.width = 256;
-            canvas.height = 256;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = 'white';
-            ctx.font = 'Bold 40px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(name, 128, 128);
-
-            const texture = new THREE.CanvasTexture(canvas);
-            const labelMaterial = new THREE.SpriteMaterial({ map: texture });
-            const label = new THREE.Sprite(labelMaterial);
-            label.position.set(x, y + height + 0.5, z);
-            label.scale.set(2, 1, 1);
-            mapScene.add(label);
-        }
-
-        // Fit camera to display the route
-        function fitCameraToRoute(points) {
-            if (!points || points.length === 0) return;
-
-            // Calculate the center and bounding box of the route
-            const center = new THREE.Vector3();
-            points.forEach(point => {
-                center.add(point);
-            });
-            center.divideScalar(points.length);
-
-            // Position camera to look at center from an angle
-            const offset = new THREE.Vector3(5, 5, 5);
-            mapCamera.position.copy(center).add(offset);
-            mapCamera.lookAt(center);
-        }
-
-        // Create a complete route between all classes in sequence
-        function createCompleteRoute(events) {
-            console.log("Creating complete route for", events.length, "events");
-
-            // Sort events by start time
-            const sortedEvents = [...events].sort((a, b) =>
-                new Date(a.start_time) - new Date(b.start_time)
-            );
-
-            // Skip if no events or only one event
-            if (sortedEvents.length <= 1) {
-                console.log("Not enough events to create a route");
-                return;
-            }
-
-            // Collect all room codes in sequence
-            const rooms = sortedEvents
-                .filter(event => event.room && event.room.building)
-                .map(event => `${event.room.building}${event.room.number}`);
-
-            console.log("Route sequence:", rooms);
-            console.log("Events in sequence:", sortedEvents.map(e => e.title));
-
-            // Create a combined route
-            let combinedRoute = [];
-
-            if (isConnectedMode && authToken) {
-                // In connected mode, fetch all routes and combine them
-                fetchAllRoutes(sortedEvents)
-                    .then(routes => {
-                        if (routes && routes.length > 0) {
-                            console.log("Using real routes from API");
-                            visualizeMultipleRoutes(routes, sortedEvents);
-                        } else {
-                            // Fall back to demo routes
-                            console.log("API routes failed, using demo routes");
-                            createDemoMultiRoute(sortedEvents);
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error fetching routes:", error);
-                        // Fall back to demo routes
-                        console.log("Error with API routes, using demo routes");
-                        createDemoMultiRoute(sortedEvents);
-                    });
-            } else {
-                // In demo mode, use predefined routes
-                console.log("Using demo routes (not connected to API)");
-                createDemoMultiRoute(sortedEvents);
-            }
-        }
-
-        // Create a demo multi-route between events
-        function createDemoMultiRoute(events) {
-            // Create points for each location
-            let allPoints = [];
-            let colors = [];
-            const markerPositions = [];
-            const markerLabels = [];
-
-            // Start at kiosk point
-            const startPoint = [0, 0, 0];
-            allPoints.push(startPoint);
-            markerPositions.push(new THREE.Vector3(startPoint[0], startPoint[2] || 0.1, startPoint[1]));
-            markerLabels.push("START");
-
-            // For each event, create a route to its location
-            for (let i = 0; i < events.length; i++) {
-                const event = events[i];
-                if (!event.room) continue;
-
-                const roomCode = `${event.room.building}${event.room.number}`;
-                let route = getDemoRoute(roomCode);
-
-                if (i > 0) {
-                    // Remove the first point to avoid duplicating positions
-                    route = route.slice(1);
-                }
-
-                // Add route points
-                allPoints = allPoints.concat(route);
-
-                // Add event location marker
-                const eventPoint = route[route.length - 1];
-                markerPositions.push(new THREE.Vector3(eventPoint[0], eventPoint[2] || 0.1, eventPoint[1]));
-                markerLabels.push(`${i + 1}: ${event.course?.code || 'Class'}`);
-
-                // Add this route's color (different color for each segment)
-                const segmentColor = getColorForSegment(i);
-                for (let j = 0; j < route.length; j++) {
-                    colors.push(segmentColor);
-                }
-            }
-
-            visualizeMultiRoute(allPoints, colors, markerPositions, markerLabels);
-        }
-
-        // Get color for route segment
-        function getColorForSegment(index) {
-            const colors = [
-                0xff3333, // red
-                0x3366ff, // blue
-                0x33cc33, // green
-                0xff9900, // orange
-                0x9933ff  // purple
-            ];
-            return colors[index % colors.length];
-        }
-
-        // Visualize a multi-segment route
-        function visualizeMultiRoute(points, colors, markerPositions, markerLabels) {
-            console.log("Visualizing route with", points.length, "points and", markerPositions.length, "markers");
-            console.log("Marker labels:", markerLabels);
-
-            // Clear existing route
-            clearRoute();
-
-            if (!points || points.length < 2) {
-                console.warn('Not enough points for route');
-                return;
-            }
-
-            // Create a group for all route objects
-            currentRoute = new THREE.Group();
-
-            // Create points for the route
-            const routePoints = points.map(coords =>
-                new THREE.Vector3(coords[0], coords[2] || 0.1, coords[1])
-            );
-
-            // Create line segments
-            const lineGeometry = new THREE.BufferGeometry().setFromPoints(routePoints);
-            const lineMaterial = new THREE.LineBasicMaterial({ color: 0xff3333, linewidth: 3 });
-            const routeLine = new THREE.Line(lineGeometry, lineMaterial);
-            currentRoute.add(routeLine);
-
-            // Add markers for each position
-            const markerGeometry = new THREE.SphereGeometry(0.2, 16, 16);
-
-            markerPositions.forEach((position, index) => {
-                // Different color for start, middle, and end points
-                let markerColor;
-                if (index === 0) {
-                    markerColor = 0x00ff00; // Green for start
-                } else if (index === markerPositions.length - 1) {
-                    markerColor = 0xff0000; // Red for end
-                } else {
-                    markerColor = 0xffcc00; // Yellow for intermediate points
-                }
-
-                const markerMaterial = new THREE.MeshBasicMaterial({ color: markerColor });
-                const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-                marker.position.copy(position);
-                currentRoute.add(marker);
-
-                // Add text label
-                addTextLabel(position, markerLabels[index]);
-            });
-
-            // Add the route group to the scene
-            mapScene.add(currentRoute);
-
-            // Adjust camera to see the entire route
-            fitCameraToRoute(routePoints);
-        }
-
-        // Add text label above a position
-        function addTextLabel(position, text) {
-            if (!text) return;
-
-            const canvas = document.createElement('canvas');
-            canvas.width = 256;
-            canvas.height = 128;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = 'white';
-            ctx.font = 'Bold 24px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(text, 128, 64);
-
-            const texture = new THREE.CanvasTexture(canvas);
-            const labelMaterial = new THREE.SpriteMaterial({ map: texture });
-            const label = new THREE.Sprite(labelMaterial);
-            label.position.set(position.x, position.y + 0.5, position.z);
-            label.scale.set(1.5, 0.75, 1);
-            currentRoute.add(label);
-        }
-
-        // Fetch all routes between events
-        async function fetchAllRoutes(events) {
-            if (!isConnectedMode || !authToken || events.length <= 1) {
-                return null;
-            }
-
-            try {
-                const routes = [];
-                let from = 'kiosk-1'; // Start from kiosk
-
-                // For each event, get route from previous location
-                for (const event of events) {
-                    if (!event.room) continue;
-
-                    const to = `${event.room.building}${event.room.number}`;
-
-                    const response = await fetch(`/api/route/?from=${from}&to=${to}`, {
-                        headers: {
-                            'Authorization': `Bearer ${authToken}`
-                        }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`API returned ${response.status}`);
-                    }
-
-                    const routeData = await response.json();
-
-                    if (routeData && routeData.features && routeData.features.length > 0) {
-                        routes.push(routeData.features[0].geometry.coordinates);
-                    }
-
-                    // The destination becomes the origin for the next segment
-                    from = to;
-                }
-
-                return routes;
-            } catch (error) {
-                console.error('Error fetching routes:', error);
-                return null;
-            }
-        }
-
-        // Visualize multiple routes between events
-        function visualizeMultipleRoutes(routes, events) {
-            // Combine all routes into one
-            let allPoints = [];
-            let colors = [];
-            const markerPositions = [];
-            const markerLabels = [];
-
-            // Add start marker
-            const firstRoute = routes[0];
-            if (firstRoute && firstRoute.length > 0) {
-                const startPoint = firstRoute[0];
-                markerPositions.push(new THREE.Vector3(startPoint[0], startPoint[2] || 0.1, startPoint[1]));
-                markerLabels.push("START");
-            }
-
-            // Process each route
-            routes.forEach((route, i) => {
-                if (!route || route.length < 2) return;
-
-                // If not first route, remove first point to avoid duplicate
-                const routePoints = i > 0 ? route.slice(1) : route;
-
-                // Add to all points
-                allPoints = allPoints.concat(routePoints);
-
-                // Add this route's color
-                const segmentColor = getColorForSegment(i);
-                for (let j = 0; j < routePoints.length; j++) {
-                    colors.push(segmentColor);
-                }
-
-                // Add event marker at the end of the route
-                const endPoint = route[route.length - 1];
-                markerPositions.push(new THREE.Vector3(endPoint[0], endPoint[2] || 0.1, endPoint[1]));
-                markerLabels.push(`${i + 1}: ${events[i].course?.code || 'Class'}`);
-            });
-
-            visualizeMultiRoute(allPoints, colors, markerPositions, markerLabels);
-        }
-
-        // Handle event click to show route
-        function showEventDetails(event) {
-            // Show event details alert
-            alert(`${event.title}\nLocation: ${event.room ? `${event.room.building} ${event.room.number}` : 'TBA'}\nTime: ${formatDate(event.start_time)} ${formatTime(event.start_time)} - ${formatTime(event.end_time)}\nLecturer: ${event.lecturer || 'N/A'}`);
-        }
-
-        // Get demo route for room
-        function getDemoRoute(roomCode) {
-            // Try exact match
-            if (demoRoutes[roomCode]) return demoRoutes[roomCode];
-
-            // Try building match
-            for (const key in demoRoutes) {
-                if (roomCode.includes(key.substring(0, 3))) {
-                    return demoRoutes[key];
-                }
-            }
-
-            // Default route if no match
-            return demoRoutes["ENG340"];
-        }
-
-        // Fetch route from API
-        async function fetchRoute(from, to) {
-            if (!isConnectedMode || !authToken) {
-                return null;
-            }
-
-            try {
-                const response = await fetch(`/api/route/?from=${from}&to=${to}`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`API returned ${response.status}`);
-                }
-
-                const routeData = await response.json();
-
-                if (routeData && routeData.features && routeData.features.length > 0) {
-                    const coordinates = routeData.features[0].geometry.coordinates;
-                    visualizeRoute(coordinates);
-                    return coordinates;
-                } else {
-                    throw new Error('Invalid route data format');
-                }
-            } catch (error) {
-                console.error('Error fetching route:', error);
-                return null;
-            }
-        }
-
-        // Handle login form submission
-        document.getElementById('login-form').addEventListener('submit', async function (e) {
+        loginForm.addEventListener('submit', async function (e) {
             e.preventDefault();
-
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-
             try {
-                showStatus('Logging in...', false);
+                showStatus('Logging in...', false, true); // true for modal status
+                // **MOCK API CALL FOR NOW**
+                // const response = await fetch('/api/login/', { /* ... */ });
+                // Simulate API delay and response
+                await new Promise(resolve => setTimeout(resolve, 1000));
 
-                const response = await fetch('/api/login/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, password })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Invalid credentials');
+                if (username === "test" && password === "test") {
+                    const fakeData = { access: "fake_jwt_token_12345", user: { username: username, events: demoEvents } };
+                    handleLoginSuccess(fakeData, username);
+                } else if (username === "user" && password === "pass") {
+                     const altEvents = [
+                        { id: 4, title: "Physics Lab Practical", event_type: "class", course: { code: "PHY101", name: "Physics I" }, room: { building: "SCI", number: "Lab 3B" }, start_time: new Date().toISOString(), end_time: new Date(Date.now() + 7200000).toISOString(), lecturer: "Dr. Quark", is_urgent: true, thumbnail: "https://via.placeholder.com/60/ec4899/fff?text=P" }
+                     ];
+                    const fakeData = { access: "another_fake_token", user: { username: username, events: altEvents } };
+                    handleLoginSuccess(fakeData, username);
                 }
-
-                const data = await response.json();
-
-                if (data.access) {
-                    // Store token
-                    authToken = data.access;
-                    currentUsername = username;
-                    isConnectedMode = true;
-
-                    // Store token for persistence
-                    localStorage.setItem('unimate_token', authToken);
-                    localStorage.setItem('unimate_username', currentUsername);
-
-                    // Show dashboard
-                    showDashboard();
-
-                    // Fetch real data
-                    fetchEvents();
-                } else {
-                    throw new Error('No access token received');
+                else {
+                    throw new Error('Invalid credentials');
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                showStatus('Login failed: ' + error.message, true);
+                showStatus('Login failed: ' + error.message, true, true); // true for modal status, true for error
             }
         });
 
-        // Demo mode button
-        document.getElementById('demo-mode-btn').addEventListener('click', function () {
+        demoModeButton.addEventListener('click', () => {
             isConnectedMode = false;
             currentUsername = 'Demo User';
-            showDashboard();
-            renderTimetable(demoEvents);
-        });
-
-        // Logout button
-        document.getElementById('logout-btn').addEventListener('click', function () {
-            authToken = null;
-            currentUsername = '';
+            authToken = null; // No token in demo mode
             localStorage.removeItem('unimate_token');
             localStorage.removeItem('unimate_username');
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('login-screen').classList.remove('hidden');
-            hideStatus();
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            clearRoute();
+            
+            showStatus('Demo Mode Activated!', false, true);
+            setTimeout(() => {
+                loginModalOverlay.classList.add('hidden');
+                hideStatus(); // Hide status after a delay
+                updateHeaderUI(true); // Update header for demo user
+                renderSidebarContent(demoEvents, "Your Demo Timetable");
+                actionsSection.classList.remove('hidden');
+            }, 1000);
+        });
+        
+        printTimetableButton.addEventListener('click', () => window.print());
+        refreshDataButton.addEventListener('click', () => {
+            if (isConnectedMode && authToken) {
+                fetchEvents();
+            } else if (!isConnectedMode && currentUsername === 'Demo User'){
+                 showStatus('Displaying demo data.', false);
+                 renderSidebarContent(demoEvents, "Your Demo Timetable");
+            } else {
+                 showStatus('Not logged in. Displaying generic events.', true);
+                 renderSidebarContent(genericEvents, "Upcoming Events");
+            }
         });
 
-        // Show dashboard
-        function showDashboard() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            document.getElementById('username-display').textContent = currentUsername;
-            document.getElementById('connection-status').textContent = isConnectedMode ?
-                'Connected to Unimate backend' : 'Demo mode (not connected to backend)';
-
-            // Initialize 3D map
-            initMap();
+        // --- UI Update Functions ---
+        function updateHeaderUI(loggedIn, username = '') {
+            if (loggedIn) {
+                usernameDisplay.textContent = username || currentUsername;
+                usernameDisplay.classList.remove('hidden');
+                mainLoginButton.textContent = 'Log out';
+            } else {
+                usernameDisplay.classList.add('hidden');
+                mainLoginButton.textContent = 'Log in';
+            }
         }
 
-        // Fetch events from API
+        function handleLoginSuccess(data, username) {
+            authToken = data.access;
+            currentUsername = username; // Use the username from param, not data.user.username for mock
+            isConnectedMode = true;
+
+            localStorage.setItem('unimate_token', authToken);
+            localStorage.setItem('unimate_username', currentUsername);
+
+            showStatus('Login successful!', false, true); // Modal status
+            setTimeout(() => {
+                loginModalOverlay.classList.add('hidden');
+                hideStatus();
+                updateHeaderUI(true);
+                fetchEvents(); // Fetch real events or use data.user.events if provided
+                actionsSection.classList.remove('hidden');
+            }, 1000);
+        }
+        
+        function logout() {
+            authToken = null;
+            currentUsername = '';
+            isConnectedMode = false;
+            localStorage.removeItem('unimate_token');
+            localStorage.removeItem('unimate_username');
+            
+            updateHeaderUI(false);
+            renderSidebarContent(genericEvents, "Upcoming Events"); // Show generic events after logout
+            actionsSection.classList.add('hidden');
+            // Optionally, clear form fields if needed, but modal is usually closed
+        }
+
+        function showStatus(message, isError = false, isModal = false) {
+            const el = isModal ? loginStatusEl : document.getElementById('global-status'); // Assuming a global status el if not modal
+            if (el) {
+                el.textContent = message;
+                el.className = isError ? 'status-message status-error' : 'status-message status-success';
+                el.classList.remove('hidden');
+            }
+        }
+
+        function hideStatus(isModal = false) {
+            const el = isModal ? loginStatusEl : document.getElementById('global-status');
+            if (el) el.classList.add('hidden');
+        }
+        
+        // --- Data Handling and Rendering ---
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            const options = { weekday: 'short', month: 'short', day: 'numeric' };
+            try {
+                return new Date(dateStr).toLocaleDateString(undefined, options);
+            } catch (e) { return 'Invalid Date'; }
+        }
+
+        function formatTime(dateStr) {
+            if (!dateStr) return '';
+            const options = { hour: '2-digit', minute: '2-digit', hour12: true };
+             try {
+                return new Date(dateStr).toLocaleTimeString(undefined, options);
+            } catch (e) { return 'Invalid Time'; }
+        }
+
         async function fetchEvents() {
             if (!authToken) {
-                console.warn('No auth token available for API request');
+                console.warn('No auth token. Cannot fetch events.');
+                showStatus('Authentication required to fetch events.', true);
+                renderSidebarContent(genericEvents, "Upcoming Events"); // Fallback to generic if not authenticated
                 return;
             }
-
+            showStatus('Fetching your events...', false);
             try {
-                const response = await fetch('/api/events/', {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
+                // const response = await fetch('/api/events/', { headers: { 'Authorization': `Bearer ${authToken}` } });
+                // if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                // const events = await response.json();
+                
+                // MOCK API call
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                const events = currentUsername === "test" ? demoEvents : [ // Simulate different events for different users
+                    { id: 4, title: "Advanced Algo Lecture", event_type: "class", course: { code: "CS301", name: "Algorithms" }, room: { building: "COMP", number: "LT101" }, start_time: new Date(Date.now() + 2*3600000).toISOString(), end_time: new Date(Date.now() + 9200000).toISOString(), lecturer: "Prof. Dijkstra", is_urgent: false, thumbnail: "https://via.placeholder.com/60/10b981/fff?text=A" },
+                    { id: 5, title: "Mid-Semester Exam: CS301", event_type: "exam", course: { code: "CS301", name: "Algorithms" }, room: { building: "EXAMHALL", number: "Hall A" }, start_time: new Date(Date.now() + 3 * 86400000).toISOString(), end_time: new Date(Date.now() + 3 * 86400000 + 7200000).toISOString(), lecturer: "N/A", is_urgent: true, thumbnail: "https://via.placeholder.com/60/ef4444/fff?text=E" }
+                ];
 
-                if (!response.ok) {
-                    throw new Error(`API returned ${response.status}`);
-                }
-
-                const events = await response.json();
-                renderTimetable(events);
+                renderSidebarContent(events, "Your Timetable");
+                hideStatus();
             } catch (error) {
                 console.error('Error fetching events:', error);
-                // Fall back to demo data
-                renderTimetable(demoEvents);
+                showStatus(`Error fetching events: ${error.message}`, true);
+                renderSidebarContent(demoEvents, "Your Timetable (Demo Fallback)"); // Fallback to demo on error
             }
         }
 
-        // Render timetable
-        function renderTimetable(events) {
-            console.log("Rendering timetable with", events ? events.length : 0, "events");
+        function renderSidebarContent(events, title = "Events") {
+            sidebarTitle.textContent = title;
+            eventListContent.innerHTML = ''; // Clear previous events
 
-            const timetable = document.getElementById('timetable');
-            timetable.innerHTML = '';
-
-            // Check if events exist
             if (!events || events.length === 0) {
-                timetable.innerHTML = '<p style="text-align:center;color:#6b7280;padding:1rem;">No upcoming events found.</p>';
+                eventListContent.innerHTML = '<div class="event-item" style="text-align:center; color:#888;">No events to display.</div>';
                 return;
             }
 
-            // Sort events by start time
-            const sortedEvents = [...events].sort((a, b) =>
-                new Date(a.start_time) - new Date(b.start_time)
-            );
+            const sortedEvents = [...events].sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
 
-            // Create a complete route on the map
-            createCompleteRoute(sortedEvents);
-
-            // Render each event
             sortedEvents.forEach((event, index) => {
                 const eventElement = document.createElement('div');
-                eventElement.className = 'event';
-                eventElement.classList.add(event.event_type === 'exam' ? 'event-exam' : 'event-class');
+                eventElement.className = 'event-item';
+                
+                const thumb = event.thumbnail || `https://via.placeholder.com/60/${event.event_type === 'exam' ? 'ef4444' : '5473e8'}/fff?text=${(event.course?.code || 'E').substring(0,1)}`;
 
-                if (event.is_urgent) {
-                    eventElement.classList.add('event-urgent');
-                }
+                let eventTypeLabel = event.event_type || 'event';
+                let eventTypeClass = `event-type-${eventTypeLabel.toLowerCase()}`;
+                 if (eventTypeLabel.toLowerCase() !== 'class' && eventTypeLabel.toLowerCase() !== 'exam') {
+                    eventTypeClass = 'event-type-generic'; // Fallback style for other event types
+                 }
 
-                const eventTypeClass = event.event_type === 'exam' ? 'event-type-exam' : 'event-type-class';
-                const eventTypeLabel = event.event_type === 'exam' ? 'EXAM' : 'CLASS';
 
-                const courseCode = event.course?.code || 'N/A';
-                const roomInfo = event.room ?
-                    `${event.room.building || ''} ${event.room.number || ''}`.trim() :
-                    'TBA';
-
-                // Add sequence number to event
                 eventElement.innerHTML = `
-                    <div class="event-header">
-                        <div class="event-title-container">
-                            <div class="event-title-row">
-                                <div class="event-title">${index + 1}. ${event.title || 'Untitled Event'}</div>
-                                <div class="event-type ${eventTypeClass}">${eventTypeLabel}</div>
-                            </div>
-                            <div class="event-course">${courseCode} - ${roomInfo}</div>
-                            <div class="event-time">
-                                ${formatDate(event.start_time)} •
-                                ${formatTime(event.start_time)} - ${formatTime(event.end_time)}
-                            </div>
-                        </div>
-                        <div class="event-right">
-                            <div class="event-lecturer">${event.lecturer || 'No lecturer'}</div>
-                            ${event.is_urgent ? '<div class="event-urgent-badge">Urgent</div>' : ''}
-                        </div>
+                    <img src="${thumb}" alt="Thumb" class="event-thumbnail">
+                    <div class="event-title">
+                        ${currentUsername && isConnectedMode ? (index + 1) + '. ' : ''}${event.title || 'Untitled Event'}
+                        <span class="event-type-badge ${eventTypeClass}">${eventTypeLabel.toUpperCase()}</span>
                     </div>
+                    <div class="event-meta">
+                        <span>Course: ${event.course?.code || 'N/A'} - ${event.course?.name || 'N/A'}</span>
+                        <span>Location: ${event.room?.building || ''} ${event.room?.number || 'TBA'}</span>
+                        <span>Time: ${formatDate(event.start_time)} &bull; ${formatTime(event.start_time)} - ${formatTime(event.end_time)}</span>
+                        ${event.lecturer ? `<span>Lecturer: ${event.lecturer}</span>` : ''}
+                    </div>
+                    ${event.is_urgent ? '<div class="event-urgent-badge">Urgent</div>' : ''}
                 `;
-
-                eventElement.addEventListener('click', () => showEventDetails(event));
-                timetable.appendChild(eventElement);
+                eventElement.addEventListener('click', () => {
+                    // Placeholder for event click action (e.g., show details on map, or modal)
+                    alert(`Event: ${event.title}\nLocation: ${event.room?.building} ${event.room?.number}`);
+                });
+                eventListContent.appendChild(eventElement);
             });
-
-            // Add print button
-            const printButton = document.createElement('button');
-            printButton.className = 'button button-secondary';
-            printButton.textContent = '🖨️ Print Timetable';
-            printButton.addEventListener('click', () => {
-                window.print();
-            });
-            timetable.appendChild(printButton);
-
-            // Add refresh button
-            if (isConnectedMode) {
-                const refreshButton = document.createElement('button');
-                refreshButton.className = 'button button-primary';
-                refreshButton.textContent = '🔄 Refresh Data';
-                refreshButton.addEventListener('click', fetchEvents);
-                refreshButton.style.marginTop = '0.5rem';
-                timetable.appendChild(refreshButton);
-            }
         }
 
-        // Initialize when the page loads
+        // --- Initialization ---
         document.addEventListener('DOMContentLoaded', function () {
-            console.log("Connected page loaded");
-
-            // Check for stored token
+            console.log("Unimate Kiosk UI Initialized");
             const storedToken = localStorage.getItem('unimate_token');
             const storedUsername = localStorage.getItem('unimate_username');
 
             if (storedToken && storedUsername) {
-                // Auto-login with stored token
                 authToken = storedToken;
                 currentUsername = storedUsername;
                 isConnectedMode = true;
-                showDashboard();
-                fetchEvents();
+                updateHeaderUI(true);
+                fetchEvents(); // Fetch events for logged-in user
+                actionsSection.classList.remove('hidden');
+            } else {
+                updateHeaderUI(false);
+                renderSidebarContent(genericEvents, "Upcoming Events"); // Show generic events if not logged in
+                actionsSection.classList.add('hidden');
             }
+            // Three.js map initialization (initMap()) would go here if re-enabled.
+            // For now, the offline map is purely CSS/HTML.
         });
 
-        // Clear current route
-        function clearRoute() {
-            if (currentRoute) {
-                if (currentRoute.isGroup) {
-                    currentRoute.traverse(child => {
-                        if (child.geometry) child.geometry.dispose();
-                        if (child.material) child.material.dispose();
-                    });
-                } else {
-                    if (currentRoute.geometry) currentRoute.geometry.dispose();
-                    if (currentRoute.material) currentRoute.material.dispose();
-                }
-                mapScene.remove(currentRoute);
-                currentRoute = null;
-            }
-        }
     </script>
 </body>
-
 </html>

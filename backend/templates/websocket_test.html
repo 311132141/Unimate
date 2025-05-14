@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif;
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        #messages { 
+            border: 1px solid #ccc; 
+            height: 300px; 
+            overflow-y: scroll; 
+            margin-bottom: 10px; 
+            padding: 10px; 
+        }
+        .log { color: #333; }
+        .error { color: red; }
+        .received { color: blue; }
+        .sent { color: green; }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Test Client</h1>
+    <div id="connection-status">Status: Disconnected</div>
+    <div id="messages"></div>
+    
+    <form id="message-form">
+        <input type="text" id="message" placeholder="Type a message" style="width: 70%;">
+        <button type="submit">Send</button>
+    </form>
+    
+    <div>
+        <button id="connect">Connect</button>
+        <button id="disconnect">Disconnect</button>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <h3>Connection Options</h3>
+        <div>
+            <input type="radio" id="direct-ws" name="ws-type" value="direct" checked>
+            <label for="direct-ws">Direct WebSocket (Port 8765)</label>
+        </div>
+        <div>
+            <input type="radio" id="django-ws" name="ws-type" value="django">
+            <label for="django-ws">Django Channels (Port 8000)</label>
+        </div>
+    </div>
+    
+    <script>
+        const djangoWsUrl = "ws://localhost:8000/ws/kiosk/kiosk-1/";
+        const directWsUrl = "ws://localhost:8765";
+        let socket = null;
+        
+        const messagesDiv = document.getElementById('messages');
+        const connectionStatus = document.getElementById('connection-status');
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message');
+        const connectBtn = document.getElementById('connect');
+        const disconnectBtn = document.getElementById('disconnect');
+        const directWsRadio = document.getElementById('direct-ws');
+        const djangoWsRadio = document.getElementById('django-ws');
+        
+        function getSelectedWsUrl() {
+            return directWsRadio.checked ? directWsUrl : djangoWsUrl;
+        }
+        
+        function logMessage(message, type = 'log') {
+            const div = document.createElement('div');
+            div.textContent = message;
+            div.className = type;
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function connect() {
+            if (socket && socket.readyState !== WebSocket.CLOSED) {
+                logMessage('Socket is already open', 'error');
+                return;
+            }
+            
+            const wsUrl = getSelectedWsUrl();
+            logMessage(`Connecting to ${wsUrl}...`);
+            
+            try {
+                socket = new WebSocket(wsUrl);
+                
+                socket.onopen = function(e) {
+                    connectionStatus.textContent = 'Status: Connected';
+                    logMessage('Connection established!');
+                };
+                
+                socket.onmessage = function(e) {
+                    const data = e.data;
+                    logMessage(`Received: ${data}`, 'received');
+                    try {
+                        const jsonData = JSON.parse(data);
+                        logMessage(`Parsed JSON: ${JSON.stringify(jsonData, null, 2)}`, 'received');
+                    } catch (e) {
+                        // Not JSON, that's fine
+                    }
+                };
+                
+                socket.onclose = function(e) {
+                    connectionStatus.textContent = 'Status: Disconnected';
+                    logMessage(`Connection closed. Code: ${e.code}, Reason: ${e.reason}`);
+                    socket = null;
+                };
+                
+                socket.onerror = function(e) {
+                    logMessage('WebSocket error', 'error');
+                    console.error('WebSocket error:', e);
+                };
+            } catch (error) {
+                logMessage(`Failed to connect: ${error.message}`, 'error');
+            }
+        }
+        
+        function disconnect() {
+            if (!socket || socket.readyState === WebSocket.CLOSED) {
+                logMessage('Socket is not open', 'error');
+                return;
+            }
+            
+            socket.close();
+            logMessage('Disconnected');
+        }
+        
+        function sendMessage(message) {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                logMessage('Cannot send message, socket is not open', 'error');
+                return;
+            }
+            
+            try {
+                const data = JSON.stringify({
+                    type: 'kiosk_status',
+                    status: message
+                });
+                socket.send(data);
+                logMessage(`Sent: ${data}`, 'sent');
+            } catch (error) {
+                logMessage(`Error sending message: ${error.message}`, 'error');
+            }
+        }
+        
+        messageForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const message = messageInput.value.trim();
+            if (message) {
+                sendMessage(message);
+                messageInput.value = '';
+            }
+        });
+        
+        connectBtn.addEventListener('click', connect);
+        disconnectBtn.addEventListener('click', disconnect);
+
+        // Connect automatically when page loads
+        window.addEventListener('load', connect);
+    </script>
+</body>
+</html> 

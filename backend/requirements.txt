@@ -1,9 +1,29 @@
+# Core dependencies
 Django==5.0.2
-channels==4.0.0
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.3.1
-python-dotenv==1.0.1
 django-cors-headers==4.3.1
-# For API testing
+python-dotenv==1.0.1
+
+# WebSocket support
+channels==4.0.0
+websockets==15.0.1
+daphne==4.1.2
+
+# ASGI servers
+uvicorn==0.34.2
+
+# Testing
 requests==2.31.0
-websocket-client==1.7.0 
+websocket-client==1.7.0
+
+# Authentication
+pyjwt==2.10.1
+
+# Database (if using something other than SQLite)
+# psycopg2-binary==2.9.9  # Uncomment if using PostgreSQL
+# mysqlclient==2.2.1      # Uncomment if using MySQL
+
+# Production deployment
+gunicorn==21.2.0
+whitenoise==6.6.0 

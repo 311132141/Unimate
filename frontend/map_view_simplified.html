@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unimate - Map Interface</title>
+    <style>
+        /* Base styles */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #fff;
+            background-color: #1a1a1a;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #333;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .search-container {
+            flex-grow: 1;
+            max-width: 600px;
+            margin: 0 1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            border: none;
+            background-color: #333;
+            color: #fff;
+            padding-left: 2.5rem;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>');
+            background-repeat: no-repeat;
+            background-position: 0.75rem center;
+        }
+
+        .login-button {
+            background-color: #5473e8;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* Main content */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background-color: #1a1a1a;
+            overflow-y: auto;
+            border-right: 1px solid #333;
+        }
+
+        .sidebar-section {
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-section h2 {
+            padding: 1rem;
+            margin: 0;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .event-list {
+            padding: 0;
+        }
+
+        .event-item {
+            padding: 1rem;
+            border-bottom: 1px solid #222;
+            cursor: pointer;
+        }
+
+        .event-item:hover {
+            background-color: #222;
+        }
+
+        .event-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .event-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .event-time {
+            color: #888;
+        }
+
+        .event-organizer {
+            color: #888;
+        }
+
+        .event-thumbnail {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 4px;
+            float: right;
+            margin-left: 10px;
+        }
+
+        /* Map area */
+        #map-container {
+            flex: 1;
+            height: 100%;
+            background-color: #f3f4f6;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #static-map {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .map-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #5473e8;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .map-marker.restaurant {
+            background-color: #ff7700;
+        }
+
+        .map-marker.school {
+            background-color: #8855ff;
+        }
+
+        .map-marker.park {
+            background-color: #44bb44;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Map</h1>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Find place">
+        </div>
+        <button class="login-button">Log in</button>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <section class="sidebar-section">
+                <h2>Tech Events</h2>
+                <div class="event-list">
+                    <div class="event-item">
+                        <img src="https://via.placeholder.com/70" alt="Event thumbnail" class="event-thumbnail">
+                        <div class="event-title">Whatever event name bro</div>
+                        <div class="event-meta">
+                            <span class="event-time">2 hours ago</span>
+                            <span class="event-organizer">By Mechatronics</span>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <img src="https://via.placeholder.com/70" alt="Event thumbnail" class="event-thumbnail">
+                        <div class="event-title">Whatever event name bro</div>
+                        <div class="event-meta">
+                            <span class="event-time">2 hours ago</span>
+                            <span class="event-organizer">By Mechatronics</span>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <img src="https://via.placeholder.com/70" alt="Event thumbnail" class="event-thumbnail">
+                        <div class="event-title">Whatever event name bro</div>
+                        <div class="event-meta">
+                            <span class="event-time">2 hours ago</span>
+                            <span class="event-organizer">By Mechatronics</span>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <img src="https://via.placeholder.com/70" alt="Event thumbnail" class="event-thumbnail">
+                        <div class="event-title">Whatever event name bro</div>
+                        <div class="event-meta">
+                            <span class="event-time">2 hours ago</span>
+                            <span class="event-organizer">By Mechatronics</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="sidebar-section">
+                <h2>Tech News</h2>
+                <div class="event-list">
+                    <div class="event-item">
+                        <img src="https://via.placeholder.com/70" alt="News thumbnail" class="event-thumbnail">
+                        <div class="event-title">Whatever event name bro</div>
+                        <div class="event-meta">
+                            <span class="event-time">2 hours ago</span>
+                            <span class="event-organizer">By Mechatronics</span>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <img src="https://via.placeholder.com/70" alt="News thumbnail" class="event-thumbnail">
+                        <div class="event-title">Whatever event name bro</div>
+                        <div class="event-meta">
+                            <span class="event-time">2 hours ago</span>
+                            <span class="event-organizer">By Mechatronics</span>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <img src="https://via.placeholder.com/70" alt="News thumbnail" class="event-thumbnail">
+                        <div class="event-title">Whatever event name bro</div>
+                        <div class="event-meta">
+                            <span class="event-time">2 hours ago</span>
+                            <span class="event-organizer">By Mechatronics</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </aside>
+
+        <div id="map-container">
+            <img id="static-map" src="https://maps.googleapis.com/maps/api/staticmap?center=-36.852,174.768&zoom=14&size=1200x800&scale=2&maptype=roadmap&style=element:geometry%7Ccolor:0x242f3e&style=element:labels.text.stroke%7Ccolor:0x242f3e&style=element:labels.text.fill%7Ccolor:0x746855&style=feature:administrative.locality%7Celement:labels.text.fill%7Ccolor:0xd59563" alt="Map of Auckland">
+            <!-- Fallback image if the above doesn't load -->
+            <img id="fallback-map" src="https://via.placeholder.com/1200x800/2a2a2a/666666?text=Auckland+Map" style="display:none;">
+            
+            <!-- Sample markers -->
+            <div class="map-marker" style="top: 40%; left: 50%;" title="University of Auckland"></div>
+            <div class="map-marker restaurant" style="top: 35%; left: 48%;" title="Cafeteria"></div>
+            <div class="map-marker school" style="top: 45%; left: 45%;" title="Engineering Building"></div>
+            <div class="map-marker park" style="top: 38%; left: 55%;" title="Albert Park"></div>
+        </div>
+    </div>
+
+    <script>
+        // Check if the static map fails to load
+        document.getElementById('static-map').onerror = function() {
+            this.style.display = 'none';
+            document.getElementById('fallback-map').style.display = 'block';
+        };
+    </script>
+</body>
+
+</html> 

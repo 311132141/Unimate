@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 UNIMATE Runner Script
 --------------------
@@ -35,6 +36,9 @@ import logging
 import socket
 import platform
 
+# Force UTF-8 encoding for subprocess calls to handle Chinese characters
+os.environ["PYTHONIOENCODING"] = "utf-8"
+
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,
@@ -58,6 +62,8 @@ def run_command_in_thread(command, cwd=None, prefix=None):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
+                encoding='utf-8',
+                errors='replace',
                 bufsize=1  # Line buffered
             )
             
@@ -172,6 +178,8 @@ def setup_test_user():
             subprocess.run(
                 [sys.executable, "create_test_user.py"],
                 cwd=os.path.dirname(test_user_script),
+                encoding='utf-8',
+                errors='replace',
                 check=True
             )
             logger.info("Test user is ready (username: testuser, password: password123)")
@@ -188,6 +196,8 @@ def setup_test_user():
                 cwd=backend_dir,
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                errors='replace',
                 check=True
             )
             
@@ -197,6 +207,8 @@ def setup_test_user():
                     [sys.executable, "manage.py", "shell", "-c", 
                      "from django.contrib.auth.models import User; User.objects.create_user('testuser', 'test@example.com', 'password123')"],
                     cwd=backend_dir,
+                    encoding='utf-8',
+                    errors='replace',
                     check=True
                 )
                 logger.info("Test user created (username: testuser, password: password123)")

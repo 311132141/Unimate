@@ -8,7 +8,7 @@ Write-Host "=========================================`n"
 # Configuration
 $baseUrl = "http://localhost:8000"
 $scanEndpoint = "$baseUrl/api/scan/"
-$validRfid = "04A1B2C3D4"  # Alice's card
+$validRfid = "5A653600"  # John's card
 $invalidRfid = "INVALID_UID"
 
 # Test server connection

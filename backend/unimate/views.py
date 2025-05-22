@@ -16,12 +16,15 @@ logger = logging.getLogger(__name__)
 @permission_classes([AllowAny])
 def rfid_scan(request):
     rfid_uid = request.data.get('rfid_uid')
+    logger.info(f"RFID scan received for UID: {rfid_uid}")
+    
     if not rfid_uid:
         return Response({'error': 'RFID UID is required'}, status=status.HTTP_400_BAD_REQUEST)
     
     try:
         profile = UserProfile.objects.get(rfid_uid=rfid_uid)
         user = profile.user
+        logger.info(f"Found user profile for RFID UID {rfid_uid}: {user.username}")
         
         # Generate JWT tokens
         refresh = RefreshToken.for_user(user)
@@ -44,19 +47,39 @@ def rfid_scan(request):
         
         # Try to send WebSocket notification, but don't fail if it doesn't work
         try:
+            logger.info("Attempting to send WebSocket notification")
             channel_layer = get_channel_layer()
             if channel_layer:
+                # Get the kiosk ID from the request data
+                kiosk_id = request.data.get('kiosk', 'unknown')
+                logger.info(f"Kiosk ID from request: {kiosk_id}")
+                
+                # Send to the main Unimate group
+                logger.info("Sending to unimate group")
                 async_to_sync(channel_layer.group_send)(
                     "unimate",
                     {
-                        "type": "user.login",
-                        "message": {
-                            "user_id": user.id,
-                            "username": user.username,
-                            "events": EventSerializer(events, many=True).data
-                        }
+                        "type": "user_login",  # Don't change this - it's the method name in the consumer
+                        "message": response_data
                     }
                 )
+                logger.info("Successfully sent to unimate group")
+                
+                # Also send to the specific kiosk group if provided
+                if kiosk_id != 'unknown':
+                    # This is the key part - send to the specific kiosk group
+                    kiosk_group = f"kiosk_{kiosk_id}"
+                    logger.info(f"Sending to kiosk group: {kiosk_group}")
+                    async_to_sync(channel_layer.group_send)(
+                        kiosk_group,
+                        {
+                            "type": "user_login",  # Don't change this - it's the method name in the consumer
+                            "message": response_data
+                        }
+                    )
+                    logger.info(f"Successfully sent to kiosk group: {kiosk_group}")
+            else:
+                logger.error("Channel layer is None - WebSocket notification not sent")
         except Exception as e:
             logger.error(f"WebSocket error: {str(e)}")
             # Continue processing - WebSocket failure shouldn't break the API
@@ -64,6 +87,7 @@ def rfid_scan(request):
         return Response(response_data)
         
     except UserProfile.DoesNotExist:
+        logger.warning(f"No user profile found for RFID UID: {rfid_uid}")
         return Response({'error': 'Invalid RFID card'}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])

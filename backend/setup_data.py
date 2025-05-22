@@ -16,6 +16,36 @@ django.setup()
 from django.contrib.auth.models import User
 from unimate.models import UserProfile, Course, Room, Enrollment, Event
 
+def register_card():
+    """Register a specific RFID card for an existing user"""
+    print("Registering your RFID card...")
+    
+    # Check if user exists
+    try:
+        user = User.objects.get(username='john')
+        print(f"Found user: {user.username}")
+    except User.DoesNotExist:
+        # Create the user if it doesn't exist
+        user = User.objects.create_user(
+            username='john',
+            email='john@example.com',
+            password='Pass123!',
+            first_name='John',
+            last_name='Doe'
+        )
+        print(f"Created user: {user.username}")
+    
+    # Update or create the profile with RFID UID
+    profile, created = UserProfile.objects.update_or_create(
+        user=user,
+        defaults={'rfid_uid': '5A653600'}
+    )
+    
+    if created:
+        print(f"Created profile for {user.username} with RFID: 5A653600")
+    else:
+        print(f"Updated profile for {user.username} with RFID: 5A653600")
+
 def create_users():
     """Create demo users with pre-defined passwords"""
     print("Creating users...")
@@ -28,7 +58,6 @@ def create_users():
         ('alice', 'Pass123!', 'Alice', 'Wonderland', '04A1B2C3D4'),
         ('bob', 'Pass123!', 'Bob', 'Builder', '04B5C6D7E8'),
         ('carol', 'Pass123!', 'Carol', 'Danvers', '0499AA11BB'),
-        ('john', 'Pass123!', 'John', 'Doe', '5A653600'),  # Added your card
     ]
     
     for username, password, first_name, last_name, rfid_uid in users:
@@ -179,18 +208,12 @@ def main():
     """Main function to create all data"""
     print("Setting up Unimate demo data...\n")
     
-    # Create data in the correct order
-    create_users()
-    courses = create_courses()
-    rooms = create_rooms()
-    create_enrollments(courses)
-    create_events(courses, rooms)
+    # Register the specific card
+    register_card()
     
-    print("\nSetup complete! Demo data has been created successfully.")
-    print("\nYou can now log in with:")
-    print("Username: alice, Password: Pass123!")
-    print("Username: bob, Password: Pass123!")
-    print("Username: carol, Password: Pass123!")
+    print("\nCard registration complete!")
+    print("\nYou can now login with the RFID card (5A653600)")
+    print("Username: john, Password: Pass123!")
 
 if __name__ == "__main__":
     main() 

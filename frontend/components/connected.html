@@ -20,14 +20,16 @@
             display: flex;
             flex-direction: column;
             color: #fff;
-            background-color: #1a1a1a; /* Dark background */
+            background-color: #1a1a1a;
+            /* Dark background */
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.5rem 1rem; /* Reduced padding */
+            padding: 0.5rem 1rem;
+            /* Reduced padding */
             background-color: #1a1a1a;
             border-bottom: 1px solid #333;
             position: relative;
@@ -35,7 +37,8 @@
         }
 
         header h1 {
-            font-size: 1.5rem; /* Reduced font size */
+            font-size: 1.5rem;
+            /* Reduced font size */
             margin: 0;
         }
 
@@ -57,7 +60,7 @@
             background-repeat: no-repeat;
             background-position: 0.75rem center;
         }
-        
+
         .header-controls {
             display: flex;
             align-items: center;
@@ -65,11 +68,13 @@
 
         .username-display {
             font-weight: 500;
-            color: #ccc; /* Lighter color for username */
+            color: #ccc;
+            /* Lighter color for username */
             margin-right: 1rem;
         }
 
-        .action-button { /* Combined login/logout button style */
+        .action-button {
+            /* Combined login/logout button style */
             background-color: #5473e8;
             color: white;
             border: none;
@@ -79,6 +84,7 @@
             font-weight: 500;
             white-space: nowrap;
         }
+
         .action-button:hover {
             background-color: #435ecc;
         }
@@ -87,15 +93,18 @@
         .main-container {
             display: flex;
             flex: 1;
-            overflow: hidden; /* Prevent scrollbars on main container */
+            overflow: hidden;
+            /* Prevent scrollbars on main container */
         }
 
         .sidebar {
             width: 300px;
             background-color: #1a1a1a;
-            overflow-y: auto; /* Allow sidebar to scroll if content overflows */
+            overflow-y: auto;
+            /* Allow sidebar to scroll if content overflows */
             border-right: 1px solid #333;
-            padding-bottom: 1rem; /* Space at the bottom of sidebar */
+            padding-bottom: 1rem;
+            /* Space at the bottom of sidebar */
         }
 
         .sidebar-section {
@@ -105,47 +114,59 @@
         .sidebar-section h2 {
             padding: 1rem;
             margin: 0;
-            font-size: 1.2rem; /* Slightly larger section titles */
+            font-size: 1.2rem;
+            /* Slightly larger section titles */
             border-bottom: 1px solid #333;
             color: #eee;
         }
 
-        .event-list { /* Used for timetable and generic events */
+        .event-list {
+            /* Used for timetable and generic events */
             padding: 0;
         }
 
-        .event-item { /* For individual events in sidebar */
+        .event-item {
+            /* For individual events in sidebar */
             padding: 1rem;
             border-bottom: 1px solid #222;
             cursor: pointer;
-            color: #ccc; /* Default text color for items */
+            color: #ccc;
+            /* Default text color for items */
         }
+
         .event-item:last-child {
             border-bottom: none;
         }
 
         .event-item:hover {
-            background-color: #252525; /* Slightly darker hover */
+            background-color: #252525;
+            /* Slightly darker hover */
         }
 
         .event-title {
             font-weight: 500;
             margin-bottom: 0.25rem;
-            color: #fff; /* Brighter title */
+            color: #fff;
+            /* Brighter title */
         }
 
-        .event-meta { /* For time, organizer, course, room */
+        .event-meta {
+            /* For time, organizer, course, room */
             font-size: 0.8rem;
             color: #888;
             margin-bottom: 0.25rem;
         }
-        .event-meta span, .event-meta div {
-             display: block; /* Stack meta info */
-             margin-bottom: 0.1rem;
+
+        .event-meta span,
+        .event-meta div {
+            display: block;
+            /* Stack meta info */
+            margin-bottom: 0.1rem;
         }
 
         .event-thumbnail {
-            width: 60px; /* Slightly smaller thumbnail */
+            width: 60px;
+            /* Slightly smaller thumbnail */
             height: 60px;
             object-fit: cover;
             border-radius: 4px;
@@ -153,7 +174,7 @@
             margin-left: 10px;
             border: 1px solid #333;
         }
-        
+
         .event-type-badge {
             padding: 0.2rem 0.4rem;
             border-radius: 4px;
@@ -163,32 +184,47 @@
             margin-left: 0.5rem;
             display: inline-block;
         }
-        .event-type-class { background-color: #2563eb; color: white; }
-        .event-type-exam { background-color: #f97316; color: white; }
+
+        .event-type-class {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .event-type-exam {
+            background-color: #f97316;
+            color: white;
+        }
+
         .event-urgent-badge {
-            background-color: #ef4444; color: white;
-            padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.7rem;
-            display: inline-block; margin-top: 0.3rem;
+            background-color: #ef4444;
+            color: white;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            display: inline-block;
+            margin-top: 0.3rem;
         }
 
 
         /* Map area from map_offline.html */
-        #map-container-wrapper { /* New wrapper for the map to control its display */
+        #map-container-wrapper {
+            /* New wrapper for the map to control its display */
             flex: 1;
             height: 100%;
-            background-color: #222; /* Darker map background */
+            background-color: #222;
+            /* Darker map background */
             overflow: hidden;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        
+
         .offline-map {
             width: 90%;
             height: 90%;
             position: relative;
-            background-image: 
+            background-image:
                 linear-gradient(rgba(40, 120, 40, 0.3) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(40, 120, 40, 0.3) 1px, transparent 1px),
                 linear-gradient(rgba(40, 120, 40, 0.1) 0.5px, transparent 0.5px),
@@ -196,7 +232,7 @@
             background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
             border: 2px solid #444;
         }
-        
+
         .offline-map::after {
             content: "";
             position: absolute;
@@ -207,26 +243,78 @@
             background: radial-gradient(circle, transparent 50%, #222 100%);
             pointer-events: none;
         }
-        
-        .road { position: absolute; background-color: rgba(150, 150, 150, 0.7); transform: translate(-50%, -50%); }
-        .highway-h { height: 15px; width: 70%; top: 50%; left: 50%; border-radius: 10px; }
-        .highway-v { width: 15px; height: 70%; top: 50%; left: 30%; border-radius: 10px; }
-        .road-1 { height: 8px; width: 40%; top: 30%; left: 60%; border-radius: 5px; }
-        .road-2 { width: 8px; height: 30%; top: 60%; left: 70%; border-radius: 5px; }
-        
-        .map-marker {
-            position: absolute; width: 20px; height: 20px;
-            background-color: #5473e8; border-radius: 50%;
-            transform: translate(-50%, -50%); border: 2px solid white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 10;
+
+        .road {
+            position: absolute;
+            background-color: rgba(150, 150, 150, 0.7);
+            transform: translate(-50%, -50%);
         }
-        .map-marker.restaurant { background-color: #ff7700; }
-        .map-marker.school { background-color: #8855ff; }
-        .map-marker.park { background-color: #44bb44; }
+
+        .highway-h {
+            height: 15px;
+            width: 70%;
+            top: 50%;
+            left: 50%;
+            border-radius: 10px;
+        }
+
+        .highway-v {
+            width: 15px;
+            height: 70%;
+            top: 50%;
+            left: 30%;
+            border-radius: 10px;
+        }
+
+        .road-1 {
+            height: 8px;
+            width: 40%;
+            top: 30%;
+            left: 60%;
+            border-radius: 5px;
+        }
+
+        .road-2 {
+            width: 8px;
+            height: 30%;
+            top: 60%;
+            left: 70%;
+            border-radius: 5px;
+        }
+
+        .map-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #5473e8;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .map-marker.restaurant {
+            background-color: #ff7700;
+        }
+
+        .map-marker.school {
+            background-color: #8855ff;
+        }
+
+        .map-marker.park {
+            background-color: #44bb44;
+        }
+
         .park-area {
-            position: absolute; width: 200px; height: 150px;
-            background-color: rgba(40, 120, 40, 0.3); border-radius: 50%;
-            top: 35%; left: 60%; transform: translate(-50%, -50%);
+            position: absolute;
+            width: 200px;
+            height: 150px;
+            background-color: rgba(40, 120, 40, 0.3);
+            border-radius: 50%;
+            top: 35%;
+            left: 60%;
+            transform: translate(-50%, -50%);
         }
 
         /* Login Modal Styles */
@@ -236,21 +324,26 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); /* Darker overlay */
+            background-color: rgba(0, 0, 0, 0.7);
+            /* Darker overlay */
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 2000; /* Ensure modal is on top */
+            z-index: 2000;
+            /* Ensure modal is on top */
         }
 
-        .login-container { /* Re-styled for modal */
-            background-color: #2a2a2a; /* Dark modal background */
+        .login-container {
+            /* Re-styled for modal */
+            background-color: #2a2a2a;
+            /* Dark modal background */
             padding: 2rem;
             border-radius: 0.5rem;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
             width: 100%;
             max-width: 24rem;
-            color: #fff; /* Text color for modal */
+            color: #fff;
+            /* Text color for modal */
         }
 
         .login-title {
@@ -262,7 +355,8 @@
 
         .login-subtitle {
             text-align: center;
-            color: #aaa; /* Lighter subtitle color */
+            color: #aaa;
+            /* Lighter subtitle color */
             margin-bottom: 1.5rem;
         }
 
@@ -273,22 +367,28 @@
         .form-input {
             display: block;
             width: 100%;
-            padding: 0.75rem; /* Increased padding */
-            border: 1px solid #444; /* Darker border */
+            padding: 0.75rem;
+            /* Increased padding */
+            border: 1px solid #444;
+            /* Darker border */
             border-radius: 0.375rem;
             font-size: 0.875rem;
             box-sizing: border-box;
-            background-color: #333; /* Dark input background */
-            color: #fff; /* Light text color for input */
+            background-color: #333;
+            /* Dark input background */
+            color: #fff;
+            /* Light text color for input */
         }
 
         .form-input:focus {
             outline: none;
-            border-color: #5473e8; /* Highlight color */
+            border-color: #5473e8;
+            /* Highlight color */
             box-shadow: 0 0 0 3px rgba(84, 115, 232, 0.3);
         }
-        
-        .modal-button { /* For buttons inside modal */
+
+        .modal-button {
+            /* For buttons inside modal */
             display: block;
             width: 100%;
             margin-top: 1rem;
@@ -302,10 +402,24 @@
             transition: background-color 0.2s;
             text-align: center;
         }
-        .modal-button-primary { background-color: #5473e8; }
-        .modal-button-primary:hover { background-color: #435ecc; }
-        .modal-button-secondary { background-color: #444; } /* Darker secondary button */
-        .modal-button-secondary:hover { background-color: #555; }
+
+        .modal-button-primary {
+            background-color: #5473e8;
+        }
+
+        .modal-button-primary:hover {
+            background-color: #435ecc;
+        }
+
+        .modal-button-secondary {
+            background-color: #444;
+        }
+
+        /* Darker secondary button */
+        .modal-button-secondary:hover {
+            background-color: #555;
+        }
+
         .modal-close-button {
             position: absolute;
             top: 10px;
@@ -325,23 +439,81 @@
             font-size: 0.875rem;
             text-align: center;
         }
-        .status-error { background-color: #7f1d1d; color: #fecaca; border: 1px solid #b91c1c;} /* Darker error */
-        .status-success { background-color: #065f46; color: #d1fae5; border: 1px solid #047857;}
 
-        .hidden { display: none !important; }
+        .status-error {
+            background-color: #7f1d1d;
+            color: #fecaca;
+            border: 1px solid #b91c1c;
+        }
+
+        /* Darker error */
+        .status-success {
+            background-color: #065f46;
+            color: #d1fae5;
+            border: 1px solid #047857;
+        }
+
+        .hidden {
+            display: none !important;
+        }
 
         /* Print styles adapted for dark theme */
         @media print {
-            body { background-color: white !important; color: black !important; }
-            header, .sidebar, .main-container { background-color: white !important; border-color: #ccc !important; }
-            header h1, .sidebar-section h2, .event-title, .event-meta, .search-input, .username-display { color: black !important; }
-            .search-input { background-color: #eee !important; }
-            .event-item { border-color: #eee !important; background-color: white !important; }
-            .event-item:hover { background-color: #f9f9f9 !important; }
-            .action-button, #login-modal-overlay, #map-container-wrapper /* Hide map for printing timetable */ { display: none !important; }
-            .sidebar { width: 100% !important; border-right: none !important; }
-             .event-list { page-break-inside: auto; }
-            .event-item { page-break-inside: avoid; }
+            body {
+                background-color: white !important;
+                color: black !important;
+            }
+
+            header,
+            .sidebar,
+            .main-container {
+                background-color: white !important;
+                border-color: #ccc !important;
+            }
+
+            header h1,
+            .sidebar-section h2,
+            .event-title,
+            .event-meta,
+            .search-input,
+            .username-display {
+                color: black !important;
+            }
+
+            .search-input {
+                background-color: #eee !important;
+            }
+
+            .event-item {
+                border-color: #eee !important;
+                background-color: white !important;
+            }
+
+            .event-item:hover {
+                background-color: #f9f9f9 !important;
+            }
+
+            .action-button,
+            #login-modal-overlay,
+            #map-container-wrapper
+
+            /* Hide map for printing timetable */
+                {
+                display: none !important;
+            }
+
+            .sidebar {
+                width: 100% !important;
+                border-right: none !important;
+            }
+
+            .event-list {
+                page-break-inside: auto;
+            }
+
+            .event-item {
+                page-break-inside: avoid;
+            }
 
         }
     </style>
@@ -354,6 +526,8 @@
             <input type="text" class="search-input" placeholder="Find place">
         </div>
         <button class="login-button" id="login-button">Log in</button>
+        <button class="action-button" id="test-ws-button" style="margin-left: 10px; background-color: #44bb44;">Test
+            WebSocket</button>
     </header>
 
     <div class="main-container">
@@ -443,11 +617,164 @@
         </form>
     </div>
 
+    <!-- Add WebSocket test UI -->
+    <div id="ws-test-panel"
+        style="position:fixed; bottom:50px; right:10px; background:#333; color:white; padding:15px; border-radius:5px; z-index:1000; display:none; width:300px;">
+        <h3 style="margin-top:0">WebSocket Diagnostics</h3>
+        <div id="ws-connection-status">Not connected</div>
+        <div style="margin-top:10px;">
+            <button id="send-test-msg"
+                style="background:#5473e8; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">Send
+                Test Message</button>
+            <button id="simulate-scan"
+                style="background:#ff7700; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; margin-left:5px;">Simulate
+                Card Scan</button>
+            <button id="close-ws-panel"
+                style="background:#999; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; margin-top:5px;">Close</button>
+        </div>
+        <div style="margin-top:10px; max-height:200px; overflow-y:auto;" id="ws-log"></div>
+    </div>
+
     <script>
+        // Initialize WebSocket for card scanning notifications
+        let ws = null;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
+
+        function connectWebSocket() {
+            // Connect to the WebSocket server for kiosk notifications
+            const kioskId = "test-kiosk-1";  // Always use the same kiosk ID as in your ESP32 code
+            const wsUrl = `ws://192.168.20.22:8000/ws/kiosk/${kioskId}/`;
+
+            console.log("Connecting to WebSocket at:", wsUrl);
+
+            // Close existing connection if any
+            if (ws) {
+                ws.close();
+            }
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = function () {
+                console.log("%cWebSocket connection established successfully", "color: green; font-weight: bold");
+                reconnectAttempts = 0;
+
+                addToWsLog('<span style="color:green">Connection established successfully</span>');
+                updateWsStatus();
+
+                // Send a message to register this kiosk
+                const registerMsg = JSON.stringify({
+                    type: 'register_kiosk',
+                    kiosk_id: kioskId
+                });
+                console.log("Sending registration message:", registerMsg);
+                ws.send(registerMsg);
+                addToWsLog('Sent registration: ' + registerMsg);
+
+                // Add visual indicator that WebSocket is connected
+                document.body.insertAdjacentHTML('beforeend',
+                    '<div id="ws-status" style="position:fixed; bottom:10px; right:10px; background:green; color:white; padding:5px; border-radius:5px;">WebSocket Connected</div>');
+            };
+
+            ws.onmessage = function (event) {
+                console.log("%cWebSocket message received:", "color: blue; font-weight: bold", event.data);
+                addToWsLog('Received: ' + event.data);
+
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log("Parsed data:", data);
+                    console.log("Message type:", data.type);
+                    addToWsLog(`Message type: ${data.type}`);
+
+                    // Flash the WebSocket status indicator to show message received
+                    const wsStatus = document.getElementById('ws-status');
+                    if (wsStatus) {
+                        wsStatus.style.backgroundColor = 'blue';
+                        wsStatus.textContent = `Message: ${data.type}`;
+                        setTimeout(() => {
+                            wsStatus.style.backgroundColor = 'green';
+                            wsStatus.textContent = 'WebSocket Connected';
+                        }, 2000);
+                    }
+
+                    // Handle login event from card scan
+                    if (data.type === "user.login") {
+                        console.log("%cLogin event detected, user data:", "color: green; font-weight: bold", data.message);
+                        addToWsLog('<span style="color:green">LOGIN EVENT DETECTED!</span>');
+                        handleUserLogin(data.message);
+                    } else {
+                        console.log("Received non-login message type:", data.type);
+                    }
+                } catch (error) {
+                    console.error("Error parsing WebSocket message:", error);
+                    addToWsLog('<span style="color:red">Error parsing message: ' + error.message + '</span>');
+                }
+            };
+
+            ws.onerror = function (error) {
+                console.error("WebSocket error:", error);
+                addToWsLog('<span style="color:red">WebSocket error</span>');
+                updateWsStatus();
+
+                const wsStatus = document.getElementById('ws-status');
+                if (wsStatus) {
+                    wsStatus.style.backgroundColor = 'red';
+                    wsStatus.textContent = 'WebSocket Error';
+                }
+            };
+
+            ws.onclose = function () {
+                console.log("WebSocket connection closed");
+
+                // Update the status indicator
+                const wsStatus = document.getElementById('ws-status');
+                if (wsStatus) {
+                    wsStatus.style.backgroundColor = 'red';
+                    wsStatus.textContent = 'WebSocket Disconnected';
+                }
+
+                // Try to reconnect after a delay with exponential backoff
+                reconnectAttempts++;
+                if (reconnectAttempts <= maxReconnectAttempts) {
+                    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+                    console.log(`Attempting to reconnect in ${delay / 1000} seconds (attempt ${reconnectAttempts}/${maxReconnectAttempts})...`);
+                    setTimeout(connectWebSocket, delay);
+                } else {
+                    console.error("Maximum reconnection attempts reached. Please refresh the page.");
+                    if (wsStatus) {
+                        wsStatus.textContent = 'WebSocket Failed - Refresh Page';
+                    }
+                }
+            };
+        }
+
+        // Handle user login from card scan
+        function handleUserLogin(userData) {
+            console.log("%cHandling user login with data:", "color: green; font-weight: bold", userData);
+
+            // Store authentication data
+            if (userData.access) {
+                console.log("Storing access token");
+                localStorage.setItem('access_token', userData.access);
+            }
+            if (userData.refresh) {
+                console.log("Storing refresh token");
+                localStorage.setItem('refresh_token', userData.refresh);
+            }
+            if (userData.user && userData.user.username) {
+                console.log("Storing username:", userData.user.username);
+                localStorage.setItem('username', userData.user.username);
+            }
+
+            // Redirect to dashboard
+            console.log("Redirecting to dashboard.html");
+            window.location.href = '../views/dashboard.html';
+        }
+
         // Initialize Map (placeholder for now)
         function initMap() {
             const mapContainer = document.getElementById('map-container');
-            
+
             // Use an iframe to show a Google Maps view for now
             // This is just for demonstration. In production, use the Three.js map or Google Maps API
             const iframe = document.createElement('iframe');
@@ -460,19 +787,19 @@
         }
 
         // Show login modal
-        document.getElementById('login-button').addEventListener('click', function() {
+        document.getElementById('login-button').addEventListener('click', function () {
             document.getElementById('login-modal').style.display = 'block';
         });
 
         // Handle login form submission
-        document.getElementById('login-form').addEventListener('submit', function(e) {
+        document.getElementById('login-form').addEventListener('submit', function (e) {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            
+
             // Placeholder for authentication logic
             console.log('Login attempt with:', username);
-            
+
             // Here you would typically call your authentication API
             // For demo purposes, simulate a successful login with mock data
             const mockLoginResponse = {
@@ -480,29 +807,120 @@
                 refresh: "mock_refresh_token_" + Math.random(),
                 user: { username: username }
             };
-            
+
             // Store authentication data
             localStorage.setItem('access_token', mockLoginResponse.access);
             localStorage.setItem('refresh_token', mockLoginResponse.refresh);
             localStorage.setItem('username', username);
-            
+
             // Hide the modal
             document.getElementById('login-modal').style.display = 'none';
-            
+
             // Redirect to dashboard
             window.location.href = '../views/dashboard.html';
         });
 
         // Close modal when clicking outside
-        window.addEventListener('click', function(e) {
+        window.addEventListener('click', function (e) {
             const modal = document.getElementById('login-modal');
             if (e.target === modal) {
                 modal.style.display = 'none';
             }
         });
 
-        // Initialize map when page loads
-        window.addEventListener('load', initMap);
+        // WebSocket testing functionality
+        document.getElementById('test-ws-button').addEventListener('click', function () {
+            document.getElementById('ws-test-panel').style.display = 'block';
+            updateWsStatus();
+        });
+
+        document.getElementById('close-ws-panel').addEventListener('click', function () {
+            document.getElementById('ws-test-panel').style.display = 'none';
+        });
+
+        document.getElementById('send-test-msg').addEventListener('click', function () {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const testMsg = JSON.stringify({
+                    type: 'test',
+                    message: 'Test message from kiosk',
+                    timestamp: new Date().toISOString()
+                });
+
+                ws.send(testMsg);
+                addToWsLog('Sent: ' + testMsg);
+            } else {
+                addToWsLog('ERROR: WebSocket not connected');
+                updateWsStatus();
+            }
+        });
+
+        document.getElementById('simulate-scan').addEventListener('click', function () {
+            addToWsLog('Simulating card scan...');
+            simulateCardScan();
+        });
+
+        function updateWsStatus() {
+            const statusEl = document.getElementById('ws-connection-status');
+            if (!ws) {
+                statusEl.innerHTML = '<span style="color:red">Not connected</span>';
+                return;
+            }
+
+            switch (ws.readyState) {
+                case WebSocket.CONNECTING:
+                    statusEl.innerHTML = '<span style="color:orange">Connecting...</span>';
+                    break;
+                case WebSocket.OPEN:
+                    statusEl.innerHTML = '<span style="color:green">Connected</span>';
+                    break;
+                case WebSocket.CLOSING:
+                    statusEl.innerHTML = '<span style="color:orange">Closing...</span>';
+                    break;
+                case WebSocket.CLOSED:
+                    statusEl.innerHTML = '<span style="color:red">Closed</span>';
+                    break;
+            }
+        }
+
+        function addToWsLog(message) {
+            const logEl = document.getElementById('ws-log');
+            const time = new Date().toLocaleTimeString();
+            logEl.innerHTML = `<div><small>[${time}]</small> ${message}</div>` + logEl.innerHTML;
+        }
+
+        // Manual simulation of card scan for testing
+        function simulateCardScan() {
+            // Create mock login data similar to what the server would send
+            const mockLoginData = {
+                type: 'user.login',
+                message: {
+                    access: "mock_access_token_" + Math.random(),
+                    refresh: "mock_refresh_token_" + Math.random(),
+                    user: {
+                        id: 8,
+                        username: "john",
+                        events: []
+                    }
+                }
+            };
+
+            // Directly call the handler as if we received this via WebSocket
+            console.log("Simulating card scan with data:", mockLoginData);
+            handleUserLogin(mockLoginData.message);
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', function () {
+            initMap();
+            connectWebSocket(); // Connect to WebSocket server for card scan events
+
+            // Check if user is already logged in
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                // Redirect to dashboard if already logged in
+                window.location.href = '../views/dashboard.html';
+            }
+        });
     </script>
 </body>
 

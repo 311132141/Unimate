@@ -239,6 +239,7 @@
             <input type="text" class="search-input" placeholder="Find place">
         </div>
         <button class="login-button" id="showLogin">Log in</button>
+        <a href="/views/test-card.html" style="margin-left: 10px; color: #5473e8; text-decoration: none;">Card Test</a>
     </header>
 
     <div class="main-container">
@@ -336,61 +337,82 @@
     <script>
         // Initialize WebSocket for card scanning notifications
         let ws = null;
-        
+
         function connectWebSocket() {
             // Connect to the WebSocket server for kiosk notifications
-            const kioskId = "kiosk-" + Math.floor(Math.random() * 1000);
-            ws = new WebSocket(`ws://localhost:8000/ws/kiosk/${kioskId}/`);
-            
-            ws.onopen = function() {
-                console.log("WebSocket connection established");
+            const kioskId = "test-kiosk-1";  // Always use the same kiosk ID as in your ESP32 code
+            // Use your PC's IP address instead of localhost
+            console.log("Connecting to WebSocket at:", `ws://192.168.20.22:8000/ws/kiosk/${kioskId}/`);
+            ws = new WebSocket(`ws://192.168.20.22:8000/ws/kiosk/${kioskId}/`);
+
+            ws.onopen = function () {
+                console.log("WebSocket connection established successfully");
+                // Send a message to register this kiosk
+                ws.send(JSON.stringify({
+                    type: 'register_kiosk',
+                    kiosk_id: kioskId
+                }));
             };
-            
-            ws.onmessage = function(event) {
+
+            ws.onmessage = function (event) {
                 console.log("WebSocket message received:", event.data);
-                const data = JSON.parse(event.data);
-                
-                // Handle login event from card scan
-                if (data.type === "user.login") {
-                    handleUserLogin(data.message);
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log("Parsed data:", data);
+
+                    // Handle login event from card scan
+                    if (data.type === "user.login") {
+                        console.log("Login event detected, user data:", data.message);
+                        handleUserLogin(data.message);
+                    } else {
+                        console.log("Received non-login message type:", data.type);
+                    }
+                } catch (error) {
+                    console.error("Error parsing WebSocket message:", error);
                 }
             };
-            
-            ws.onerror = function(error) {
+
+            ws.onerror = function (error) {
                 console.error("WebSocket error:", error);
             };
-            
-            ws.onclose = function() {
+
+            ws.onclose = function () {
                 console.log("WebSocket connection closed");
                 // Try to reconnect after a delay
                 setTimeout(connectWebSocket, 5000);
             };
         }
-        
+
         // Handle user login (both from form and card scan)
         function handleUserLogin(userData) {
+            console.log("handleUserLogin called with:", userData);
+
             // Store authentication data
             if (userData.access) {
+                console.log("Storing access token");
                 localStorage.setItem('access_token', userData.access);
             }
             if (userData.refresh) {
+                console.log("Storing refresh token");
                 localStorage.setItem('refresh_token', userData.refresh);
             }
             if (userData.user && userData.user.username) {
+                console.log("Storing username:", userData.user.username);
                 localStorage.setItem('username', userData.user.username);
             }
-            
+
             // Hide the modal if it's open
             document.getElementById('loginModal').style.display = 'none';
-            
+
             // Redirect to dashboard
+            console.log("Redirecting to dashboard.html");
             window.location.href = 'dashboard.html';
         }
 
         // Initialize Map (placeholder for now)
         function initMap() {
             const mapContainer = document.getElementById('map-container');
-            
+
             // Use an iframe to show a Google Maps view for now
             // This is just for demonstration. In production, use the Three.js map or Google Maps API
             const iframe = document.createElement('iframe');
@@ -403,29 +425,29 @@
         }
 
         // Show login modal
-        document.getElementById('showLogin').addEventListener('click', function() {
+        document.getElementById('showLogin').addEventListener('click', function () {
             document.getElementById('loginModal').style.display = 'block';
             document.getElementById('loginError').style.display = 'none';
         });
 
         // Handle login form submission
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const errorElement = document.getElementById('loginError');
-            
+
             try {
                 const response = await axios.post('/api/login/', {
                     username: username,
                     password: password
                 });
-                
+
                 // Handle successful login
                 handleUserLogin(response.data);
             } catch (error) {
                 console.error('Login error:', error);
-                
+
                 // Display error message
                 errorElement.textContent = error.response?.data?.error || 'Invalid credentials';
                 errorElement.style.display = 'block';
@@ -433,7 +455,7 @@
         });
 
         // Close modal when clicking outside
-        window.addEventListener('click', function(e) {
+        window.addEventListener('click', function (e) {
             const modal = document.getElementById('loginModal');
             if (e.target === modal) {
                 modal.style.display = 'none';
@@ -441,10 +463,10 @@
         });
 
         // Initialize when page loads
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             initMap();
             connectWebSocket();
-            
+
             // Check if user is already logged in
             const token = localStorage.getItem('access_token');
             if (token) {

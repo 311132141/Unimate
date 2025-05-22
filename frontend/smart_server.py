@@ -38,6 +38,10 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         if self.path == '/' or self.path == '':
             self.path = '/components/connected.html'
         
+        # Special handling for test-card.html
+        elif self.path == '/test-card.html':
+            self.path = '/test-card.html'
+            
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
     
     def guess_type(self, path):

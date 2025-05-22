@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RFID Card Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        pre {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+            overflow: auto;
+        }
+
+        .log {
+            max-height: 300px;
+            overflow: auto;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>RFID Card Scan Test</h1>
+        <p>This page will connect to the WebSocket server and listen for card scan events.</p>
+        <p>Status: <span id="status">Disconnected</span></p>
+        <button id="connect">Connect</button>
+        <button id="test">Test Redirect</button>
+        <button id="simulate">Simulate Login</button>
+    </div>
+
+    <div class="card">
+        <h2>WebSocket Log</h2>
+        <div id="log" class="log"></div>
+    </div>
+
+    <div class="card">
+        <h2>Last Received Data</h2>
+        <pre id="data">None</pre>
+    </div>
+
+    <script>
+        let ws = null;
+        const logElement = document.getElementById('log');
+        const statusElement = document.getElementById('status');
+        const dataElement = document.getElementById('data');
+
+        function log(message, type = 'info') {
+            const line = document.createElement('div');
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            line.className = type;
+            logElement.appendChild(line);
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function connectWebSocket() {
+            // Connect to the WebSocket server for kiosk notifications
+            const kioskId = "test-kiosk-1";
+            log(`Connecting to WebSocket at ws://192.168.20.22:8000/ws/kiosk/${kioskId}/`);
+
+            ws = new WebSocket(`ws://192.168.20.22:8000/ws/kiosk/${kioskId}/`);
+
+            ws.onopen = function () {
+                log('WebSocket connection established successfully', 'success');
+                statusElement.textContent = 'Connected';
+                statusElement.style.color = 'green';
+            };
+
+            ws.onmessage = function (event) {
+                log(`Message received: ${event.data.substring(0, 100)}${event.data.length > 100 ? '...' : ''}`, 'received');
+                try {
+                    const data = JSON.parse(event.data);
+                    dataElement.textContent = JSON.stringify(data, null, 2);
+
+                    if (data.type === 'user.login') {
+                        log('LOGIN EVENT DETECTED!', 'success');
+                        log(`User: ${data.message.user.username}`, 'success');
+
+                        // Store tokens
+                        localStorage.setItem('access_token', data.message.access);
+                        localStorage.setItem('refresh_token', data.message.refresh);
+                        localStorage.setItem('username', data.message.user.username);
+
+                        // Optional: auto-redirect
+                        // window.location.href = 'dashboard.html';
+                    }
+                } catch (error) {
+                    log(`Error parsing message: ${error}`, 'error');
+                }
+            };
+
+            ws.onerror = function (error) {
+                log(`WebSocket error: ${error}`, 'error');
+                statusElement.textContent = 'Error';
+                statusElement.style.color = 'red';
+            };
+
+            ws.onclose = function () {
+                log('WebSocket connection closed', 'error');
+                statusElement.textContent = 'Disconnected';
+                statusElement.style.color = 'red';
+            };
+        }
+
+        document.getElementById('connect').addEventListener('click', function () {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.close();
+                this.textContent = 'Connect';
+            } else {
+                connectWebSocket();
+                this.textContent = 'Disconnect';
+            }
+        });
+
+        document.getElementById('test').addEventListener('click', function () {
+            log('Testing redirect to dashboard...');
+            window.location.href = 'dashboard.html';
+        });
+
+        document.getElementById('simulate').addEventListener('click', function () {
+            log('Simulating login event...');
+
+            // Create a fake login response
+            const fakeLoginData = {
+                type: 'user.login',
+                message: {
+                    access: 'fake_access_token_for_testing',
+                    refresh: 'fake_refresh_token_for_testing',
+                    user: {
+                        id: 8,
+                        username: 'john_simulated',
+                        events: []
+                    }
+                }
+            };
+
+            // Process it as if it came from WebSocket
+            const dataStr = JSON.stringify(fakeLoginData);
+            log(`Simulated message: ${dataStr.substring(0, 100)}...`, 'received');
+            dataElement.textContent = JSON.stringify(fakeLoginData, null, 2);
+
+            // Store tokens
+            localStorage.setItem('access_token', fakeLoginData.message.access);
+            localStorage.setItem('refresh_token', fakeLoginData.message.refresh);
+            localStorage.setItem('username', fakeLoginData.message.user.username);
+
+            log('Login simulated, tokens stored. Ready to redirect.', 'success');
+        });
+
+        // Automatically connect
+        connectWebSocket();
+        document.getElementById('connect').textContent = 'Disconnect';
+    </script>
+</body>
+
+</html>

@@ -1196,33 +1196,65 @@
             const buildingGroup = new THREE.Group();
             buildingGroup.position.set(x, 0, z);
             
-            // Create the main building structure
-            const geometry = new THREE.BoxGeometry(width, height, depth);
+            // Create layers for the building
+            const numLayers = 3; // Number of layers per building
+            const layerHeight = height / numLayers;
+            const layers = [];
             
-            // Use custom material for interactive highlighting
-            const material = new THREE.MeshStandardMaterial({ 
-                color: color,
-                metalness: 0.1,
-                roughness: 0.8
-            });
+            // Create each layer with slightly different colors
+            for (let i = 0; i < numLayers; i++) {
+                const layerGeometry = new THREE.BoxGeometry(width, layerHeight, depth);
+                
+                // Create a slightly different color for each layer
+                const layerColor = new THREE.Color(color);
+                layerColor.r *= (1 - (i * 0.1)); // Darken each layer slightly
+                layerColor.g *= (1 - (i * 0.1));
+                layerColor.b *= (1 - (i * 0.1));
+                
+                const layerMaterial = new THREE.MeshStandardMaterial({ 
+                    color: layerColor,
+                    metalness: 0.1 + (i * 0.1), // Increase metalness for higher layers
+                    roughness: 0.8 - (i * 0.1)  // Decrease roughness for higher layers
+                });
+                
+                const layer = new THREE.Mesh(layerGeometry, layerMaterial);
+                layer.position.y = (i * layerHeight) + (layerHeight / 2);
+                
+                // Add a thin border between layers
+                if (i < numLayers - 1) {
+                    const borderGeometry = new THREE.BoxGeometry(width + 0.1, 0.05, depth + 0.1);
+                    const borderMaterial = new THREE.MeshStandardMaterial({ 
+                        color: 0x333333,
+                        metalness: 0.5,
+                        roughness: 0.5
+                    });
+                    const border = new THREE.Mesh(borderGeometry, borderMaterial);
+                    border.position.y = layerHeight;
+                    layer.add(border);
+                }
+                
+                // Store layer data
+                layer.userData = {
+                    originalColor: layerColor,
+                    name: name,
+                    id: id,
+                    layerIndex: i,
+                    originalY: layer.position.y,
+                    expandedY: layer.position.y + (i * 0.5), // Each layer will expand upward
+                    isExpanded: false
+                };
+                
+                buildingGroup.add(layer);
+                layers.push(layer);
+            }
             
-            const building = new THREE.Mesh(geometry, material);
-            
-            // Position the building with bottom at y=0
-            building.position.y = height/2;
-            
-            // Store original color for hover effects
-            building.userData = {
-                originalColor: color,
+            // Store building data
+            buildingGroup.userData = {
                 name: name,
-                id: id
+                id: id,
+                layers: layers,
+                isExpanded: false
             };
-            
-            // Add the main building to the group
-            buildingGroup.add(building);
-            
-            // Add architectural details based on building type
-            addBuildingDetails(buildingGroup, id, width, depth, height);
             
             // Add the building group to the scene
             fullscreenMapScene.add(buildingGroup);
@@ -1230,171 +1262,52 @@
             // Add text label above building
             createBuildingLabel(x, height + 0.8, z, name);
             
-            // Make building interactive (use the main building mesh for interaction)
-            building.callback = function() {
-                selectDestination(id, name);
+            // Make building interactive (use the first layer for interaction)
+            layers[0].callback = function() {
+                toggleBuildingExpansion(buildingGroup);
             };
             
             // Add to interactive objects array
-            interactiveObjects.push(building);
+            interactiveObjects.push(layers[0]);
             
-            return building;
+            return layers[0];
         }
         
-        function addBuildingDetails(buildingGroup, buildingId, width, depth, height) {
-            const x = 0; // local position in the group
-            const z = 0;
+        function toggleBuildingExpansion(buildingGroup) {
+            const buildingData = buildingGroup.userData;
+            const isExpanding = !buildingData.isExpanded;
             
-            switch(buildingId) {
-                case 'main':
-                    // Add a decorative roof
-                    const roofGeometry = new THREE.ConeGeometry(Math.max(width, depth) * 0.7, height * 0.4, 4);
-                    const roofMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
-                    const roof = new THREE.Mesh(roofGeometry, roofMaterial);
-                    roof.position.set(x, height + height * 0.2, z);
-                    roof.rotation.y = Math.PI / 4;
-                    buildingGroup.add(roof);
-                    
-                    // Add pillars at the entrance
-                    addPillars(buildingGroup, width, depth, height);
-                    break;
-                    
-                case 'library':
-                    // Add book-like structure on top
-                    const bookGeometry = new THREE.BoxGeometry(width * 0.7, height * 0.2, depth * 0.3);
-                    const bookMaterial = new THREE.MeshStandardMaterial({ color: 0x4a5b70 });
-                    const book = new THREE.Mesh(bookGeometry, bookMaterial);
-                    book.position.set(x, height + height * 0.1, z);
-                    buildingGroup.add(book);
-                    break;
-                    
-                case 'science':
-                    // Add dome/observatory
-                    const domeGeometry = new THREE.SphereGeometry(width * 0.3, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.5);
-                    const domeMaterial = new THREE.MeshStandardMaterial({ color: 0x809AAB, metalness: 0.5 });
-                    const dome = new THREE.Mesh(domeGeometry, domeMaterial);
-                    dome.position.set(x + width * 0.3, height, z - depth * 0.3);
-                    buildingGroup.add(dome);
-                    break;
-                    
-                case 'engineering':
-                    // Add antenna/tower structure
-                    const towerGeometry = new THREE.CylinderGeometry(0.15, 0.15, height * 0.7, 8);
-                    const towerMaterial = new THREE.MeshStandardMaterial({ color: 0xA0A0A0, metalness: 0.7 });
-                    const tower = new THREE.Mesh(towerGeometry, towerMaterial);
-                    tower.position.set(x + width * 0.3, height + height * 0.35, z);
-                    buildingGroup.add(tower);
-                    break;
-                    
-                case 'bizschool':
-                    // Add a modern glass-like top
-                    const glassGeometry = new THREE.BoxGeometry(width, height * 0.1, depth);
-                    const glassMaterial = new THREE.MeshStandardMaterial({ 
-                        color: 0x90BBDB, 
-                        metalness: 0.9,
-                        roughness: 0.1,
-                        transparent: true,
-                        opacity: 0.7
-                    });
-                    const glass = new THREE.Mesh(glassGeometry, glassMaterial);
-                    glass.position.set(x, height + height * 0.05, z);
-                    buildingGroup.add(glass);
-                    break;
-                    
-                case 'student_center':
-                    // Add a circular central area
-                    const centerGeometry = new THREE.CylinderGeometry(width * 0.3, width * 0.3, height * 0.3, 16);
-                    const centerMaterial = new THREE.MeshStandardMaterial({ color: 0xCDAA88 });
-                    const center = new THREE.Mesh(centerGeometry, centerMaterial);
-                    center.position.set(x, height * 0.65, z);
-                    buildingGroup.add(center);
-                    break;
+            // Animate each layer
+            buildingData.layers.forEach(layer => {
+                const targetY = isExpanding ? layer.userData.expandedY : layer.userData.originalY;
                 
-                // Add more custom details for other buildings as needed
-            }
-            
-            // Add windows to all buildings
-            addWindows(buildingGroup, width, depth, height);
-        }
-        
-        function addPillars(buildingGroup, width, depth, height) {
-            const pillarGeometry = new THREE.CylinderGeometry(0.2, 0.2, height * 0.8, 8);
-            const pillarMaterial = new THREE.MeshStandardMaterial({ color: 0xCCCCCC });
-            
-            // Front pillars
-            const spacing = width / 3;
-            for (let i = -1; i <= 1; i++) {
-                const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
-                pillar.position.set(i * spacing, height * 0.4, depth / 2 + 0.1);
-                buildingGroup.add(pillar);
-            }
-        }
-        
-        function addWindows(buildingGroup, width, depth, height) {
-            // Window material
-            const windowMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x90BBDB, 
-                metalness: 0.9,
-                roughness: 0.1,
-                transparent: true,
-                opacity: 0.7
+                // Create animation
+                const startY = layer.position.y;
+                const duration = 1000; // 1 second
+                const startTime = Date.now();
+                
+                function animateLayer() {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Ease in-out function
+                    const easeProgress = progress < 0.5 
+                        ? 2 * progress * progress 
+                        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                    
+                    layer.position.y = startY + (targetY - startY) * easeProgress;
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animateLayer);
+                    } else {
+                        layer.userData.isExpanded = isExpanding;
+                    }
+                }
+                
+                animateLayer();
             });
             
-            // Window dimensions
-            const windowWidth = 0.3;
-            const windowHeight = 0.4;
-            const windowDepth = 0.05;
-            
-            // Front and back windows
-            const frontWindowZ = depth / 2 + 0.01;
-            const backWindowZ = -depth / 2 - 0.01;
-            
-            for (let row = 0; row < 2; row++) {
-                const y = height * 0.3 + row * height * 0.3;
-                
-                for (let i = -1; i <= 1; i++) {
-                    // Skip center window on ground floor for main entrance
-                    if (row === 0 && i === 0) continue;
-                    
-                    const x = i * (width / 3);
-                    
-                    // Front windows
-                    const frontWindowGeometry = new THREE.BoxGeometry(windowWidth, windowHeight, windowDepth);
-                    const frontWindow = new THREE.Mesh(frontWindowGeometry, windowMaterial);
-                    frontWindow.position.set(x, y, frontWindowZ);
-                    buildingGroup.add(frontWindow);
-                    
-                    // Back windows
-                    const backWindowGeometry = new THREE.BoxGeometry(windowWidth, windowHeight, windowDepth);
-                    const backWindow = new THREE.Mesh(backWindowGeometry, windowMaterial);
-                    backWindow.position.set(x, y, backWindowZ);
-                    buildingGroup.add(backWindow);
-                }
-            }
-            
-            // Side windows
-            const rightWindowX = width / 2 + 0.01;
-            const leftWindowX = -width / 2 - 0.01;
-            
-            for (let row = 0; row < 2; row++) {
-                const y = height * 0.3 + row * height * 0.3;
-                
-                for (let i = -1; i <= 1; i++) {
-                    const z = i * (depth / 3);
-                    
-                    // Right windows
-                    const rightWindowGeometry = new THREE.BoxGeometry(windowDepth, windowHeight, windowWidth);
-                    const rightWindow = new THREE.Mesh(rightWindowGeometry, windowMaterial);
-                    rightWindow.position.set(rightWindowX, y, z);
-                    buildingGroup.add(rightWindow);
-                    
-                    // Left windows
-                    const leftWindowGeometry = new THREE.BoxGeometry(windowDepth, windowHeight, windowWidth);
-                    const leftWindow = new THREE.Mesh(leftWindowGeometry, windowMaterial);
-                    leftWindow.position.set(leftWindowX, y, z);
-                    buildingGroup.add(leftWindow);
-                }
-            }
+            buildingData.isExpanded = isExpanding;
         }
         
         function createBuildingLabel(x, y, z, text) {
@@ -1786,15 +1699,25 @@
             if (intersects.length > 0) {
                 document.body.style.cursor = 'pointer';
                 
+                const intersectedObject = intersects[0].object;
+                const buildingGroup = intersectedObject.parent;
+                const buildingData = buildingGroup.userData;
+                
                 // Don't highlight if it's the selected building
-                if (!selectedBuilding || intersects[0].object.userData.id !== selectedBuilding) {
-                    intersects[0].object.material.emissive.setHex(0x333333);
+                if (!selectedBuilding || intersectedObject.userData.id !== selectedBuilding) {
+                    // Highlight all layers of the building
+                    buildingData.layers.forEach(layer => {
+                        layer.material.emissive.setHex(0x333333);
+                    });
                 }
                 
-                // Update tooltip
+                // Update tooltip with layer information
                 const tooltip = document.getElementById('map-tooltip');
                 if (tooltip) {
-                    tooltip.textContent = intersects[0].object.userData.name;
+                    const layerInfo = buildingData.isExpanded 
+                        ? `\nLayers: ${buildingData.layers.length} (Expanded)`
+                        : `\nLayers: ${buildingData.layers.length} (Click to expand)`;
+                    tooltip.textContent = `${intersectedObject.userData.name}${layerInfo}`;
                     tooltip.style.left = (event.clientX + 10) + 'px';
                     tooltip.style.top = (event.clientY + 10) + 'px';
                     tooltip.style.display = 'block';

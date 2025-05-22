@@ -26,10 +26,10 @@
 #include <ArduinoJson.h>
 
 // Network configuration
-const char* ssid = "UNIMATE-demo";       // WiFi SSID
-const char* password = "Unimate2025!";   // WiFi password
-const char* serverUrl = "http://192.168.4.1:8000/api/scan/"; // Change to your server IP
-const char* kioskId = "kiosk-1";         // Unique ID for this kiosk
+const char* ssid = "John's Galaxy S22+";       // WiFi SSID
+const char* password = "77777778";   // WiFi password
+const char* serverUrl = "http://172.23.43.197:8000/api/scan/"; // Updated to your computer's IP
+const char* kioskId = "test-kiosk-1";         // Test kiosk ID
 
 // MFRC522 pins
 #define SS_PIN  5  // SDA
@@ -46,6 +46,20 @@ MFRC522 rfid(SS_PIN, RST_PIN);
 String lastCardId = "";
 unsigned long lastScanTime = 0;
 const unsigned long scanCooldown = 3000; // 3 seconds cooldown between scans
+
+// Test mode variables
+bool testMode = false;  // Enable test mode
+unsigned long lastTestTime = 0;
+const unsigned long testInterval = 5000; // Send test scan every 5 seconds
+
+// Valid test card IDs (from test fixtures)
+const char* TEST_CARDS[] = {
+    "5A653600",     // Your actual RFID card
+    "04B5C6D7E8",   // Bob's card
+    "0499AA11BB"    // Carol's card
+};
+const int NUM_TEST_CARDS = 3;
+int currentTestCard = 0;
 
 void setup() {
   // Initialize serial
@@ -72,6 +86,18 @@ void setup() {
   
   // Connect to WiFi
   connectToWiFi();
+  
+  if (testMode) {
+    Serial.println("Test mode enabled - will send test scans every 5 seconds");
+    Serial.println("Press any key to send a manual test scan");
+    Serial.println("Available test cards:");
+    for (int i = 0; i < NUM_TEST_CARDS; i++) {
+      Serial.print("  ");
+      Serial.print(i + 1);
+      Serial.print(". ");
+      Serial.println(TEST_CARDS[i]);
+    }
+  }
 }
 
 void loop() {
@@ -81,48 +107,81 @@ void loop() {
     connectToWiFi();
   }
   
-  // Check if a new card is present
-  if (!rfid.PICC_IsNewCardPresent()) {
-    return;
+  // Test mode functionality
+  if (testMode) {
+    unsigned long currentTime = millis();
+    
+    // Check for manual test trigger (any serial input)
+    if (Serial.available() > 0) {
+      Serial.read(); // Clear the input
+      sendTestScan();
+    }
+    
+    // Automatic test scans
+    if (currentTime - lastTestTime >= testInterval) {
+      sendTestScan();
+      lastTestTime = currentTime;
+    }
   }
   
-  // Read the card serial
-  if (!rfid.PICC_ReadCardSerial()) {
-    return;
+  // Normal RFID reading
+  if (!testMode) {
+    // Check if a new card is present
+    if (!rfid.PICC_IsNewCardPresent()) {
+      return;
+    }
+    
+    // Read the card serial
+    if (!rfid.PICC_ReadCardSerial()) {
+      return;
+    }
+    
+    // Convert ID to string
+    String cardId = "";
+    for (byte i = 0; i < rfid.uid.size; i++) {
+      cardId.concat(String(rfid.uid.uidByte[i] < 0x10 ? "0" : ""));
+      cardId.concat(String(rfid.uid.uidByte[i], HEX));
+    }
+    cardId.toUpperCase();
+    
+    // Check if enough time has passed since the last scan
+    unsigned long currentTime = millis();
+    if (cardId == lastCardId && (currentTime - lastScanTime) < scanCooldown) {
+      Serial.println("Same card scanned too quickly. Ignoring.");
+      // Blink red LED to indicate cooldown
+      blinkLED(RED_LED, 3, 100);
+      return;
+    }
+    
+    // Update last scan variables
+    lastCardId = cardId;
+    lastScanTime = currentTime;
+    
+    // Print card info
+    Serial.println("Card detected:");
+    Serial.print("UID: ");
+    Serial.println(cardId);
+    
+    // Send card ID to server
+    sendCardToServer(cardId);
+    
+    // Halt PICC and stop encryption
+    rfid.PICC_HaltA();
+    rfid.PCD_StopCrypto1();
   }
+}
+
+void sendTestScan() {
+  // Use the next test card in sequence
+  String testCardId = TEST_CARDS[currentTestCard];
+  currentTestCard = (currentTestCard + 1) % NUM_TEST_CARDS;
   
-  // Convert ID to string
-  String cardId = "";
-  for (byte i = 0; i < rfid.uid.size; i++) {
-    cardId.concat(String(rfid.uid.uidByte[i] < 0x10 ? "0" : ""));
-    cardId.concat(String(rfid.uid.uidByte[i], HEX));
-  }
-  cardId.toUpperCase();
+  Serial.println("Sending test scan:");
+  Serial.print("Test Card ID: ");
+  Serial.println(testCardId);
   
-  // Check if enough time has passed since the last scan
-  unsigned long currentTime = millis();
-  if (cardId == lastCardId && (currentTime - lastScanTime) < scanCooldown) {
-    Serial.println("Same card scanned too quickly. Ignoring.");
-    // Blink red LED to indicate cooldown
-    blinkLED(RED_LED, 3, 100);
-    return;
-  }
-  
-  // Update last scan variables
-  lastCardId = cardId;
-  lastScanTime = currentTime;
-  
-  // Print card info
-  Serial.println("Card detected:");
-  Serial.print("UID: ");
-  Serial.println(cardId);
-  
-  // Send card ID to server
-  sendCardToServer(cardId);
-  
-  // Halt PICC and stop encryption
-  rfid.PICC_HaltA();
-  rfid.PCD_StopCrypto1();
+  // Send test card ID to server
+  sendCardToServer(testCardId);
 }
 
 void connectToWiFi() {
@@ -171,6 +230,11 @@ void sendCardToServer(String cardId) {
     
     // Send the request
     Serial.println("Sending card ID to server...");
+    Serial.print("URL: ");
+    Serial.println(serverUrl);
+    Serial.print("Payload: ");
+    Serial.println(requestBody);
+    
     int httpResponseCode = http.POST(requestBody);
     
     if (httpResponseCode > 0) {

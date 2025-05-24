@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unimate - University Wayfinding</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #fff;
+            background-color: #1a1a1a;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #333;
+            position: relative;
+            z-index: 1000;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        .search-container {
+            flex-grow: 1;
+            max-width: 600px;
+            margin: 0 1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            border: none;
+            background-color: #333;
+            color: #fff;
+            padding-left: 2.5rem;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>');
+            background-repeat: no-repeat;
+            background-position: 0.75rem center;
+        }
+
+        .login-button {
+            background-color: #5473e8;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .login-button:hover {
+            background-color: #435ecc;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: #1a1a1a;
+            overflow-y: auto;
+            border-right: 1px solid #333;
+            padding-bottom: 1rem;
+        }
+
+        .sidebar-section {
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-section h2 {
+            padding: 1rem;
+            margin: 0;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #333;
+            color: #eee;
+        }
+
+        .event-list {
+            padding: 0;
+        }
+
+        .event-item {
+            padding: 1rem;
+            border-bottom: 1px solid #222;
+            cursor: pointer;
+            color: #ccc;
+            display: flex;
+        }
+
+        .event-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-item:hover {
+            background-color: #252525;
+        }
+
+        .event-content {
+            flex: 1;
+        }
+
+        .event-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            color: #fff;
+        }
+
+        .event-meta {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 0.25rem;
+        }
+
+        .event-thumbnail {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-left: 10px;
+            border: 1px solid #333;
+        }
+
+        #map-container {
+            flex: 1;
+            height: 100%;
+            background-color: #222;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .login-modal {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(26, 26, 26, 0.9);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid #333;
+            width: 320px;
+            z-index: 2000;
+            display: none;
+        }
+
+        .login-modal h2 {
+            margin-top: 0;
+            color: #fff;
+            text-align: center;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .login-form input {
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background-color: #222;
+            color: #fff;
+        }
+
+        .login-form button {
+            background-color: #5473e8;
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .login-form button:hover {
+            background-color: #435ecc;
+        }
+
+        .card-scan-note {
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            border-top: 1px solid #444;
+            padding-top: 1rem;
+        }
+
+        .card-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23888888"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4V6h16v12zM4 0h16v2H4zm0 22h16v2H4zm8-10c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm4 3.43c0-.81-.48-1.53-1.22-1.85-.85-.37-1.79-.58-2.78-.58-.99 0-1.93.21-2.78.58C8.48 11.9 8 12.62 8 13.43V14h8v-.57z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+
+        .error-message {
+            color: #ff5555;
+            margin-bottom: 1rem;
+            text-align: center;
+            display: none;
+        }
+
+        .urgent-event {
+            background-color: rgba(255, 50, 50, 0.1);
+            border-left: 3px solid #ff5555;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Map</h1>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Find place">
+        </div>
+        <button class="login-button" id="showLogin">Log in</button>
+        <a href="/views/test-card.html" style="margin-left: 10px; color: #5473e8; text-decoration: none;">Card Test</a>
+    </header>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h2>Tech Events</h2>
+                <div class="event-list">
+                    <!-- Tech Events -->
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Event 1</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                    <div class="event-item urgent-event">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">URGENT: System Maintenance</div>
+                            <div class="event-meta">2 hours ago · By IT Services</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Event 2</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Event 3</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h2>Tech News</h2>
+                <div class="event-list">
+                    <!-- Tech News -->
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Event 4</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Event 5</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-meta">Tech Events</div>
+                            <div class="event-title">Event 6</div>
+                            <div class="event-meta">2 hours ago · By Mechatronics</div>
+                        </div>
+                        <img src="https://picsum.photos/60/60" class="event-thumbnail" alt="Event thumbnail">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="map-container">
+            <!-- Map will be loaded here -->
+        </div>
+    </div>
+
+    <div class="login-modal" id="loginModal">
+        <h2>Login</h2>
+        <div class="error-message" id="loginError"></div>
+        <form class="login-form" id="loginForm">
+            <input type="text" placeholder="Username" id="username" required>
+            <input type="password" placeholder="Password" id="password" required>
+            <button type="submit">Login</button>
+            <div class="card-scan-note">
+                <span class="card-icon"></span>
+                <span>Tap your student ID card to log in instantly</span>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Initialize WebSocket for card scanning notifications
+        let ws = null;
+
+        function connectWebSocket() {
+            // Connect to the WebSocket server for kiosk notifications
+            const kioskId = "test-kiosk-1";  // Always use the same kiosk ID as in your ESP32 code
+            // Use your PC's IP address instead of localhost
+            console.log("Connecting to WebSocket at:", `ws://192.168.20.22:8000/ws/kiosk/${kioskId}/`);
+            ws = new WebSocket(`ws://192.168.20.22:8000/ws/kiosk/${kioskId}/`);
+
+            ws.onopen = function () {
+                console.log("WebSocket connection established successfully");
+                // Send a message to register this kiosk
+                ws.send(JSON.stringify({
+                    type: 'register_kiosk',
+                    kiosk_id: kioskId
+                }));
+            };
+
+            ws.onmessage = function (event) {
+                console.log("WebSocket message received:", event.data);
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log("Parsed data:", data);
+
+                    // Handle login event from card scan
+                    if (data.type === "user.login") {
+                        console.log("Login event detected, user data:", data.message);
+                        handleUserLogin(data.message);
+                    } else {
+                        console.log("Received non-login message type:", data.type);
+                    }
+                } catch (error) {
+                    console.error("Error parsing WebSocket message:", error);
+                }
+            };
+
+            ws.onerror = function (error) {
+                console.error("WebSocket error:", error);
+            };
+
+            ws.onclose = function () {
+                console.log("WebSocket connection closed");
+                // Try to reconnect after a delay
+                setTimeout(connectWebSocket, 5000);
+            };
+        }
+
+        // Handle user login (both from form and card scan)
+        function handleUserLogin(userData) {
+            console.log("handleUserLogin called with:", userData);
+
+            // Store authentication data
+            if (userData.access) {
+                console.log("Storing access token");
+                localStorage.setItem('access_token', userData.access);
+            }
+            if (userData.refresh) {
+                console.log("Storing refresh token");
+                localStorage.setItem('refresh_token', userData.refresh);
+            }
+            if (userData.user && userData.user.username) {
+                console.log("Storing username:", userData.user.username);
+                localStorage.setItem('username', userData.user.username);
+            }
+
+            // Hide the modal if it's open
+            document.getElementById('loginModal').style.display = 'none';
+
+            // Redirect to dashboard
+            console.log("Redirecting to dashboard.html");
+            window.location.href = 'dashboard.html';
+        }
+
+        // Initialize Map (placeholder for now)
+        function initMap() {
+            const mapContainer = document.getElementById('map-container');
+
+            // Use an iframe to show a Google Maps view for now
+            // This is just for demonstration. In production, use the Three.js map or Google Maps API
+            const iframe = document.createElement('iframe');
+            iframe.src = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5587.867820291437!2d174.76568619358058!3d-36.85292772229561!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6d0d47fb5a9ce6fb%3A0x500ef6143a29917!2sThe%20University%20of%20Auckland!5e0!3m2!1sen!2snz!4v1593482149224!5m2!1sen!2snz';
+            iframe.width = '100%';
+            iframe.height = '100%';
+            iframe.style.border = '0';
+            iframe.allowFullscreen = true;
+            mapContainer.appendChild(iframe);
+        }
+
+        // Show login modal
+        document.getElementById('showLogin').addEventListener('click', function () {
+            document.getElementById('loginModal').style.display = 'block';
+            document.getElementById('loginError').style.display = 'none';
+        });
+
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorElement = document.getElementById('loginError');
+
+            try {
+                const response = await axios.post('/api/login/', {
+                    username: username,
+                    password: password
+                });
+
+                // Handle successful login
+                handleUserLogin(response.data);
+            } catch (error) {
+                console.error('Login error:', error);
+
+                // Display error message
+                errorElement.textContent = error.response?.data?.error || 'Invalid credentials';
+                errorElement.style.display = 'block';
+            }
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function (e) {
+            const modal = document.getElementById('loginModal');
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Initialize when page loads
+        window.addEventListener('load', function () {
+            initMap();
+            connectWebSocket();
+
+            // Check if user is already logged in
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                // Redirect to dashboard if already logged in
+                window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
+</body>
+
+</html>

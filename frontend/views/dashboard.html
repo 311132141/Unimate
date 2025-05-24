@@ -89,8 +89,8 @@
         }
 
         #fullscreen-map-container {
-            width: 100%;
-            height: calc(100vh - 60px);
+            width: 100%; 
+            height: calc(100vh - 60px); 
             position: relative;
             background-color: #1a1a1a;
         }
@@ -148,35 +148,23 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         @keyframes fadeOut {
-            from {
-                opacity: 1;
-            }
-
-            to {
-                opacity: 0;
-            }
+            from { opacity: 1; }
+            to { opacity: 0; }
         }
 
         /* Add styles for the different views */
         .view-container {
             flex: 1;
-            display: none;
-            /* Hide all views by default */
+            display: none; /* Hide all views by default */
         }
 
         .view-container.active {
-            display: flex;
-            /* Show only the active view */
+            display: flex; /* Show only the active view */
         }
 
         #dashboard-view {
@@ -184,16 +172,12 @@
             gap: 1rem;
         }
 
-        #timetable-view,
-        #map-view,
-        #events-view,
-        #settings-view {
+        #timetable-view, #map-view, #events-view, #settings-view {
             flex-direction: column;
         }
-
+        
         /* Map Navigation UI */
-        #map-controls,
-        .dashboard-map-controls {
+        #map-controls, .dashboard-map-controls {
             position: absolute;
             top: 20px;
             right: 20px;
@@ -202,7 +186,7 @@
             gap: 10px;
             z-index: 10;
         }
-
+        
         .map-control-btn {
             width: 40px;
             height: 40px;
@@ -217,11 +201,11 @@
             justify-content: center;
             transition: background-color 0.2s;
         }
-
+        
         .map-control-btn:hover {
             background: rgba(50, 50, 50, 0.9);
         }
-
+        
         /* Building selection UI */
         #building-selector {
             background: rgba(0, 0, 0, 0.7);
@@ -233,14 +217,14 @@
             z-index: 10;
             max-width: 250px;
         }
-
+        
         #building-selector h3 {
             color: white;
             margin-top: 0;
             margin-bottom: 10px;
             font-size: 14px;
         }
-
+        
         #building-list {
             display: flex;
             flex-direction: column;
@@ -248,7 +232,7 @@
             max-height: 200px;
             overflow-y: auto;
         }
-
+        
         .building-option {
             background: rgba(60, 60, 60, 0.7);
             color: white;
@@ -262,15 +246,15 @@
             display: flex;
             align-items: center;
         }
-
+        
         .building-option:hover {
             background: rgba(80, 80, 80, 0.9);
         }
-
+        
         .building-option.selected {
             background: #1f3a93;
         }
-
+        
         /* Add checkbox style for building options */
         .building-option:before {
             content: "";
@@ -282,7 +266,7 @@
             border-radius: 2px;
             background-color: transparent;
         }
-
+        
         .building-option.selected:before {
             background-color: #1f3a93;
             content: "✓";
@@ -292,7 +276,7 @@
             align-items: center;
             justify-content: center;
         }
-
+        
         /* Dashboard building selector */
         #dashboard-building-selector {
             background: rgba(0, 0, 0, 0.7);
@@ -304,14 +288,14 @@
             z-index: 10;
             max-width: 200px;
         }
-
+        
         #dashboard-building-selector h3 {
             color: white;
             margin-top: 0;
             margin-bottom: 8px;
             font-size: 12px;
         }
-
+        
         #dashboard-building-list {
             display: flex;
             flex-direction: column;
@@ -319,7 +303,7 @@
             max-height: 150px;
             overflow-y: auto;
         }
-
+        
         /* Dashboard route info */
         #dashboard-route-info {
             background: rgba(0, 0, 0, 0.7);
@@ -333,25 +317,25 @@
             max-width: 200px;
             font-size: 12px;
         }
-
+        
         #dashboard-route-info h3 {
             margin-top: 0;
             margin-bottom: 5px;
             font-size: 12px;
         }
-
+        
         #dashboard-selected-destination {
             font-weight: bold;
             color: #4dabf7;
         }
-
+        
         /* Match mockup header */
         header {
             background-color: #1a1a1a;
             border-bottom: 1px solid #333;
             padding: 0.5rem 1rem;
         }
-
+        
         /* View titles */
         .view-title {
             margin-top: 0;
@@ -359,40 +343,40 @@
             font-size: 1.5rem;
             color: #ffffff;
         }
-
+        
         /* Make the sidebar match the mockup */
         .sidebar {
             background-color: #1a1a1a;
             border-right: 1px solid #333;
             min-width: 180px;
         }
-
+        
         .sidebar-section h2 {
             font-size: 1rem;
             padding: 0.75rem 1rem;
             margin: 0;
             color: #888;
         }
-
+        
         .event-item {
             padding: 0.75rem 1rem;
             cursor: pointer;
             transition: background-color 0.2s;
         }
-
+        
         .event-item:hover {
             background-color: #252525;
         }
-
+        
         .event-item.active {
             background-color: #2a2a2a;
             border-left: 3px solid #3b82f6;
         }
-
+        
         /* Map tooltip */
         #map-tooltip {
             position: fixed;
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: rgba(0,0,0,0.7);
             color: white;
             padding: 5px 10px;
             border-radius: 3px;
@@ -463,7 +447,7 @@
                 <h2 class="panel-title">Campus Map</h2>
                 <div id="map-container">
                     <!-- 3D Map will be rendered here -->
-
+                    
                     <!-- Route information for dashboard map -->
                     <div id="dashboard-route-info">
                         <h3>Navigation</h3>
@@ -471,7 +455,7 @@
                         <div>To: <span id="dashboard-selected-destination">Select a building</span></div>
                         <div id="dashboard-distance-info" style="margin-top: 5px; font-size: 11px;"></div>
                     </div>
-
+                    
                     <!-- Building selector for dashboard map -->
                     <div id="dashboard-building-selector">
                         <h3>Campus Buildings</h3>
@@ -483,9 +467,9 @@
 
         <div id="timetable-view" class="view-container">
             <h2 class="view-title">Full Timetable</h2>
-            <div id="full-timetable">
-                <div class="loading-indicator">Loading your complete timetable...</div>
-                <!-- Will be populated with the same data as the dashboard timetable -->
+                <div id="full-timetable">
+                    <div class="loading-indicator">Loading your complete timetable...</div>
+                    <!-- Will be populated with the same data as the dashboard timetable -->
             </div>
         </div>
 
@@ -499,7 +483,7 @@
                     <button class="map-control-btn" id="reset-view-btn" title="Reset View">⟲</button>
                     <button class="map-control-btn" id="top-view-btn" title="Top View">⤓</button>
                 </div>
-
+                
                 <!-- Route information -->
                 <div id="route-info">
                     <h3>Navigation</h3>
@@ -507,7 +491,7 @@
                     <div>To: <span id="selected-destination">Select a building</span></div>
                     <div id="distance-info" style="margin-top: 5px; font-size: 12px;"></div>
                 </div>
-
+                
                 <!-- Building selector -->
                 <div id="building-selector">
                     <h3>Campus Buildings</h3>
@@ -518,26 +502,26 @@
 
         <div id="events-view" class="view-container">
             <h2 class="view-title">Campus Events</h2>
-            <div id="events-list">
-                <div class="event-item">
-                    <div class="event-content">
-                        <div class="event-title">Tech Week Exhibition</div>
-                        <div class="event-meta">Tomorrow at 10:00 AM · Engineering Building</div>
-                        <div class="event-meta">Join us for demonstrations of student projects</div>
+                <div id="events-list">
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-title">Tech Week Exhibition</div>
+                            <div class="event-meta">Tomorrow at 10:00 AM · Engineering Building</div>
+                            <div class="event-meta">Join us for demonstrations of student projects</div>
+                        </div>
                     </div>
-                </div>
-                <div class="event-item">
-                    <div class="event-content">
-                        <div class="event-title">Guest Lecture: AI Ethics</div>
-                        <div class="event-meta">May 20 at 2:00 PM · Lecture Hall 4</div>
-                        <div class="event-meta">Prof. Maria Johnson from Stanford University</div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-title">Guest Lecture: AI Ethics</div>
+                            <div class="event-meta">May 20 at 2:00 PM · Lecture Hall 4</div>
+                            <div class="event-meta">Prof. Maria Johnson from Stanford University</div>
+                        </div>
                     </div>
-                </div>
-                <div class="event-item">
-                    <div class="event-content">
-                        <div class="event-title">Career Fair 2025</div>
-                        <div class="event-meta">June 5 at 9:00 AM · Student Center</div>
-                        <div class="event-meta">Over 50 companies will be present</div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-title">Career Fair 2025</div>
+                            <div class="event-meta">June 5 at 9:00 AM · Student Center</div>
+                            <div class="event-meta">Over 50 companies will be present</div>
                     </div>
                 </div>
             </div>
@@ -545,32 +529,32 @@
 
         <div id="settings-view" class="view-container">
             <h2 class="view-title">Settings</h2>
-            <div style="padding:1rem;">
-                <div style="margin-bottom:1.5rem;">
-                    <h3 style="margin-top:0;">User Settings</h3>
-                    <div style="margin-bottom:1rem;">
-                        <label style="display:block; margin-bottom:0.5rem;">Display Name</label>
-                        <input type="text" class="search-input" style="max-width:300px;" value="John Doe">
-                    </div>
-                    <div style="margin-bottom:1rem;">
-                        <label style="display:block; margin-bottom:0.5rem;">Email Notifications</label>
-                        <label style="display:flex; align-items:center; gap:0.5rem;">
-                            <input type="checkbox" checked> Receive notifications about timetable changes
-                        </label>
-                    </div>
-                </div>
-                <div>
-                    <h3>Application Settings</h3>
-                    <div style="margin-bottom:1rem;">
-                        <label style="display:block; margin-bottom:0.5rem;">Theme</label>
-                        <select class="search-input" style="max-width:300px;">
-                            <option selected>Dark Theme</option>
-                            <option>Light Theme</option>
-                            <option>System Default</option>
-                        </select>
+                <div style="padding:1rem;">
+                    <div style="margin-bottom:1.5rem;">
+                        <h3 style="margin-top:0;">User Settings</h3>
+                        <div style="margin-bottom:1rem;">
+                            <label style="display:block; margin-bottom:0.5rem;">Display Name</label>
+                            <input type="text" class="search-input" style="max-width:300px;" value="John Doe">
+                        </div>
+                        <div style="margin-bottom:1rem;">
+                            <label style="display:block; margin-bottom:0.5rem;">Email Notifications</label>
+                            <label style="display:flex; align-items:center; gap:0.5rem;">
+                                <input type="checkbox" checked> Receive notifications about timetable changes
+                            </label>
+                        </div>
                     </div>
                     <div>
-                        <button class="login-button">Save Changes</button>
+                        <h3>Application Settings</h3>
+                        <div style="margin-bottom:1rem;">
+                            <label style="display:block; margin-bottom:0.5rem;">Theme</label>
+                            <select class="search-input" style="max-width:300px;">
+                                <option selected>Dark Theme</option>
+                                <option>Light Theme</option>
+                                <option>System Default</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button class="login-button">Save Changes</button>
                     </div>
                 </div>
             </div>
@@ -580,68 +564,16 @@
     <div id="status-message"></div>
 
     <script>
-        // Authentication check - do this first thing
-        document.addEventListener('DOMContentLoaded', function () {
-            // Check if user is authenticated
-            const token = localStorage.getItem('access_token');
-            const username = localStorage.getItem('username');
-
-            console.log("Dashboard loaded, checking authentication");
-            console.log("Token exists:", !!token);
-            console.log("Username:", username);
-
-            if (!token) {
-                console.log("No authentication token found, redirecting to home");
-                window.location.href = '/components/connected.html';
-                return;
-            }
-
-            // Set the username in the UI
-            const userNameElement = document.getElementById('user-name');
-            if (userNameElement && username) {
-                userNameElement.textContent = username;
-            }
-
-            // Continue with the rest of the initialization
-            console.log("Authentication successful, initializing dashboard");
-
-            // Initialize 3D map
-            initDashboardMap();
-
-            // Fetch and load timetable data
-            fetchTimetableData();
-
-            // Setup navigation
-            setupNavigation();
-
-            // Set up logout functionality
-            document.getElementById('logout-button').addEventListener('click', function () {
-                localStorage.removeItem('access_token');
-                localStorage.removeItem('refresh_token');
-                localStorage.removeItem('username');
-
-                // Redirect directly to connected.html instead of the root URL
-                window.location.href = '/components/connected.html';
-            });
-        });
-
-        // ... existing code ...
-
-        function initializeDashboard() {
-            // Your existing dashboard initialization code
-            // ...
-        }
-
         // Global variables for map
         let mapScene, mapCamera, mapRenderer;
         let isDragging = false;
         let previousMousePosition = { x: 0, y: 0 };
         let cameraRotation = { x: 0, y: 0 };
-
+        
         // Variables for fullscreen map
         let fullscreenMapScene, fullscreenMapCamera, fullscreenMapRenderer;
         let fullscreenCameraRotation = { x: 0, y: 0 };
-
+        
         // Dashboard map interaction variables
         let dashboardSelectedBuilding = null;
         let dashboardCurrentRoute = null;
@@ -649,60 +581,95 @@
         let dashboardRaycaster = new THREE.Raycaster();
         let dashboardMouse = new THREE.Vector2();
         let dashboardIsFullscreenDragging = false;
-
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const token = localStorage.getItem('access_token');
+            const username = localStorage.getItem('username');
+            
+            if (token) {
+                // Update UI for logged-in user
+                if (username) {
+                    document.getElementById('user-name').textContent = username;
+                }
+                
+                // Initialize 3D map
+                initDashboardMap();
+                
+                // Fetch and load timetable data
+                fetchTimetableData();
+                
+                // Setup navigation
+                setupNavigation();
+            } else {
+                // Redirect to login page if not authenticated
+                window.location.href = 'index.html';
+            }
+            
+            // Set up logout functionality
+            document.getElementById('logout-button').addEventListener('click', function() {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                localStorage.removeItem('username');
+                
+                // Redirect to login page
+                window.location.href = 'index.html';
+            });
+        });
+        
         function initDashboardMap() {
             const container = document.getElementById('map-container');
-
+            
             // Create scene with background color
             mapScene = new THREE.Scene();
             mapScene.background = new THREE.Color(0x1a1a1a);
-
+            
             // Create camera
             mapCamera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
             mapCamera.position.set(0, 12, 15);
             mapCamera.lookAt(0, 0, 0);
-
+            
             // Create renderer
             mapRenderer = new THREE.WebGLRenderer({ antialias: true });
             mapRenderer.setSize(container.clientWidth, container.clientHeight);
             mapRenderer.setPixelRatio(window.devicePixelRatio);
             mapRenderer.shadowMap.enabled = true;
             container.appendChild(mapRenderer.domElement);
-
+            
             // Add lights
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             mapScene.add(ambientLight);
-
+            
             const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
             directionalLight.position.set(5, 10, 5);
             directionalLight.castShadow = true;
             mapScene.add(directionalLight);
-
+            
             // Initialize dashboard interactive objects array
             dashboardInteractiveObjects = [];
-
+            
             // Create campus model with same structure as fullscreen map
             createDashboardCampusModel();
-
+            
             // Add event listeners for map interaction
             container.addEventListener('mousedown', onDashboardMapMouseDown);
             document.addEventListener('mousemove', onDashboardMapMouseMove);
             document.addEventListener('mouseup', onDashboardMapMouseUp);
             window.addEventListener('resize', onWindowResize);
-
+            
             // Create Map Controls UI
             createDashboardMapControls(container);
-
+            
             // Populate dashboard building list
             populateDashboardBuildingList();
-
+            
             // Start animation loop
             animateMap();
-
+            
             // Show success message
             showStatusMessage('3D map loaded successfully');
         }
-
+        
         function onDashboardMapMouseDown(event) {
             // Handle drag start for camera rotation
             isDragging = true;
@@ -710,22 +677,22 @@
                 x: event.clientX,
                 y: event.clientY
             };
-
+            
             // Handle object selection on click
             event.preventDefault();
-
+            
             // Get normalized device coordinates
             const container = document.getElementById('map-container');
             const rect = container.getBoundingClientRect();
             dashboardMouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
             dashboardMouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
-
+            
             // Update the raycaster
             dashboardRaycaster.setFromCamera(dashboardMouse, mapCamera);
-
+            
             // Check for intersections with interactive objects
             const intersects = dashboardRaycaster.intersectObjects(dashboardInteractiveObjects);
-
+            
             if (intersects.length > 0) {
                 // Call the callback function of the intersected object
                 if (intersects[0].object.callback) {
@@ -733,7 +700,7 @@
                 }
             }
         }
-
+        
         function onDashboardMapMouseMove(event) {
             // Handle hover effect for interactive objects when not dragging
             if (!isDragging) {
@@ -742,23 +709,23 @@
                 const rect = container.getBoundingClientRect();
                 dashboardMouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
                 dashboardMouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
-
+                
                 // Update the raycaster
                 dashboardRaycaster.setFromCamera(dashboardMouse, mapCamera);
-
+                
                 // Check for intersections with interactive objects
                 const intersects = dashboardRaycaster.intersectObjects(dashboardInteractiveObjects);
-
+                
                 // Reset all buildings to original color (except selected)
                 dashboardInteractiveObjects.forEach(obj => {
                     if (dashboardSelectedBuilding && obj.userData.id === dashboardSelectedBuilding) return;
                     obj.material.emissive.setHex(0x000000);
                 });
-
+                
                 // Show cursor pointer and highlight hovered building
                 if (intersects.length > 0) {
                     document.body.style.cursor = 'pointer';
-
+                    
                     // Don't highlight if it's the selected building
                     if (!dashboardSelectedBuilding || intersects[0].object.userData.id !== dashboardSelectedBuilding) {
                         intersects[0].object.material.emissive.setHex(0x333333);
@@ -768,48 +735,48 @@
                 }
                 return;
             }
-
+            
             // Handle camera rotation when dragging
             const deltaMove = {
                 x: event.clientX - previousMousePosition.x,
                 y: event.clientY - previousMousePosition.y
             };
-
+            
             // Rotate camera based on mouse movement
             cameraRotation.y += deltaMove.x * 0.01;
             cameraRotation.x += deltaMove.y * 0.01;
-
+            
             // Limit vertical rotation
-            cameraRotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraRotation.x));
-
+            cameraRotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraRotation.x));
+            
             // Calculate camera position
             const distance = mapCamera.position.length();
             mapCamera.position.x = distance * Math.sin(cameraRotation.y) * Math.cos(cameraRotation.x);
             mapCamera.position.z = distance * Math.cos(cameraRotation.y) * Math.cos(cameraRotation.x);
             mapCamera.position.y = distance * Math.sin(cameraRotation.x);
-
+            
             mapCamera.lookAt(0, 0, 0);
-
+            
             previousMousePosition = {
                 x: event.clientX,
                 y: event.clientY
             };
         }
-
+        
         function onDashboardMapMouseUp() {
             isDragging = false;
         }
-
+        
         function onWindowResize() {
             const container = document.getElementById('map-container');
             mapCamera.aspect = container.clientWidth / container.clientHeight;
             mapCamera.updateProjectionMatrix();
             mapRenderer.setSize(container.clientWidth, container.clientHeight);
         }
-
+        
         function fetchTimetableData() {
             const token = localStorage.getItem('access_token');
-
+            
             // Demo data for testing
             const demoEvents = [
                 {
@@ -835,21 +802,21 @@
                     "is_urgent": true
                 }
             ];
-
+            
             // For demo purposes, use the demo events directly
             renderFallbackTimetable(demoEvents);
         }
-
+        
         function renderFallbackTimetable(events) {
             const timetable = document.getElementById('timetable');
             timetable.innerHTML = '';
-
+            
             // Also update the full timetable if it exists
             const fullTimetable = document.getElementById('full-timetable');
             if (fullTimetable) {
                 fullTimetable.innerHTML = '';
             }
-
+            
             if (!events || events.length === 0) {
                 const noEventsMessage = '<div class="empty-state">No events scheduled.</div>';
                 timetable.innerHTML = noEventsMessage;
@@ -858,12 +825,12 @@
                 }
                 return;
             }
-
+            
             events.forEach(event => {
                 // Create timetable item for dashboard
                 const item = createTimetableItem(event);
                 timetable.appendChild(item);
-
+                
                 // Create duplicate for full timetable view if it exists
                 if (fullTimetable) {
                     const fullItem = createTimetableItem(event);
@@ -871,21 +838,21 @@
                 }
             });
         }
-
+        
         function createTimetableItem(event) {
-            const item = document.createElement('div');
-            item.className = `timetable-item ${event.event_type === 'exam' ? 'exam' : ''}`;
-            if (event.is_urgent) {
-                item.classList.add('urgent');
-            }
-
-            const startTime = new Date(event.start_time);
-            const endTime = new Date(event.end_time);
-
+                const item = document.createElement('div');
+                item.className = `timetable-item ${event.event_type === 'exam' ? 'exam' : ''}`;
+                if (event.is_urgent) {
+                    item.classList.add('urgent');
+                }
+                
+                const startTime = new Date(event.start_time);
+                const endTime = new Date(event.end_time);
+            
             // Store building ID for navigation
             let buildingId = '';
             if (event.room && event.room.building) {
-                switch (event.room.building) {
+                switch(event.room.building) {
                     case 'ENG': buildingId = 'engineering'; break;
                     case 'SCI': buildingId = 'science'; break;
                     case 'LIB': buildingId = 'library'; break;
@@ -896,38 +863,38 @@
                 }
                 item.dataset.buildingId = buildingId;
             }
-
-            item.innerHTML = `
+                
+                item.innerHTML = `
                     <div class="timetable-title">${event.title}</div>
                     <div class="timetable-info">
                         <div>${event.course ? event.course.code : 'N/A'} - ${event.room ? `${event.room.building} ${event.room.number}` : 'TBA'}</div>
-                        <div>${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                        <div>${startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${endTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
                     </div>
                 ${buildingId ? '<button class="navigate-btn">Navigate</button>' : ''}
             `;
-
+            
             // Add click handler for navigation button
             if (buildingId) {
                 const navigateBtn = item.querySelector('.navigate-btn');
-                navigateBtn.addEventListener('click', function (e) {
+                navigateBtn.addEventListener('click', function(e) {
                     e.stopPropagation(); // Prevent parent item click
                     navigateToBuilding(buildingId);
                 });
-
+                
                 // Make entire item clickable to view details (optional)
-                item.addEventListener('click', function () {
+                item.addEventListener('click', function() {
                     // Could show event details in the future
                     console.log('Event clicked:', event.title);
                 });
             }
-
+            
             return item;
         }
-
+        
         function navigateToBuilding(buildingId) {
             // Switch to map view
             document.querySelector('.event-item[data-view="map-view"]').click();
-
+            
             // Wait for map to initialize if needed
             setTimeout(() => {
                 // Make sure any previous selection is cleared
@@ -939,24 +906,24 @@
                     }
                     selectedBuilding = null;
                 }
-
+                
                 // Clear any existing routes
                 clearRoute();
-
+                
                 // Force update the building selection UI
                 const buttons = document.querySelectorAll('.building-option');
                 buttons.forEach(btn => btn.classList.remove('selected'));
-
+                
                 const selectedButton = document.querySelector(`.building-option[data-building-id="${buildingId}"]`);
                 if (selectedButton) {
                     selectedButton.classList.add('selected');
                 }
-
+                
                 // Get building data and show route
                 const building = window.campusBuildings[buildingId];
                 if (building) {
                     selectDestination(buildingId, building.data.name);
-
+                    
                     // Flash a highlight on the destination
                     const mesh = building.mesh;
                     if (mesh) {
@@ -969,13 +936,13 @@
                 }
             }, 500);
         }
-
+        
         function showStatusMessage(message, isError = false) {
             const statusEl = document.getElementById('status-message');
             statusEl.textContent = message;
             statusEl.classList.toggle('error', isError);
             statusEl.classList.add('show');
-
+            
             setTimeout(() => {
                 statusEl.classList.remove('show');
             }, 3000);
@@ -984,26 +951,26 @@
         function setupNavigation() {
             // Get all navigation items
             const navItems = document.querySelectorAll('.event-item[data-view]');
-
+            
             // Add click event to each item
             navItems.forEach(item => {
-                item.addEventListener('click', function () {
+                item.addEventListener('click', function() {
                     // Remove active class from all items
                     navItems.forEach(navItem => navItem.classList.remove('active'));
-
+                    
                     // Add active class to clicked item
                     this.classList.add('active');
-
+                    
                     // Get the view to show
                     const viewId = this.getAttribute('data-view');
-
+                    
                     // Hide all views
                     const views = document.querySelectorAll('.view-container');
                     views.forEach(view => view.classList.remove('active'));
-
+                    
                     // Show selected view
                     document.getElementById(viewId).classList.add('active');
-
+                    
                     // Special handling for map view
                     if (viewId === 'map-view') {
                         // Initialize fullscreen map if not already done
@@ -1011,21 +978,21 @@
                             initFullscreenMap();
                         }
                     }
-
+                    
                     // Special handling for timetable view
                     if (viewId === 'timetable-view') {
                         // If we've added event listeners to full timetable items already, we're done
                         if (document.querySelector('#full-timetable .navigate-btn')) return;
-
+                        
                         // Copy timetable data to full timetable view
                         const fullTimetable = document.getElementById('full-timetable');
                         const timetable = document.getElementById('timetable');
-
+                        
                         // Only copy if the source timetable has content
                         if (timetable.children.length > 0 && !timetable.querySelector('.loading-indicator')) {
                             // Clear existing content
                             fullTimetable.innerHTML = '';
-
+                            
                             // For each timetable item in the dashboard, create a copy for the full timetable
                             Array.from(timetable.children).forEach(child => {
                                 // Get data from original item
@@ -1034,12 +1001,12 @@
                                 const infoItems = child.querySelectorAll('.timetable-info div');
                                 const info1 = infoItems[0] ? infoItems[0].textContent : '';
                                 const info2 = infoItems[1] ? infoItems[1].textContent : '';
-
+                                
                                 // Create new item
                                 const fullItem = document.createElement('div');
                                 fullItem.className = child.className;
                                 if (buildingId) fullItem.dataset.buildingId = buildingId;
-
+                                
                                 fullItem.innerHTML = `
                                     <div class="timetable-title">${title}</div>
                                     <div class="timetable-info">
@@ -1048,20 +1015,20 @@
                                     </div>
                                     ${buildingId ? '<button class="navigate-btn">Navigate</button>' : ''}
                                 `;
-
+                                
                                 // Add event listeners
                                 if (buildingId) {
                                     const navigateBtn = fullItem.querySelector('.navigate-btn');
-                                    navigateBtn.addEventListener('click', function (e) {
+                                    navigateBtn.addEventListener('click', function(e) {
                                         e.stopPropagation();
                                         navigateToBuilding(buildingId);
                                     });
-
-                                    fullItem.addEventListener('click', function () {
+                                    
+                                    fullItem.addEventListener('click', function() {
                                         console.log('Full timetable event clicked:', title);
                                     });
                                 }
-
+                                
                                 fullTimetable.appendChild(fullItem);
                             });
                         } else {
@@ -1071,11 +1038,11 @@
                     }
                 });
             });
-
+            
             // Initialize reset view button for the map
             const resetViewButton = document.getElementById('reset-view-btn');
             if (resetViewButton) {
-                resetViewButton.addEventListener('click', function () {
+                resetViewButton.addEventListener('click', function() {
                     // Reset camera position
                     if (fullscreenMapCamera) {
                         fullscreenMapCamera.position.set(0, 15, 20);
@@ -1088,41 +1055,41 @@
 
         function initFullscreenMap() {
             const container = document.getElementById('fullscreen-map-container');
-
+            
             // Create scene
             fullscreenMapScene = new THREE.Scene();
             fullscreenMapScene.background = new THREE.Color(0x1a1a1a);
-
+            
             // Create camera
             fullscreenMapCamera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
             fullscreenMapCamera.position.set(0, 15, 20);
             fullscreenMapCamera.lookAt(0, 0, 0);
-
+            
             // Create renderer
             fullscreenMapRenderer = new THREE.WebGLRenderer({ antialias: true });
             fullscreenMapRenderer.setSize(container.clientWidth, container.clientHeight);
             fullscreenMapRenderer.setPixelRatio(window.devicePixelRatio);
             fullscreenMapRenderer.shadowMap.enabled = true;
             container.appendChild(fullscreenMapRenderer.domElement);
-
+            
             // Add lights
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             fullscreenMapScene.add(ambientLight);
-
+            
             const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
             directionalLight.position.set(5, 10, 5);
             directionalLight.castShadow = true;
             fullscreenMapScene.add(directionalLight);
-
+            
             // Create the campus model
             createFullscreenCampusModel();
-
+            
             // Add event listeners
             container.addEventListener('mousedown', onFullscreenMapMouseDown);
             document.addEventListener('mousemove', onFullscreenMapMouseMove);
             document.addEventListener('mouseup', onFullscreenMapMouseUp);
             window.addEventListener('resize', onFullscreenWindowResize);
-
+            
             // Create tooltip element if not exists
             if (!document.getElementById('map-tooltip')) {
                 const tooltip = document.createElement('div');
@@ -1137,10 +1104,10 @@
                 tooltip.style.zIndex = '1000';
                 document.body.appendChild(tooltip);
             }
-
+            
             // Populate building list
             populateBuildingList();
-
+            
             // Start animation
             animateFullscreenMap();
         }
@@ -1148,7 +1115,7 @@
         function createFullscreenCampusModel() {
             // Floor/ground - matching campus layout from image
             const floorGeometry = new THREE.PlaneGeometry(40, 40);
-            const floorMaterial = new THREE.MeshStandardMaterial({
+            const floorMaterial = new THREE.MeshStandardMaterial({ 
                 color: 0x95c795,
                 roughness: 0.8
             });
@@ -1156,7 +1123,7 @@
             floor.rotation.x = -Math.PI / 2;
             floor.position.y = -0.1;
             fullscreenMapScene.add(floor);
-
+            
             // Campus buildings - layout matching the provided image
             const buildings = [
                 { id: 'main', name: 'Main Building', x: 0, z: 0, width: 4, depth: 3, height: 2, color: 0x555555 },
@@ -1169,50 +1136,50 @@
                 { id: 'arts', name: 'Arts Building', x: 10, z: 0, width: 3, depth: 2, height: 2.2, color: 0x67685D },
                 { id: 'health', name: 'Health Sciences', x: 7, z: -9, width: 2.5, depth: 2.5, height: 2, color: 0x607673 }
             ];
-
+            
             // Store building references for interaction
             window.campusBuildings = {};
-
+            
             // Create all buildings
             buildings.forEach(building => {
                 const buildingMesh = createFullscreenBuilding(
-                    building.x,
-                    building.z,
-                    building.width,
-                    building.depth,
-                    building.height,
-                    building.color,
+                    building.x, 
+                    building.z, 
+                    building.width, 
+                    building.depth, 
+                    building.height, 
+                    building.color, 
                     building.name,
                     building.id
                 );
-
+                
                 // Store reference for interaction
                 window.campusBuildings[building.id] = {
                     mesh: buildingMesh,
                     data: building
                 };
             });
-
+            
             // Roads - create paths between buildings as in the image
             createCampusRoads();
         }
 
         function createCampusRoads() {
             const roadMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
-
+            
             // Main horizontal road
             createRoad(-15, 0, 30, 2, roadMaterial);
-
+            
             // Main vertical road
             createRoad(0, -15, 2, 30, roadMaterial);
-
+            
             // Secondary roads
             createRoad(-10, 5, 10, 1.5, roadMaterial);
             createRoad(5, 5, 10, 1.5, roadMaterial);
             createRoad(-10, -7, 15, 1.5, roadMaterial);
             createRoad(7, -7, 8, 1.5, roadMaterial);
         }
-
+        
         function createRoad(x, z, width, depth, material) {
             const roadGeo = new THREE.PlaneGeometry(width, depth);
             const road = new THREE.Mesh(roadGeo, material);
@@ -1228,254 +1195,167 @@
             // Create a group to hold the building and its details
             const buildingGroup = new THREE.Group();
             buildingGroup.position.set(x, 0, z);
-
-            // Create the main building structure
-            const geometry = new THREE.BoxGeometry(width, height, depth);
-
-            // Use custom material for interactive highlighting
-            const material = new THREE.MeshStandardMaterial({
-                color: color,
-                metalness: 0.1,
-                roughness: 0.8
-            });
-
-            const building = new THREE.Mesh(geometry, material);
-
-            // Position the building with bottom at y=0
-            building.position.y = height / 2;
-
-            // Store original color for hover effects
-            building.userData = {
-                originalColor: color,
+            
+            // Create layers for the building
+            const numLayers = 3; // Number of layers per building
+            const layerHeight = height / numLayers;
+            const layers = [];
+            
+            // Create each layer with slightly different colors
+            for (let i = 0; i < numLayers; i++) {
+                const layerGeometry = new THREE.BoxGeometry(width, layerHeight, depth);
+                
+                // Create a slightly different color for each layer
+                const layerColor = new THREE.Color(color);
+                layerColor.r *= (1 - (i * 0.1)); // Darken each layer slightly
+                layerColor.g *= (1 - (i * 0.1));
+                layerColor.b *= (1 - (i * 0.1));
+                
+                const layerMaterial = new THREE.MeshStandardMaterial({ 
+                    color: layerColor,
+                    metalness: 0.1 + (i * 0.1), // Increase metalness for higher layers
+                    roughness: 0.8 - (i * 0.1)  // Decrease roughness for higher layers
+                });
+                
+                const layer = new THREE.Mesh(layerGeometry, layerMaterial);
+                layer.position.y = (i * layerHeight) + (layerHeight / 2);
+                
+                // Add a thin border between layers
+                if (i < numLayers - 1) {
+                    const borderGeometry = new THREE.BoxGeometry(width + 0.1, 0.05, depth + 0.1);
+                    const borderMaterial = new THREE.MeshStandardMaterial({ 
+                        color: 0x333333,
+                        metalness: 0.5,
+                        roughness: 0.5
+                    });
+                    const border = new THREE.Mesh(borderGeometry, borderMaterial);
+                    border.position.y = layerHeight;
+                    layer.add(border);
+                }
+                
+                // Store layer data
+                layer.userData = {
+                    originalColor: layerColor,
+                    name: name,
+                    id: id,
+                    layerIndex: i,
+                    originalY: layer.position.y,
+                    expandedY: layer.position.y + (i * 0.5), // Each layer will expand upward
+                    isExpanded: false
+                };
+                
+                buildingGroup.add(layer);
+                layers.push(layer);
+            }
+            
+            // Store building data
+            buildingGroup.userData = {
                 name: name,
-                id: id
+                id: id,
+                layers: layers,
+                isExpanded: false
             };
-
-            // Add the main building to the group
-            buildingGroup.add(building);
-
-            // Add architectural details based on building type
-            addBuildingDetails(buildingGroup, id, width, depth, height);
-
+            
             // Add the building group to the scene
             fullscreenMapScene.add(buildingGroup);
-
+            
             // Add text label above building
             createBuildingLabel(x, height + 0.8, z, name);
-
-            // Make building interactive (use the main building mesh for interaction)
-            building.callback = function () {
-                selectDestination(id, name);
+            
+            // Make building interactive (use the first layer for interaction)
+            layers[0].callback = function() {
+                toggleBuildingExpansion(buildingGroup);
             };
-
+            
             // Add to interactive objects array
-            interactiveObjects.push(building);
-
-            return building;
+            interactiveObjects.push(layers[0]);
+            
+            return layers[0];
         }
-
-        function addBuildingDetails(buildingGroup, buildingId, width, depth, height) {
-            const x = 0; // local position in the group
-            const z = 0;
-
-            switch (buildingId) {
-                case 'main':
-                    // Add a decorative roof
-                    const roofGeometry = new THREE.ConeGeometry(Math.max(width, depth) * 0.7, height * 0.4, 4);
-                    const roofMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
-                    const roof = new THREE.Mesh(roofGeometry, roofMaterial);
-                    roof.position.set(x, height + height * 0.2, z);
-                    roof.rotation.y = Math.PI / 4;
-                    buildingGroup.add(roof);
-
-                    // Add pillars at the entrance
-                    addPillars(buildingGroup, width, depth, height);
-                    break;
-
-                case 'library':
-                    // Add book-like structure on top
-                    const bookGeometry = new THREE.BoxGeometry(width * 0.7, height * 0.2, depth * 0.3);
-                    const bookMaterial = new THREE.MeshStandardMaterial({ color: 0x4a5b70 });
-                    const book = new THREE.Mesh(bookGeometry, bookMaterial);
-                    book.position.set(x, height + height * 0.1, z);
-                    buildingGroup.add(book);
-                    break;
-
-                case 'science':
-                    // Add dome/observatory
-                    const domeGeometry = new THREE.SphereGeometry(width * 0.3, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.5);
-                    const domeMaterial = new THREE.MeshStandardMaterial({ color: 0x809AAB, metalness: 0.5 });
-                    const dome = new THREE.Mesh(domeGeometry, domeMaterial);
-                    dome.position.set(x + width * 0.3, height, z - depth * 0.3);
-                    buildingGroup.add(dome);
-                    break;
-
-                case 'engineering':
-                    // Add antenna/tower structure
-                    const towerGeometry = new THREE.CylinderGeometry(0.15, 0.15, height * 0.7, 8);
-                    const towerMaterial = new THREE.MeshStandardMaterial({ color: 0xA0A0A0, metalness: 0.7 });
-                    const tower = new THREE.Mesh(towerGeometry, towerMaterial);
-                    tower.position.set(x + width * 0.3, height + height * 0.35, z);
-                    buildingGroup.add(tower);
-                    break;
-
-                case 'bizschool':
-                    // Add a modern glass-like top
-                    const glassGeometry = new THREE.BoxGeometry(width, height * 0.1, depth);
-                    const glassMaterial = new THREE.MeshStandardMaterial({
-                        color: 0x90BBDB,
-                        metalness: 0.9,
-                        roughness: 0.1,
-                        transparent: true,
-                        opacity: 0.7
-                    });
-                    const glass = new THREE.Mesh(glassGeometry, glassMaterial);
-                    glass.position.set(x, height + height * 0.05, z);
-                    buildingGroup.add(glass);
-                    break;
-
-                case 'student_center':
-                    // Add a circular central area
-                    const centerGeometry = new THREE.CylinderGeometry(width * 0.3, width * 0.3, height * 0.3, 16);
-                    const centerMaterial = new THREE.MeshStandardMaterial({ color: 0xCDAA88 });
-                    const center = new THREE.Mesh(centerGeometry, centerMaterial);
-                    center.position.set(x, height * 0.65, z);
-                    buildingGroup.add(center);
-                    break;
-
-                // Add more custom details for other buildings as needed
-            }
-
-            // Add windows to all buildings
-            addWindows(buildingGroup, width, depth, height);
-        }
-
-        function addPillars(buildingGroup, width, depth, height) {
-            const pillarGeometry = new THREE.CylinderGeometry(0.2, 0.2, height * 0.8, 8);
-            const pillarMaterial = new THREE.MeshStandardMaterial({ color: 0xCCCCCC });
-
-            // Front pillars
-            const spacing = width / 3;
-            for (let i = -1; i <= 1; i++) {
-                const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
-                pillar.position.set(i * spacing, height * 0.4, depth / 2 + 0.1);
-                buildingGroup.add(pillar);
-            }
-        }
-
-        function addWindows(buildingGroup, width, depth, height) {
-            // Window material
-            const windowMaterial = new THREE.MeshStandardMaterial({
-                color: 0x90BBDB,
-                metalness: 0.9,
-                roughness: 0.1,
-                transparent: true,
-                opacity: 0.7
+        
+        function toggleBuildingExpansion(buildingGroup) {
+            const buildingData = buildingGroup.userData;
+            const isExpanding = !buildingData.isExpanded;
+            
+            // Animate each layer
+            buildingData.layers.forEach(layer => {
+                const targetY = isExpanding ? layer.userData.expandedY : layer.userData.originalY;
+                
+                // Create animation
+                const startY = layer.position.y;
+                const duration = 1000; // 1 second
+                const startTime = Date.now();
+                
+                function animateLayer() {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Ease in-out function
+                    const easeProgress = progress < 0.5 
+                        ? 2 * progress * progress 
+                        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                    
+                    layer.position.y = startY + (targetY - startY) * easeProgress;
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animateLayer);
+                    } else {
+                        layer.userData.isExpanded = isExpanding;
+                    }
+                }
+                
+                animateLayer();
             });
-
-            // Window dimensions
-            const windowWidth = 0.3;
-            const windowHeight = 0.4;
-            const windowDepth = 0.05;
-
-            // Front and back windows
-            const frontWindowZ = depth / 2 + 0.01;
-            const backWindowZ = -depth / 2 - 0.01;
-
-            for (let row = 0; row < 2; row++) {
-                const y = height * 0.3 + row * height * 0.3;
-
-                for (let i = -1; i <= 1; i++) {
-                    // Skip center window on ground floor for main entrance
-                    if (row === 0 && i === 0) continue;
-
-                    const x = i * (width / 3);
-
-                    // Front windows
-                    const frontWindowGeometry = new THREE.BoxGeometry(windowWidth, windowHeight, windowDepth);
-                    const frontWindow = new THREE.Mesh(frontWindowGeometry, windowMaterial);
-                    frontWindow.position.set(x, y, frontWindowZ);
-                    buildingGroup.add(frontWindow);
-
-                    // Back windows
-                    const backWindowGeometry = new THREE.BoxGeometry(windowWidth, windowHeight, windowDepth);
-                    const backWindow = new THREE.Mesh(backWindowGeometry, windowMaterial);
-                    backWindow.position.set(x, y, backWindowZ);
-                    buildingGroup.add(backWindow);
-                }
-            }
-
-            // Side windows
-            const rightWindowX = width / 2 + 0.01;
-            const leftWindowX = -width / 2 - 0.01;
-
-            for (let row = 0; row < 2; row++) {
-                const y = height * 0.3 + row * height * 0.3;
-
-                for (let i = -1; i <= 1; i++) {
-                    const z = i * (depth / 3);
-
-                    // Right windows
-                    const rightWindowGeometry = new THREE.BoxGeometry(windowDepth, windowHeight, windowWidth);
-                    const rightWindow = new THREE.Mesh(rightWindowGeometry, windowMaterial);
-                    rightWindow.position.set(rightWindowX, y, z);
-                    buildingGroup.add(rightWindow);
-
-                    // Left windows
-                    const leftWindowGeometry = new THREE.BoxGeometry(windowDepth, windowHeight, windowWidth);
-                    const leftWindow = new THREE.Mesh(leftWindowGeometry, windowMaterial);
-                    leftWindow.position.set(leftWindowX, y, z);
-                    buildingGroup.add(leftWindow);
-                }
-            }
+            
+            buildingData.isExpanded = isExpanding;
         }
-
+        
         function createBuildingLabel(x, y, z, text) {
             // Create canvas for text
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
             canvas.width = 256;
             canvas.height = 64;
-
+            
             // Set up text style
             context.fillStyle = 'rgba(0, 0, 0, 0.85)';
             context.fillRect(0, 0, canvas.width, canvas.height);
-
+            
             // Add a border
             context.strokeStyle = '#1f3a93';
             context.lineWidth = 3;
-            context.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
-
+            context.strokeRect(2, 2, canvas.width-4, canvas.height-4);
+            
             // Add text
             context.font = 'bold 24px Arial';
             context.fillStyle = 'white';
             context.textAlign = 'center';
             context.textBaseline = 'middle';
             context.fillText(text, canvas.width / 2, canvas.height / 2);
-
+            
             // Create texture from canvas
             const texture = new THREE.CanvasTexture(canvas);
-            const material = new THREE.SpriteMaterial({
+            const material = new THREE.SpriteMaterial({ 
                 map: texture,
                 transparent: true,
                 opacity: 0.9
             });
             const sprite = new THREE.Sprite(material);
-
+            
             // Position and scale the label
             sprite.position.set(x, y, z);
             sprite.scale.set(3, 0.8, 1);
-
+            
             // Add to scene
             fullscreenMapScene.add(sprite);
-
+            
             // Store original y position for animation
             sprite.userData = { originalY: y };
-
+            
             // Add to animation objects for floating effect
             if (!window.animatedLabels) window.animatedLabels = [];
             window.animatedLabels.push(sprite);
-
+            
             return sprite;
         }
 
@@ -1486,7 +1366,7 @@
         let raycaster = new THREE.Raycaster();
         let mouse = new THREE.Vector2();
         let currentUserPosition = { x: 0, z: -12 }; // Default position near entrance
-
+        
         function selectDashboardDestination(buildingId, buildingName) {
             // Clear any existing routes first
             if (dashboardCurrentRoute) {
@@ -1498,7 +1378,7 @@
                 }
                 dashboardCurrentRoute = null;
             }
-
+            
             // Deselect previous building if any
             if (dashboardSelectedBuilding) {
                 const prevBuilding = window.dashboardBuildings[dashboardSelectedBuilding];
@@ -1507,108 +1387,108 @@
                     prevBuilding.mesh.material.emissive.setHex(0x000000);
                 }
             }
-
+            
             // Select new building
             dashboardSelectedBuilding = buildingId;
             const building = window.dashboardBuildings[buildingId];
-
+            
             if (building && building.mesh) {
                 // Highlight selected building
                 building.mesh.material.emissive.setHex(0x1f3a93);
-
+                
                 // Show selection in UI
                 showStatusMessage(`Selected destination: ${buildingName}`);
-
+                
                 // Update destination display in UI
                 const destinationElement = document.getElementById('dashboard-selected-destination');
                 if (destinationElement) {
                     destinationElement.textContent = buildingName;
                 }
-
+                
                 // Calculate and show route
                 dashboardCurrentRoute = calculateDashboardRoute({ x: 0, z: -12 }, {
                     x: building.data.x,
                     z: building.data.z
                 });
-
+                
                 // Update building list selection
                 const buttons = document.querySelectorAll('#dashboard-building-list .building-option');
                 buttons.forEach(btn => btn.classList.remove('selected'));
-
+                
                 const selectedButton = document.querySelector(`#dashboard-building-list .building-option[data-building-id="${buildingId}"]`);
                 if (selectedButton) {
                     selectedButton.classList.add('selected');
                 }
             }
         }
-
+        
         function selectDashboardBuildingFromList(buildingId) {
             // Update button styles
             const buttons = document.querySelectorAll('#dashboard-building-list .building-option');
-
+            
             // If selecting the same building, toggle selection off
             if (dashboardSelectedBuilding === buildingId) {
                 // Deselect the building
                 buttons.forEach(btn => btn.classList.remove('selected'));
-
+                
                 // Find the building and reset its appearance
                 const building = window.dashboardBuildings[buildingId];
                 if (building && building.mesh) {
                     building.mesh.material.emissive.setHex(0x000000);
                 }
-
+                
                 // Clear route
                 if (dashboardCurrentRoute) {
                     // Remove the route line
                     mapScene.remove(dashboardCurrentRoute);
-
+                    
                     // Remove any associated markers
                     if (dashboardCurrentRoute.userData && dashboardCurrentRoute.userData.markers) {
                         dashboardCurrentRoute.userData.markers.forEach(marker => {
                             mapScene.remove(marker);
                         });
                     }
-
+                    
                     dashboardCurrentRoute = null;
                 }
-
+                
                 // Reset destination
                 const destinationElement = document.getElementById('dashboard-selected-destination');
                 if (destinationElement) {
                     destinationElement.textContent = 'Select a building';
                 }
-
+                
                 // Reset distance info
                 const distanceInfo = document.getElementById('dashboard-distance-info');
                 if (distanceInfo) {
                     distanceInfo.textContent = '';
                 }
-
+                
                 // Reset selection tracking
                 dashboardSelectedBuilding = null;
                 showStatusMessage('Route cleared');
                 return;
             }
-
+            
             // Otherwise, proceed with selection
             buttons.forEach(btn => btn.classList.remove('selected'));
-
+            
             const selectedButton = document.querySelector(`#dashboard-building-list .building-option[data-building-id="${buildingId}"]`);
             if (selectedButton) {
                 selectedButton.classList.add('selected');
             }
-
+            
             // Get building data and call select function
             const building = window.dashboardBuildings[buildingId];
             if (building) {
                 selectDashboardDestination(buildingId, building.data.name);
             }
         }
-
+        
         function calculateDashboardRoute(from, to) {
             // Generate a random color for this route
             const routeColor = Math.floor(Math.random() * 0xffffff);
-
+            
             // Create a simple route (in real app this would use pathfinding)
             const points = [
                 new THREE.Vector3(from.x, 0.1, from.z),
@@ -1616,55 +1496,55 @@
                 new THREE.Vector3((from.x + to.x) / 2, 0.1, to.z),
                 new THREE.Vector3(to.x, 0.1, to.z)
             ];
-
+            
             // Create a smooth path with a curve
             const curve = new THREE.CatmullRomCurve3(points);
             const routePoints = curve.getPoints(50);
-
+            
             // Create line geometry for the route
             const routeGeometry = new THREE.BufferGeometry().setFromPoints(routePoints);
-
+            
             // Create line material with the random color
             const routeMaterial = new THREE.LineBasicMaterial({
                 color: routeColor,
                 linewidth: 3
             });
-
+            
             // Create the line and add to scene
             const routeLine = new THREE.Line(routeGeometry, routeMaterial);
-            routeLine.userData = {
+            routeLine.userData = { 
                 color: routeColor,
                 markers: [],
                 buildingId: dashboardSelectedBuilding
             };
-
+            
             // Make sure line is visible by setting position high enough
             routeLine.position.y = 0.2;
-
+            
             // Add to scene
             mapScene.add(routeLine);
-
+            
             // Add start and end markers
             const startMarker = createDashboardLocationMarker(from.x, from.z);
             routeLine.userData.markers.push(startMarker);
-
+            
             const endMarker = createDashboardDestinationMarker(to.x, to.z);
             routeLine.userData.markers.push(endMarker);
-
+            
             // Calculate and show distance with more realistic walking time
             const distance = calculateDistance(from, to);
             const walkingSpeed = 1.4; // meters per second
             const walkingTimeSeconds = distance / walkingSpeed;
             const walkingTimeMinutes = Math.max(2, Math.min(10, Math.ceil(walkingTimeSeconds / 60)));
-
+            
             const distanceInfo = document.getElementById('dashboard-distance-info');
             if (distanceInfo) {
                 distanceInfo.textContent = `Distance: ${Math.round(distance)} m • Walking: ${walkingTimeMinutes} min`;
             }
-
+            
             return routeLine;
         }
-
+        
         function createDashboardLocationMarker(x, z) {
             const markerGeometry = new THREE.CylinderGeometry(0.3, 0.3, 0.2, 16);
             const markerMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
@@ -1673,7 +1553,7 @@
             mapScene.add(marker);
             return marker;
         }
-
+        
         function createDashboardDestinationMarker(x, z) {
             const markerGeometry = new THREE.CylinderGeometry(0.3, 0, 0.5, 16);
             const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
@@ -1682,52 +1562,52 @@
             mapScene.add(marker);
             return marker;
         }
-
+        
         function calculateDistance(from, to) {
             // Simple Euclidean distance, multiplied by 5 to approximate realistic campus distances in meters
             const dx = to.x - from.x;
             const dz = to.z - from.z;
             return Math.sqrt(dx * dx + dz * dz) * 5;
         }
-
+        
         function createLocationMarker(x, z) {
             const markerGeometry = new THREE.CylinderGeometry(0.3, 0.3, 0.2, 16);
             const markerMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
             const marker = new THREE.Mesh(markerGeometry, markerMaterial);
             marker.position.set(x, 0.2, z);
             fullscreenMapScene.add(marker);
-
+            
             // Add to current route objects for cleanup
             if (!currentRoute.userData) currentRoute.userData = {};
             if (!currentRoute.userData.markers) currentRoute.userData.markers = [];
             currentRoute.userData.markers.push(marker);
         }
-
+        
         function createDestinationMarker(x, z) {
             const markerGeometry = new THREE.CylinderGeometry(0.3, 0, 0.5, 16);
             const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
             const marker = new THREE.Mesh(markerGeometry, markerMaterial);
             marker.position.set(x, 0.3, z);
             fullscreenMapScene.add(marker);
-
+            
             // Add to current route objects for cleanup
             if (!currentRoute.userData) currentRoute.userData = {};
             if (!currentRoute.userData.markers) currentRoute.userData.markers = [];
             currentRoute.userData.markers.push(marker);
         }
-
+        
         function clearRoute() {
             if (currentRoute) {
                 // Remove the route line
                 fullscreenMapScene.remove(currentRoute);
-
+                
                 // Remove any associated markers
                 if (currentRoute.userData && currentRoute.userData.markers) {
                     currentRoute.userData.markers.forEach(marker => {
                         fullscreenMapScene.remove(marker);
                     });
                 }
-
+                
                 currentRoute = null;
             }
         }
@@ -1739,26 +1619,26 @@
                 x: event.clientX,
                 y: event.clientY
             };
-
+            
             // Handle object selection on click
             event.preventDefault();
-
+            
             // Get normalized device coordinates
             const container = document.getElementById('fullscreen-map-container');
             const rect = container.getBoundingClientRect();
             mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
             mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
-
+            
             // Update the raycaster
             raycaster.setFromCamera(mouse, fullscreenMapCamera);
-
+            
             // Check for intersections with interactive objects
             const intersects = raycaster.intersectObjects(interactiveObjects);
-
+            
             if (intersects.length > 0) {
                 // Prevent unintended camera rotation when clicking on objects
                 isFullscreenDragging = false;
-
+                
                 // Call the callback function of the intersected object
                 if (intersects[0].object.callback) {
                     intersects[0].object.callback();
@@ -1774,67 +1654,77 @@
                     x: event.clientX - fullscreenPreviousMousePosition.x,
                     y: event.clientY - fullscreenPreviousMousePosition.y
                 };
-
+                
                 // Rotate camera based on mouse movement
                 fullscreenCameraRotation.y += deltaMove.x * 0.01;
                 fullscreenCameraRotation.x += deltaMove.y * 0.01;
-
+                
                 // Limit vertical rotation
-                fullscreenCameraRotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, fullscreenCameraRotation.x));
-
+                fullscreenCameraRotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, fullscreenCameraRotation.x));
+                
                 // Calculate camera position
                 const distance = fullscreenMapCamera.position.length();
                 fullscreenMapCamera.position.x = distance * Math.sin(fullscreenCameraRotation.y) * Math.cos(fullscreenCameraRotation.x);
                 fullscreenMapCamera.position.z = distance * Math.cos(fullscreenCameraRotation.y) * Math.cos(fullscreenCameraRotation.x);
                 fullscreenMapCamera.position.y = distance * Math.sin(fullscreenCameraRotation.x);
-
+                
                 fullscreenMapCamera.lookAt(0, 0, 0);
-
+                
                 fullscreenPreviousMousePosition = {
                     x: event.clientX,
                     y: event.clientY
                 };
                 return;
             }
-
+            
             // Handle hover effect for interactive objects
             const container = document.getElementById('fullscreen-map-container');
             const rect = container.getBoundingClientRect();
             mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
             mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
-
+            
             // Update the raycaster
             raycaster.setFromCamera(mouse, fullscreenMapCamera);
-
+            
             // Check for intersections with interactive objects
             const intersects = raycaster.intersectObjects(interactiveObjects);
-
+            
             // Reset all buildings to original color (except selected)
             interactiveObjects.forEach(obj => {
                 if (selectedBuilding && obj.userData.id === selectedBuilding) return;
                 obj.material.emissive.setHex(0x000000);
             });
-
+            
             // Show tooltip and highlight hovered building
             if (intersects.length > 0) {
                 document.body.style.cursor = 'pointer';
-
+                
+                const intersectedObject = intersects[0].object;
+                const buildingGroup = intersectedObject.parent;
+                const buildingData = buildingGroup.userData;
+                
                 // Don't highlight if it's the selected building
-                if (!selectedBuilding || intersects[0].object.userData.id !== selectedBuilding) {
-                    intersects[0].object.material.emissive.setHex(0x333333);
+                if (!selectedBuilding || intersectedObject.userData.id !== selectedBuilding) {
+                    // Highlight all layers of the building
+                    buildingData.layers.forEach(layer => {
+                        layer.material.emissive.setHex(0x333333);
+                    });
                 }
-
-                // Update tooltip
+                
+                // Update tooltip with layer information
                 const tooltip = document.getElementById('map-tooltip');
                 if (tooltip) {
-                    tooltip.textContent = intersects[0].object.userData.name;
+                    const layerInfo = buildingData.isExpanded 
+                        ? `\nLayers: ${buildingData.layers.length} (Expanded)`
+                        : `\nLayers: ${buildingData.layers.length} (Click to expand)`;
+                    tooltip.textContent = `${intersectedObject.userData.name}${layerInfo}`;
                     tooltip.style.left = (event.clientX + 10) + 'px';
                     tooltip.style.top = (event.clientY + 10) + 'px';
                     tooltip.style.display = 'block';
                 }
             } else {
                 document.body.style.cursor = 'default';
-
+                
                 // Hide tooltip
                 const tooltip = document.getElementById('map-tooltip');
                 if (tooltip) {
@@ -1856,7 +1746,7 @@
 
         function animateFullscreenMap() {
             requestAnimationFrame(animateFullscreenMap);
-
+            
             // Animate building labels (floating effect)
             if (window.animatedLabels && window.animatedLabels.length > 0) {
                 const time = Date.now() * 0.001;
@@ -1866,46 +1756,41 @@
                     }
                 });
             }
-
+            
             if (fullscreenMapRenderer) {
                 fullscreenMapRenderer.render(fullscreenMapScene, fullscreenMapCamera);
             }
         }
 
         // Initialize the app on load
-        window.addEventListener('DOMContentLoaded', function () {
+        window.addEventListener('DOMContentLoaded', function() {
             // Set up variables
             cameraRotation = { x: 0, y: 0 };
             fullscreenCameraRotation = { x: 0, y: 0 };
             isDragging = false;
-
+            
             // Initialize dashboard
             setupNavigation();
             fetchTimetableData();
             initDashboardMap();
-
+            
             // Set up logout functionality
-            document.getElementById('logout-button').addEventListener('click', function () {
-                localStorage.removeItem('access_token');
-                localStorage.removeItem('refresh_token');
-                localStorage.removeItem('username');
-
-                // Redirect directly to connected.html instead of the root URL
-                window.location.href = '/components/connected.html';
+            document.getElementById('logout-button').addEventListener('click', function() {
+                logoutUser();
             });
-
+            
             // Initialize building list once map view is active
-            document.querySelector('.event-item[data-view="map-view"]').addEventListener('click', function () {
+            document.querySelector('.event-item[data-view="map-view"]').addEventListener('click', function() {
                 setTimeout(populateBuildingList, 500);
             });
         });
-
+        
         function populateBuildingList() {
             const buildingList = document.getElementById('building-list');
             if (!buildingList) return;
-
+            
             buildingList.innerHTML = '';
-
+            
             // Campus buildings data - must match the data in createFullscreenCampusModel
             const buildings = [
                 { id: 'main', name: 'Main Building' },
@@ -1918,7 +1803,7 @@
                 { id: 'arts', name: 'Arts Building' },
                 { id: 'health', name: 'Health Sciences' }
             ];
-
+            
             // Create buttons for all buildings
             buildings.forEach(building => {
                 const button = document.createElement('button');
@@ -1928,50 +1813,50 @@
                 }
                 button.dataset.buildingId = building.id;
                 button.textContent = building.name;
-
+                
                 // Add click handler to select building
-                button.addEventListener('click', function () {
+                button.addEventListener('click', function() {
                     const buildingId = this.dataset.buildingId;
-
+                    
                     // Update button styles first
                     const allButtons = document.querySelectorAll('.building-option');
-
+                    
                     // If selecting the same building, toggle selection off
                     if (selectedBuilding === buildingId) {
                         // Deselect the building
                         allButtons.forEach(btn => btn.classList.remove('selected'));
-
+                        
                         // Reset the 3D object appearance
                         const building = window.campusBuildings[buildingId];
                         if (building && building.mesh) {
                             building.mesh.material.emissive.setHex(0x000000);
                         }
-
+                        
                         // Clear associated route if any
                         clearRoute();
-
+                        
                         // Reset destination text
                         const destinationElement = document.getElementById('selected-destination');
                         if (destinationElement) {
                             destinationElement.textContent = 'Select a building';
                         }
-
+                        
                         // Reset distance info
                         const distanceInfo = document.getElementById('distance-info');
                         if (distanceInfo) {
                             distanceInfo.textContent = '';
                         }
-
+                        
                         // Reset selection tracking
                         selectedBuilding = null;
                         showStatusMessage('Route cleared');
                         return;
                     }
-
+                    
                     // Otherwise, proceed with selection
                     allButtons.forEach(btn => btn.classList.remove('selected'));
                     this.classList.add('selected');
-
+                    
                     // Select the building in 3D scene
                     const building = window.campusBuildings[buildingId];
                     if (building) {
@@ -1982,26 +1867,26 @@
                                 prevBuilding.mesh.material.emissive.setHex(0x000000);
                             }
                         }
-
+                        
                         // Clear previous routes
                         clearRoute();
-
+                        
                         // Store new selected building
                         selectedBuilding = buildingId;
-
+                        
                         // Highlight the building
                         building.mesh.material.emissive.setHex(0x1f3a93);
-
+                        
                         // Show selection in UI
                         const name = building.data.name;
                         showStatusMessage(`Selected destination: ${name}`);
-
+                        
                         // Update destination display in UI
                         const destinationElement = document.getElementById('selected-destination');
                         if (destinationElement) {
                             destinationElement.textContent = name;
                         }
-
+                        
                         // Calculate and show route
                         currentRoute = calculateRoute(currentUserPosition, {
                             x: building.data.x,
@@ -2009,29 +1894,29 @@
                         });
                     }
                 });
-
+                
                 buildingList.appendChild(button);
             });
-
+            
             // Set up map control buttons
             setupMapControls();
         }
-
+        
         function selectBuildingFromList(buildingId) {
             // Update button styles
             const buttons = document.querySelectorAll('.building-option');
-
+            
             // If selecting the same building, toggle selection off
             if (selectedBuilding === buildingId) {
                 // Deselect the building
                 buttons.forEach(btn => btn.classList.remove('selected'));
-
+                
                 // Find the building and reset its appearance
                 const building = window.campusBuildings[buildingId];
                 if (building && building.mesh) {
                     building.mesh.material.emissive.setHex(0x000000);
                 }
-
+                
                 // Clear associated route if any
                 const linesToRemove = [];
                 fullscreenMapScene.traverse(obj => {
@@ -2039,7 +1924,7 @@
                         linesToRemove.push(obj);
                     }
                 });
-
+                
                 linesToRemove.forEach(line => {
                     // Remove associated markers
                     if (line.userData && line.userData.markers) {
@@ -2049,32 +1934,32 @@
                     }
                     fullscreenMapScene.remove(line);
                 });
-
+                
                 // Reset destination
                 const destinationElement = document.getElementById('selected-destination');
                 if (destinationElement) {
                     destinationElement.textContent = 'Select a building';
                 }
-
+                
                 // Reset selection tracking
                 selectedBuilding = null;
                 showStatusMessage('Route cleared');
                 return;
             }
-
+            
             // Otherwise, proceed with selection
             buttons.forEach(btn => btn.classList.remove('selected'));
-
+            
             const selectedButton = document.querySelector(`.building-option[data-building-id="${buildingId}"]`);
             if (selectedButton) {
                 selectedButton.classList.add('selected');
             }
-
+            
             // Get building data and call select function
             const building = window.campusBuildings[buildingId];
             if (building) {
                 const name = building.data.name;
-
+                
                 // Deselect previous building if any
                 if (selectedBuilding) {
                     const prevBuilding = window.campusBuildings[selectedBuilding];
@@ -2083,22 +1968,22 @@
                         prevBuilding.mesh.material.emissive.setHex(0x000000);
                     }
                 }
-
+                
                 // Select new building
                 selectedBuilding = buildingId;
-
+                
                 // Highlight selected building
                 building.mesh.material.emissive.setHex(0x1f3a93);
-
+                
                 // Show selection in UI
                 showStatusMessage(`Selected destination: ${name}`);
-
+                
                 // Update destination display in UI
                 const destinationElement = document.getElementById('selected-destination');
                 if (destinationElement) {
                     destinationElement.textContent = name;
                 }
-
+                
                 // Calculate and show route
                 currentRoute = calculateRoute(currentUserPosition, {
                     x: building.data.x,
@@ -2106,41 +1991,41 @@
                 });
             }
         }
-
+        
         function setupMapControls() {
             // Zoom in button
-            document.getElementById('zoom-in-btn').addEventListener('click', function () {
+            document.getElementById('zoom-in-btn').addEventListener('click', function() {
                 const distance = fullscreenMapCamera.position.length();
                 if (distance > 5) {
                     fullscreenMapCamera.position.multiplyScalar(0.8);
                 }
             });
-
+            
             // Zoom out button
-            document.getElementById('zoom-out-btn').addEventListener('click', function () {
+            document.getElementById('zoom-out-btn').addEventListener('click', function() {
                 const distance = fullscreenMapCamera.position.length();
                 if (distance < 50) {
                     fullscreenMapCamera.position.multiplyScalar(1.2);
                 }
             });
-
+            
             // Reset view button
-            document.getElementById('reset-view-btn').addEventListener('click', function () {
+            document.getElementById('reset-view-btn').addEventListener('click', function() {
                 fullscreenMapCamera.position.set(0, 15, 20);
                 fullscreenMapCamera.lookAt(0, 0, 0);
                 fullscreenCameraRotation = { x: 0, y: 0 };
             });
-
+            
             // Top view button
-            document.getElementById('top-view-btn').addEventListener('click', function () {
+            document.getElementById('top-view-btn').addEventListener('click', function() {
                 fullscreenMapCamera.position.set(0, 30, 0.1);
                 fullscreenMapCamera.lookAt(0, 0, 0);
-                fullscreenCameraRotation = { x: Math.PI / 2 - 0.01, y: 0 };
+                fullscreenCameraRotation = { x: Math.PI/2 - 0.01, y: 0 };
             });
-
+            
             // Add a clear routes button to the map controls
             const mapControls = document.getElementById('map-controls');
-
+            
             // Create clear routes button if it doesn't exist
             if (!document.getElementById('clear-routes-btn')) {
                 const clearRoutesBtn = document.createElement('button');
@@ -2148,17 +2033,17 @@
                 clearRoutesBtn.className = 'map-control-btn';
                 clearRoutesBtn.innerHTML = '✕';
                 clearRoutesBtn.title = 'Clear Routes';
-
-                clearRoutesBtn.addEventListener('click', function () {
+                
+                clearRoutesBtn.addEventListener('click', function() {
                     // Remove all routes from the scene (children of type Line)
                     const linesToRemove = [];
-
+                    
                     fullscreenMapScene.traverse(obj => {
                         if (obj.type === 'Line') {
                             linesToRemove.push(obj);
                         }
                     });
-
+                    
                     linesToRemove.forEach(line => {
                         // Remove associated markers
                         if (line.userData && line.userData.markers) {
@@ -2168,16 +2053,16 @@
                         }
                         fullscreenMapScene.remove(line);
                     });
-
+                    
                     // Reset current route reference
                     currentRoute = null;
-
+                    
                     // Reset distance info
                     const distanceInfo = document.getElementById('distance-info');
                     if (distanceInfo) {
                         distanceInfo.textContent = '';
                     }
-
+                    
                     // Reset selected building
                     if (selectedBuilding) {
                         const prevBuilding = window.campusBuildings[selectedBuilding];
@@ -2187,21 +2072,21 @@
                         }
                         selectedBuilding = null;
                     }
-
+                    
                     // Reset destination text
                     const destinationElement = document.getElementById('selected-destination');
                     if (destinationElement) {
                         destinationElement.textContent = 'Select a building';
                     }
-
+                    
                     // Clear selected state from building buttons
                     document.querySelectorAll('.building-option').forEach(btn => {
                         btn.classList.remove('selected');
                     });
-
+                    
                     showStatusMessage('All routes cleared');
                 });
-
+                
                 mapControls.appendChild(clearRoutesBtn);
             }
         }
@@ -2209,9 +2094,9 @@
         function populateDashboardBuildingList() {
             const buildingList = document.getElementById('dashboard-building-list');
             if (!buildingList) return;
-
+            
             buildingList.innerHTML = '';
-
+            
             // Campus buildings data - must match the data in createDashboardCampusModel
             const buildings = [
                 { id: 'main', name: 'Main Building' },
@@ -2224,7 +2109,7 @@
                 { id: 'arts', name: 'Arts Building' },
                 { id: 'health', name: 'Health Sciences' }
             ];
-
+            
             // Create buttons for all buildings
             buildings.forEach(building => {
                 const button = document.createElement('button');
@@ -2234,25 +2119,25 @@
                 }
                 button.dataset.buildingId = building.id;
                 button.textContent = building.name;
-
+                
                 // Add click handler to select building
-                button.addEventListener('click', function () {
+                button.addEventListener('click', function() {
                     const buildingId = this.dataset.buildingId;
-
+                    
                     // Update button styles first
                     const allButtons = document.querySelectorAll('#dashboard-building-list .building-option');
-
+                    
                     // If selecting the same building, toggle selection off
                     if (dashboardSelectedBuilding === buildingId) {
                         // Deselect the building
                         allButtons.forEach(btn => btn.classList.remove('selected'));
-
+                        
                         // Reset the 3D object appearance
                         const building = window.dashboardBuildings[buildingId];
                         if (building && building.mesh) {
                             building.mesh.material.emissive.setHex(0x000000);
                         }
-
+                        
                         // Clear associated route if any
                         if (dashboardCurrentRoute) {
                             mapScene.remove(dashboardCurrentRoute);
@@ -2263,29 +2148,29 @@
                             }
                             dashboardCurrentRoute = null;
                         }
-
+                        
                         // Reset destination text
                         const destinationElement = document.getElementById('dashboard-selected-destination');
                         if (destinationElement) {
                             destinationElement.textContent = 'Select a building';
                         }
-
+                        
                         // Reset distance info
                         const distanceInfo = document.getElementById('dashboard-distance-info');
                         if (distanceInfo) {
                             distanceInfo.textContent = '';
                         }
-
+                        
                         // Reset selection tracking
                         dashboardSelectedBuilding = null;
                         showStatusMessage('Route cleared');
                         return;
                     }
-
+                    
                     // Otherwise, proceed with selection
                     allButtons.forEach(btn => btn.classList.remove('selected'));
                     this.classList.add('selected');
-
+                    
                     // Get building data and create route
                     const building = window.dashboardBuildings[buildingId];
                     if (building) {
@@ -2296,7 +2181,7 @@
                                 prevBuilding.mesh.material.emissive.setHex(0x000000);
                             }
                         }
-
+                        
                         // Clear any existing routes
                         if (dashboardCurrentRoute) {
                             mapScene.remove(dashboardCurrentRoute);
@@ -2307,23 +2192,23 @@
                             }
                             dashboardCurrentRoute = null;
                         }
-
+                        
                         // Store new selected building
                         dashboardSelectedBuilding = buildingId;
-
+                        
                         // Highlight the building
                         building.mesh.material.emissive.setHex(0x1f3a93);
-
+                        
                         // Show selection in UI
                         const name = building.data.name;
                         showStatusMessage(`Selected destination: ${name}`);
-
+                        
                         // Update destination display in UI
                         const destinationElement = document.getElementById('dashboard-selected-destination');
                         if (destinationElement) {
                             destinationElement.textContent = name;
                         }
-
+                        
                         // Calculate and show route
                         dashboardCurrentRoute = calculateDashboardRoute({ x: 0, z: -12 }, {
                             x: building.data.x,
@@ -2331,7 +2216,7 @@
                         });
                     }
                 });
-
+                
                 buildingList.appendChild(button);
             });
         }
@@ -2339,7 +2224,7 @@
         function createDashboardCampusModel() {
             // Floor/ground - matching campus layout from image
             const floorGeometry = new THREE.PlaneGeometry(40, 40);
-            const floorMaterial = new THREE.MeshStandardMaterial({
+            const floorMaterial = new THREE.MeshStandardMaterial({ 
                 color: 0x95c795,
                 roughness: 0.8
             });
@@ -2347,7 +2232,7 @@
             floor.rotation.x = -Math.PI / 2;
             floor.position.y = -0.1;
             mapScene.add(floor);
-
+            
             // Campus buildings - same layout as fullscreen map
             const buildings = [
                 { id: 'main', name: 'Main Building', x: 0, z: 0, width: 4, depth: 3, height: 2, color: 0x555555 },
@@ -2360,100 +2245,100 @@
                 { id: 'arts', name: 'Arts Building', x: 10, z: 0, width: 3, depth: 2, height: 2.2, color: 0x67685D },
                 { id: 'health', name: 'Health Sciences', x: 7, z: -9, width: 2.5, depth: 2.5, height: 2, color: 0x607673 }
             ];
-
+            
             // Store building references for interaction
             window.dashboardBuildings = {};
-
+            
             // Create all buildings
             buildings.forEach(building => {
                 const buildingMesh = createDashboardBuilding(
-                    building.x,
-                    building.z,
-                    building.width,
-                    building.depth,
-                    building.height,
-                    building.color,
+                    building.x, 
+                    building.z, 
+                    building.width, 
+                    building.depth, 
+                    building.height, 
+                    building.color, 
                     building.name,
                     building.id
                 );
-
+                
                 // Store reference for interaction
                 window.dashboardBuildings[building.id] = {
                     mesh: buildingMesh,
                     data: building
                 };
             });
-
+            
             // Create roads
             createDashboardRoads();
         }
-
+        
         function createDashboardBuilding(x, z, width, depth, height, color, name, id) {
             // Create a group to hold the building and its details
             const buildingGroup = new THREE.Group();
             buildingGroup.position.set(x, 0, z);
-
+            
             // Create the main building structure
             const geometry = new THREE.BoxGeometry(width, height, depth);
-
+            
             // Use custom material with basic details
-            const material = new THREE.MeshStandardMaterial({
+            const material = new THREE.MeshStandardMaterial({ 
                 color: color,
                 metalness: 0.1,
                 roughness: 0.8
             });
-
+            
             const building = new THREE.Mesh(geometry, material);
-            building.position.y = height / 2;
-
+            building.position.y = height/2;
+            
             // Store original color for hover effects
             building.userData = {
                 originalColor: color,
                 name: name,
                 id: id
             };
-
+            
             // Add the main building to the group
             buildingGroup.add(building);
-
+            
             // Add windows for more detail
             addDashboardWindows(buildingGroup, width, depth, height);
-
+            
             // Add the building group to the scene
             mapScene.add(buildingGroup);
-
+            
             // Make building interactive
-            building.callback = function () {
+            building.callback = function() {
                 selectDashboardDestination(id, name);
             };
-
+            
             // Add to dashboard interactive objects array
             dashboardInteractiveObjects.push(building);
-
+            
             return building;
         }
-
+        
         function addDashboardWindows(buildingGroup, width, depth, height) {
             // Window material
-            const windowMaterial = new THREE.MeshStandardMaterial({
-                color: 0x90BBDB,
+            const windowMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x90BBDB, 
                 metalness: 0.9,
                 roughness: 0.1,
                 transparent: true,
                 opacity: 0.7
             });
-
+            
             // Window dimensions
             const windowWidth = 0.3;
             const windowHeight = 0.4;
             const windowDepth = 0.05;
-
+            
             // Front and back windows - simplified for dashboard view
             const frontWindowZ = depth / 2 + 0.01;
-
+            
             for (let i = -1; i <= 1; i += 2) { // Just add windows on the sides for simplicity
                 const x = i * (width / 3);
-
+                
                 // Front windows
                 const frontWindowGeometry = new THREE.BoxGeometry(windowWidth, windowHeight, windowDepth);
                 const frontWindow = new THREE.Mesh(frontWindowGeometry, windowMaterial);
@@ -2461,21 +2346,21 @@
                 buildingGroup.add(frontWindow);
             }
         }
-
+        
         function createDashboardRoads() {
             const roadMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
-
+            
             // Main roads - same as fullscreen map
             createDashboardRoad(-15, 0, 30, 2, roadMaterial);
             createDashboardRoad(0, -15, 2, 30, roadMaterial);
-
+            
             // Secondary roads
             createDashboardRoad(-10, 5, 10, 1.5, roadMaterial);
             createDashboardRoad(5, 5, 10, 1.5, roadMaterial);
             createDashboardRoad(-10, -7, 15, 1.5, roadMaterial);
             createDashboardRoad(7, -7, 8, 1.5, roadMaterial);
         }
-
+        
         function createDashboardRoad(x, z, width, depth, material) {
             const roadGeo = new THREE.PlaneGeometry(width, depth);
             const road = new THREE.Mesh(roadGeo, material);
@@ -2486,7 +2371,7 @@
             mapScene.add(road);
             return road;
         }
-
+        
         function createDashboardMapControls(container) {
             // Create control container
             const controlsDiv = document.createElement('div');
@@ -2496,38 +2381,38 @@
             controlsDiv.style.right = '10px';
             controlsDiv.style.zIndex = '10';
             container.appendChild(controlsDiv);
-
+            
             // Create expand button to switch to full map view
             const expandBtn = document.createElement('button');
             expandBtn.className = 'map-control-btn';
             expandBtn.innerHTML = '⛶';
             expandBtn.title = 'Expand Map';
-            expandBtn.addEventListener('click', function () {
+            expandBtn.addEventListener('click', function() {
                 document.querySelector('.event-item[data-view="map-view"]').click();
             });
             controlsDiv.appendChild(expandBtn);
-
+            
             // Create clear routes button
             const clearRoutesBtn = document.createElement('button');
             clearRoutesBtn.className = 'map-control-btn';
             clearRoutesBtn.innerHTML = '✕';
             clearRoutesBtn.title = 'Clear Routes';
-            clearRoutesBtn.addEventListener('click', function () {
+            clearRoutesBtn.addEventListener('click', function() {
                 // Clear route
                 if (dashboardCurrentRoute) {
                     // Remove the route line
                     mapScene.remove(dashboardCurrentRoute);
-
+                    
                     // Remove any associated markers
                     if (dashboardCurrentRoute.userData && dashboardCurrentRoute.userData.markers) {
                         dashboardCurrentRoute.userData.markers.forEach(marker => {
                             mapScene.remove(marker);
                         });
                     }
-
+                    
                     dashboardCurrentRoute = null;
                 }
-
+                
                 // Reset selected building
                 if (dashboardSelectedBuilding) {
                     const prevBuilding = window.dashboardBuildings[dashboardSelectedBuilding];
@@ -2537,29 +2422,29 @@
                     }
                     dashboardSelectedBuilding = null;
                 }
-
+                
                 // Reset destination
                 const destinationElement = document.getElementById('dashboard-selected-destination');
                 if (destinationElement) {
                     destinationElement.textContent = 'Select a building';
                 }
-
+                
                 // Reset distance info
                 const distanceInfo = document.getElementById('dashboard-distance-info');
                 if (distanceInfo) {
                     distanceInfo.textContent = '';
                 }
-
+                
                 // Clear selected state from building buttons
                 document.querySelectorAll('#dashboard-building-list .building-option').forEach(btn => {
                     btn.classList.remove('selected');
                 });
-
+                
                 showStatusMessage('Routes cleared');
             });
             controlsDiv.appendChild(clearRoutesBtn);
         }
-
+        
         function animateMap() {
             requestAnimationFrame(animateMap);
             mapRenderer.render(mapScene, mapCamera);
@@ -2568,7 +2453,7 @@
         function selectDestination(buildingId, buildingName) {
             // Clear any existing routes first
             clearRoute();
-
+            
             // Deselect previous building if any
             if (selectedBuilding) {
                 const prevBuilding = window.campusBuildings[selectedBuilding];
@@ -2577,34 +2462,34 @@
                     prevBuilding.mesh.material.emissive.setHex(0x000000);
                 }
             }
-
+            
             // Select new building
             selectedBuilding = buildingId;
             const building = window.campusBuildings[buildingId];
-
+            
             if (building && building.mesh) {
                 // Highlight selected building
                 building.mesh.material.emissive.setHex(0x1f3a93);
-
+                
                 // Show selection in UI
                 showStatusMessage(`Selected destination: ${buildingName}`);
-
+                
                 // Update destination display in UI
                 const destinationElement = document.getElementById('selected-destination');
                 if (destinationElement) {
                     destinationElement.textContent = buildingName;
                 }
-
+                
                 // Calculate and show route
                 currentRoute = calculateRoute(currentUserPosition, {
                     x: building.data.x,
                     z: building.data.z
                 });
-
+                
                 // Update building list selection
                 const buttons = document.querySelectorAll('.building-option');
                 buttons.forEach(btn => btn.classList.remove('selected'));
-
+                
                 const selectedButton = document.querySelector(`.building-option[data-building-id="${buildingId}"]`);
                 if (selectedButton) {
                     selectedButton.classList.add('selected');
@@ -2615,7 +2500,7 @@
         function calculateRoute(from, to) {
             // Generate a random color for this route
             const routeColor = Math.floor(Math.random() * 0xffffff);
-
+            
             // Create a simple route (in real app this would use pathfinding)
             const points = [
                 new THREE.Vector3(from.x, 0.1, from.z),
@@ -2623,54 +2508,54 @@
                 new THREE.Vector3((from.x + to.x) / 2, 0.1, to.z),
                 new THREE.Vector3(to.x, 0.1, to.z)
             ];
-
+            
             // Create a smooth path with a curve
             const curve = new THREE.CatmullRomCurve3(points);
             const routePoints = curve.getPoints(50);
-
+            
             // Create line geometry for the route
             const routeGeometry = new THREE.BufferGeometry().setFromPoints(routePoints);
-
+            
             // Create animated line material with the random color
             const routeMaterial = new THREE.LineBasicMaterial({
                 color: routeColor,
                 linewidth: 3
             });
-
+            
             // Create the line and add to scene
             const routeLine = new THREE.Line(routeGeometry, routeMaterial);
-            routeLine.userData = {
+            routeLine.userData = { 
                 color: routeColor,
                 markers: [],
                 buildingId: selectedBuilding
             };
             fullscreenMapScene.add(routeLine);
-
+            
             // Store reference to the route
             currentRoute = routeLine;
-
+            
             // Add location marker at the start position
             const startMarker = createLocationMarker(from.x, from.z);
             routeLine.userData.markers.push(startMarker);
-
+            
             // Add destination marker
             const endMarker = createDestinationMarker(to.x, to.z);
             routeLine.userData.markers.push(endMarker);
-
+            
             // Calculate and show distance with more realistic walking time
             const distance = calculateDistance(from, to);
             const walkingSpeed = 1.4; // meters per second
             const walkingTimeSeconds = distance / walkingSpeed;
             const walkingTimeMinutes = Math.max(2, Math.min(10, Math.ceil(walkingTimeSeconds / 60)));
-
+            
             const distanceInfo = document.getElementById('distance-info');
             if (distanceInfo) {
                 distanceInfo.textContent = `Estimated distance: ${Math.round(distance)} m • Walking time: ${walkingTimeMinutes} min`;
             }
-
+            
             return routeLine;
         }
     </script>
 </body>
 
-</html>
+</html> 

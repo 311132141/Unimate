@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connected.html - Functionality Test</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .status-card {
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .success {
+            border-left-color: #10b981;
+        }
+
+        .error {
+            border-left-color: #ef4444;
+        }
+
+        .warning {
+            border-left-color: #f59e0b;
+        }
+
+        .test-button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.5rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .test-button:hover {
+            background-color: #2563eb;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .feature-item {
+            background-color: #333;
+            padding: 1rem;
+            border-radius: 6px;
+        }
+
+        .icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎯 Connected.html Functionality Status</h1>
+
+    <div class="status-card success">
+        <h2>✅ Issues Fixed</h2>
+        <p>All major conflicts and errors have been resolved:</p>
+        <ul>
+            <li>Removed conflicting app.js import</li>
+            <li>Added standalone modal system</li>
+            <li>Fixed variable name conflicts (ws)</li>
+            <li>Improved login modal styling</li>
+            <li>Added event click handlers</li>
+        </ul>
+    </div>
+
+    <div class="status-card">
+        <h2>🧪 Test Instructions</h2>
+        <p>Click the button below to test all functionalities in connected.html:</p>
+        <a href="/components/connected.html" target="_blank" class="test-button">
+            🚀 Open Connected.html
+        </a>
+    </div>
+
+    <div class="feature-list">
+        <div class="feature-item">
+            <h3><span class="icon">👆</span>Event Clicks</h3>
+            <p><strong>Test:</strong> Click any event in the sidebar</p>
+            <p><strong>Expected:</strong> Modal popup with event details</p>
+            <p><strong>Features:</strong> Title, schedule, location, course info</p>
+        </div>
+
+        <div class="feature-item">
+            <h3><span class="icon">🔐</span>Login Modal</h3>
+            <p><strong>Test:</strong> Click "Log in" button</p>
+            <p><strong>Expected:</strong> Beautiful login modal appears</p>
+            <p><strong>Features:</strong> Username/password, cancel button</p>
+        </div>
+
+        <div class="feature-item">
+            <h3><span class="icon">🌐</span>WebSocket</h3>
+            <p><strong>Test:</strong> Click "Test WebSocket" button</p>
+            <p><strong>Expected:</strong> WebSocket diagnostics panel</p>
+            <p><strong>Features:</strong> Connection status, send test messages</p>
+        </div>
+
+        <div class="feature-item">
+            <h3><span class="icon">🗺️</span>Map Display</h3>
+            <p><strong>Test:</strong> Map should load automatically</p>
+            <p><strong>Expected:</strong> Google Maps iframe of University of Auckland</p>
+            <p><strong>Features:</strong> Interactive map view</p>
+        </div>
+
+        <div class="feature-item">
+            <h3><span class="icon">⌨️</span>Modal Controls</h3>
+            <p><strong>Test:</strong> Various ways to close modals</p>
+            <p><strong>Expected:</strong> Close via X button, ESC key, or clicking outside</p>
+            <p><strong>Features:</strong> Intuitive user interaction</p>
+        </div>
+
+        <div class="feature-item">
+            <h3><span class="icon">📱</span>Card Simulation</h3>
+            <p><strong>Test:</strong> Click "Simulate Card Scan" in WebSocket panel</p>
+            <p><strong>Expected:</strong> Mock authentication and redirect</p>
+            <p><strong>Features:</strong> Simulates RFID card scanning</p>
+        </div>
+    </div>
+
+    <div class="status-card warning">
+        <h2>⚠️ Important Notes</h2>
+        <ul>
+            <li>WebSocket connects to <code>ws://192.168.20.22:8000</code> - make sure backend is running</li>
+            <li>Login credentials are handled via mock data for demonstration</li>
+            <li>Event data is generated as sample content for testing</li>
+            <li>All modal functionality is now self-contained in connected.html</li>
+        </ul>
+    </div>
+
+    <div class="status-card">
+        <h2>🔧 Technical Details</h2>
+        <p><strong>What was fixed:</strong></p>
+        <ul>
+            <li><strong>JavaScript Conflicts:</strong> Removed external app.js dependency</li>
+            <li><strong>Modal System:</strong> Added complete inline modal implementation</li>
+            <li><strong>Event Handlers:</strong> All events now have click handlers</li>
+            <li><strong>Login Modal:</strong> Properly styled modal overlay</li>
+            <li><strong>WebSocket:</strong> Maintained existing functionality without conflicts</li>
+        </ul>
+    </div>
+
+    <h2>📋 Test Checklist</h2>
+    <div id="test-checklist" style="margin-top: 1rem;">
+        <label style="display: block; margin: 0.5rem 0;">
+            <input type="checkbox"> Event clicks show modal popup
+        </label>
+        <label style="display: block; margin: 0.5rem 0;">
+            <input type="checkbox"> Login button shows login modal
+        </label>
+        <label style="display: block; margin: 0.5rem 0;">
+            <input type="checkbox"> WebSocket test panel works
+        </label>
+        <label style="display: block; margin: 0.5rem 0;">
+            <input type="checkbox"> Modals close with X, ESC, or click outside
+        </label>
+        <label style="display: block; margin: 0.5rem 0;">
+            <input type="checkbox"> Map loads properly
+        </label>
+        <label style="display: block; margin: 0.5rem 0;">
+            <input type="checkbox"> No JavaScript errors in console
+        </label>
+    </div>
+
+    <script>
+        // Add some interactivity to the checklist
+        document.querySelectorAll('#test-checklist input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                if (this.checked) {
+                    this.parentElement.style.color = '#10b981';
+                    this.parentElement.style.textDecoration = 'line-through';
+                } else {
+                    this.parentElement.style.color = '';
+                    this.parentElement.style.textDecoration = '';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connected.html - Functionality Test</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .status-card {
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .success {
+            border-left-color: #10b981;
+        }
+
+        .error {
+            border-left-color: #ef4444;
+        }
+
+        .warning {
+            border-left-color: #f59e0b;
+        }
+
+        .test-button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.5rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .test-button:hover {
+            background-color: #2563eb;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .feature-item {
+            background-color: #333;
+            padding: 1rem;
+            border-radius: 6px;
+        }
+
+        .icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎯 Connected.html Functionality Status</h1>
+
+    <div class="status-card success">
+        <h2>✅ Issues Fixed</h2>
+        <p>All major conflicts and errors have been resolved:</p>
+        <ul>
+            <li>Removed conflicting app.js import</li>
+            <li>Added standalone modal system</li>
+            <li>Fixed variable name conflicts (ws)</li>
+            <li>Improved login modal styling</li>
+            <li>Added event click handlers</li>
+        </ul>
+    </div>
+
+    <div class="status-card">
+        <h2>🧪 Test Instructions</h2>
+        <p>Click the button below to test all functionalities in connected.html:</p>
+        <a href="/components/connected.html" target="_blank" class="test-button">
+            🚀 Open Connected.html
+        </a>
+    </div>
+
+    <div class="feature-list">
+        <div class="feature-item">
+            <h3><span class="icon">👆</span>Event Clicks</h3>
+            <p><strong>Test:</strong> Click any event in the sidebar</p>
+            <p><strong>Expected:</strong> Modal popup with event details</p>
+            <p><strong>Features:</strong> Title, schedule, location, course info</p>
+        </div>
+
+        <div class="feature-item">
+            <h3><span class="icon">🔐</span>Login Modal</h3>
+            <p><strong>Test:</strong> Click "Log in" button</p>
+            <p><strong>Expected:</strong> Beautiful login modal appears</p>
+            <p><strong>Features:</strong> Username/password, cancel button</p>
+        </div>
+
+        <div class="feature-item">
+            <h3><span class="icon">🌐</span>WebSocket</h3>
+            <p><strong>Test:</strong> Click "Test WebSocket" button</p>
+            <p><strong>Expected:</strong> WebSocket diagnostics panel</p>
+            <p><strong>Features:</strong> Connection status, send test messages</p>
+        </div>
+
+        <div class="feature-item">
+            <h3><span class="icon">🗺️</span>Map Display</h3>
+            <p><strong>Test:</strong> Map should load automatically</p>
+            <p><strong>Expected:</strong> Google Maps iframe of University of Auckland</p>
+            <p><strong>Features:</strong> Interactive map view</p>
+        </div>
+
+        <div class="feature-item">
+            <h3><span class="icon">⌨️</span>Modal Controls</h3>
+            <p><strong>Test:</strong> Various ways to close modals</p>
+            <p><strong>Expected:</strong> Close via X button, ESC key, or clicking outside</p>
+            <p><strong>Features:</strong> Intuitive user interaction</p>
+        </div>
+
+        <div class="feature-item">
+            <h3><span class="icon">📱</span>Card Simulation</h3>
+            <p><strong>Test:</strong> Click "Simulate Card Scan" in WebSocket panel</p>
+            <p><strong>Expected:</strong> Mock authentication and redirect</p>
+            <p><strong>Features:</strong> Simulates RFID card scanning</p>
+        </div>
+    </div>
+
+    <div class="status-card warning">
+        <h2>⚠️ Important Notes</h2>
+        <ul>
+            <li>WebSocket connects to <code>ws://192.168.20.22:8000</code> - make sure backend is running</li>
+            <li>Login credentials are handled via mock data for demonstration</li>
+            <li>Event data is generated as sample content for testing</li>
+            <li>All modal functionality is now self-contained in connected.html</li>
+        </ul>
+    </div>
+
+    <div class="status-card">
+        <h2>🔧 Technical Details</h2>
+        <p><strong>What was fixed:</strong></p>
+        <ul>
+            <li><strong>JavaScript Conflicts:</strong> Removed external app.js dependency</li>
+            <li><strong>Modal System:</strong> Added complete inline modal implementation</li>
+            <li><strong>Event Handlers:</strong> All events now have click handlers</li>
+            <li><strong>Login Modal:</strong> Properly styled modal overlay</li>
+            <li><strong>WebSocket:</strong> Maintained existing functionality without conflicts</li>
+        </ul>
+    </div>
+
+    <h2>📋 Test Checklist</h2>
+    <div id="test-checklist" style="margin-top: 1rem;">
+        <label style="display: block; margin: 0.5rem 0;">
+            <input type="checkbox"> Event clicks show modal popup
+        </label>
+        <label style="display: block; margin: 0.5rem 0;">
+            <input type="checkbox"> Login button shows login modal
+        </label>
+        <label style="display: block; margin: 0.5rem 0;">
+            <input type="checkbox"> WebSocket test panel works
+        </label>
+        <label style="display: block; margin: 0.5rem 0;">
+            <input type="checkbox"> Modals close with X, ESC, or click outside
+        </label>
+        <label style="display: block; margin: 0.5rem 0;">
+            <input type="checkbox"> Map loads properly
+        </label>
+        <label style="display: block; margin: 0.5rem 0;">
+            <input type="checkbox"> No JavaScript errors in console
+        </label>
+    </div>
+
+    <script>
+        // Add some interactivity to the checklist
+        document.querySelectorAll('#test-checklist input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                if (this.checked) {
+                    this.parentElement.style.color = '#10b981';
+                    this.parentElement.style.textDecoration = 'line-through';
+                } else {
+                    this.parentElement.style.color = '';
+                    this.parentElement.style.textDecoration = '';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

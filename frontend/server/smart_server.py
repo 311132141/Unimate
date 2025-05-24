@@ -40,7 +40,11 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         
         # Special handling for test-card.html
         elif self.path == '/test-card.html':
-            self.path = '/test-card.html'
+            self.path = '/pages/test-card.html'
+
+        # Map old paths to new paths
+        elif self.path.startswith('/views/'):
+            self.path = self.path.replace('/views/', '/pages/')
             
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
     
@@ -66,13 +70,20 @@ class ProxyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         if self.path.startswith('/api/'):
             self.proxy_request('GET')
         else:
+            # Special handling for root path
+            if self.path == '/' or self.path == '':
+                self.path = '/components/connected.html'
+            
+            # Special handling for test-card.html
+            elif self.path == '/test-card.html':
+                self.path = '/pages/test-card.html'
+
+            # Map old paths to new paths
+            elif self.path.startswith('/views/'):
+                self.path = self.path.replace('/views/', '/pages/')
+            
             # For other requests, serve from the local directory
             super().do_GET()
-            
-            # Special handling for root path after super().do_GET()
-            if (self.path == '/' or self.path == '') and hasattr(self, 'path_handled') and not self.path_handled:
-                self.path = '/components/connected.html'
-                super().do_GET()
     
     def do_POST(self):
         # If it's an API request, proxy to the backend
@@ -154,8 +165,8 @@ def find_available_port(start_port=DEFAULT_PORT, max_attempts=10):
 
 def start_server(use_proxy=False):
     """Start either the regular or proxy server on an available port"""
-    # Change to the current directory (where this script is)
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    # Change to the frontend directory (one level up from where this script is)
+    os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
     
     # Find an available port
     port = find_available_port()

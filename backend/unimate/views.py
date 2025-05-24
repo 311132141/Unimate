@@ -3,10 +3,11 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from .models import UserProfile, Event, Course, Room
+from .models import UserProfile, Event, Course, Room, Enrollment
 from .serializers import EventSerializer, CourseSerializer
 import logging
 
@@ -29,10 +30,9 @@ def rfid_scan(request):
         # Generate JWT tokens
         refresh = RefreshToken.for_user(user)
         
-        # Get user's events
-        events = Event.objects.filter(
-            course__in=profile.courses.all()
-        ).order_by('start_time')
+        # Get user's events through enrollment - FIX: Use enrollment relationship
+        enrolled_courses = [enrollment.course for enrollment in Enrollment.objects.filter(user=profile)]
+        events = Event.objects.filter(course__in=enrolled_courses).order_by('start_time')
         
         # Prepare the response data first
         response_data = {
@@ -101,9 +101,9 @@ def login(request):
         refresh = RefreshToken.for_user(user)
         profile = user.userprofile
         
-        events = Event.objects.filter(
-            course__in=profile.courses.all()
-        ).order_by('start_time')
+        # FIX: Use enrollment relationship to get events
+        enrolled_courses = [enrollment.course for enrollment in Enrollment.objects.filter(user=profile)]
+        events = Event.objects.filter(course__in=enrolled_courses).order_by('start_time')
         
         return Response({
             'access': str(refresh.access_token),
@@ -117,6 +117,40 @@ def login(request):
     
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
+# NEW: Add a dedicated user events endpoint
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def user_events(request):
+    """Get events for a specific user by user ID or username"""
+    user_id = request.query_params.get('user_id')
+    username = request.query_params.get('username')
+    
+    if not user_id and not username:
+        return Response({'error': 'user_id or username parameter required'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        if user_id:
+            user = User.objects.get(id=user_id)
+        else:
+            user = User.objects.get(username=username)
+            
+        profile = user.userprofile
+        enrolled_courses = [enrollment.course for enrollment in Enrollment.objects.filter(user=profile)]
+        events = Event.objects.filter(course__in=enrolled_courses).order_by('start_time')
+        
+        return Response({
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'events': EventSerializer(events, many=True).data
+            }
+        })
+        
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
+
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
@@ -126,7 +160,9 @@ class EventViewSet(viewsets.ModelViewSet):
         queryset = Event.objects.all()
         if self.request.user.is_authenticated:
             profile = self.request.user.userprofile
-            queryset = queryset.filter(course__in=profile.courses.all())
+            # FIX: Use enrollment relationship
+            enrolled_courses = [enrollment.course for enrollment in Enrollment.objects.filter(user=profile)]
+            queryset = queryset.filter(course__in=enrolled_courses)
         return queryset.order_by('start_time')
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -163,11 +199,22 @@ def route(request):
     try:
         # Try to match by room number
         destination_room = Room.objects.filter(number__icontains=end_point).first()
-    except:
-        pass
+        
+        if not destination_room:
+            # Try to match by building and room combination
+            parts = end_point.split()
+            if len(parts) >= 2:
+                building = parts[0]
+                room_number = parts[1]
+                destination_room = Room.objects.filter(
+                    building__iexact=building, 
+                    number__icontains=room_number
+                ).first()
+    except Exception as e:
+        logger.warning(f"Error finding room: {e}")
     
-    # Simple placeholder route as GeoJSON
-    route_geojson = {
+    # Create a simple route (normally this would be calculated using pathfinding)
+    route_data = {
         "type": "FeatureCollection",
         "features": [
             {
@@ -175,34 +222,61 @@ def route(request):
                 "geometry": {
                     "type": "LineString",
                     "coordinates": [
-                        [0, 0, 0],  # Starting point (x, y, z)
-                        [5, 0, 0],  # First corner
-                        [5, 5, 0],  # Second corner
-                        [10, 5, 0]  # Destination
+                        [174.7693, -36.8485],  # Starting point (rough coordinates)
+                        [174.7695, -36.8487],  # Waypoint
+                        [174.7697, -36.8489]   # Destination (rough coordinates)
                     ]
                 },
                 "properties": {
-                    "start": start_point,
-                    "destination": end_point,
-                    "distance": 15.0,  # meters
-                    "estimated_time": 30  # seconds
+                    "from": start_point,
+                    "to": end_point,
+                    "distance": "150m",
+                    "estimated_time": "2 minutes",
+                    "destination_room": {
+                        "building": destination_room.building if destination_room else "Unknown",
+                        "number": destination_room.number if destination_room else "Unknown",
+                        "floor": destination_room.floor if destination_room else 0
+                    } if destination_room else None
                 }
             }
         ]
     }
     
-    # If we found a real room, use its coordinates for the destination
-    if destination_room:
-        coords = destination_room.coordinates
-        route_geojson["features"][0]["geometry"]["coordinates"][-1] = [
-            coords.get('x', 0), 
-            coords.get('y', 0), 
-            coords.get('z', 0)
-        ]
-        route_geojson["features"][0]["properties"]["room_details"] = {
-            "building": destination_room.building,
-            "number": destination_room.number,
-            "floor": destination_room.floor
-        }
+    return Response(route_data) 
+                destination_room = Room.objects.filter(
+                    building__iexact=building, 
+                    number__icontains=room_number
+                ).first()
+    except Exception as e:
+        logger.warning(f"Error finding room: {e}")
     
-    return Response(route_geojson) 
+    # Create a simple route (normally this would be calculated using pathfinding)
+    route_data = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                        [174.7693, -36.8485],  # Starting point (rough coordinates)
+                        [174.7695, -36.8487],  # Waypoint
+                        [174.7697, -36.8489]   # Destination (rough coordinates)
+                    ]
+                },
+                "properties": {
+                    "from": start_point,
+                    "to": end_point,
+                    "distance": "150m",
+                    "estimated_time": "2 minutes",
+                    "destination_room": {
+                        "building": destination_room.building if destination_room else "Unknown",
+                        "number": destination_room.number if destination_room else "Unknown",
+                        "floor": destination_room.floor if destination_room else 0
+                    } if destination_room else None
+                }
+            }
+        ]
+    }
+    
+    return Response(route_data) 

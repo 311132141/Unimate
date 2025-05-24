@@ -1,0 +1,425 @@
+# Unimate Project Intelligence
+
+## Project Overview
+Unimate is a campus navigation system combining RFID authentication with 3D visualization. The system helps students navigate between classes by clicking on their timetable.
+
+## Critical Implementation Paths
+
+### Authentication Flow
+1. RFID card scanned → ESP32 sends to `/api/scan/`
+2. Backend validates → Returns JWT token
+3. Frontend stores token in localStorage
+4. All API calls include: `Authorization: Bearer ${token}`
+
+### Navigation Priority
+1. **Primary:** Click timetable class → Navigate to specific room
+2. **Secondary:** Manual building selection as backup
+3. Selected items highlighted in blue (#1f3a93)
+
+### WebSocket Pattern
+- Connect to: `ws://192.168.20.22:8000/ws/kiosk/{kiosk_id}/`
+- Always handle reconnection on disconnect
+- Group messages by kiosk_id for targeted updates
+
+## User Preferences & Workflow
+
+### Code Style
+- Vanilla JavaScript (no frameworks) for frontend
+- Async/await preferred over promises
+- Event delegation for dynamic elements
+- Clear function names describing action
+
+### UI/UX Patterns
+- Collapsible panels save space
+- Loading states for all async operations
+- Status messages appear top-right, auto-hide after 3s
+- Hover effects indicate clickable elements
+
+### Testing Approach
+- Standalone test servers for hardware simulation
+- Visual test files for UI components
+- PowerShell scripts for quick API testing
+- Always test with the 3 valid RFID cards
+
+## Project-Specific Patterns
+
+### 3D Map Conventions
+```javascript
+// Building IDs are lowercase, single words
+buildingId: 'main', 'library', 'science'
+
+// Interactive objects must be added to array
+dashboardInteractiveObjects.push(building);
+
+// Always cleanup when removing objects
+mapScene.remove(object);
+```
+
+### State Management
+```javascript
+// Global variables for dashboard state
+dashboardSelectedBuilding = null;  // Currently selected building
+dashboardSelectedClass = null;     // Currently selected class
+dashboardCurrentRoute = null;      // Active route object
+```
+
+### Error Handling
+```javascript
+// Always show user-friendly messages
+showStatusMessage('Failed to calculate route', true);  // true = error
+
+// Log technical details to console
+console.error('Route calculation error:', error);
+```
+
+## Known Challenges & Solutions
+
+### Challenge: ESP32 Memory Limits
+- Keep HTTP payloads small
+- Use simple JSON structures
+- Test mode for development without hardware
+
+### Challenge: WebSocket Stability
+- Implement reconnection logic
+- Use heartbeat/ping messages
+- Graceful degradation if WebSocket fails
+
+### Challenge: 3D Performance
+- Limit polygon count in buildings
+- Use simple geometries
+- Implement level-of-detail if needed
+
+## Tool Usage Patterns
+
+### File Organization
+```
+frontend/
+  pages/       # Complete HTML pages
+  components/  # Reusable HTML fragments
+  static/      # CSS, JS, images
+  
+backend/
+  api/         # Django apps
+  setup_data.py # Test data creation
+  
+tools/
+  test_*.py    # Testing utilities
+  standalone_*.py # Mock servers
+```
+
+### Development Commands
+```bash
+# Start with WebSocket support
+python run.py --asgi
+
+# Create test data
+python backend/setup_data.py
+
+# Test RFID without hardware
+python tools/standalone_rfid_server.py
+```
+
+## Evolution of Decisions
+
+### Navigation Evolution
+1. Started: Building-only navigation
+2. Added: Room information display
+3. Current: Direct class-to-room navigation
+4. Future: Indoor floor plans
+
+### UI Evolution
+1. Started: Always visible building list
+2. Added: Collapsible panel design
+3. Current: Secondary navigation option
+4. Future: Search-based navigation
+
+### Testing Evolution
+1. Started: Manual RFID testing
+2. Added: Standalone test server
+3. Current: Automated test modes
+4. Future: Full E2E test suite
+
+## Performance Optimizations
+
+### Frontend
+- Debounce search inputs (300ms)
+- Lazy load 3D map after auth
+- Cache timetable data locally
+- Reuse Three.js geometries
+
+### Backend
+- Use select_related for queries
+- Index frequently searched fields
+- Paginate large result sets
+- Cache building/room data
+
+## Security Considerations
+
+### Always Remember
+- Validate RFID format (hex string)
+- Sanitize room numbers
+- Check JWT expiration
+- CORS restricted to campus network
+- No sensitive data in console logs
+
+## Common Pitfalls to Avoid
+
+1. **Don't** modify ESP32 code without testing memory usage
+2. **Don't** create complex 3D geometries (impacts performance)
+3. **Don't** store passwords or sensitive data in frontend
+4. **Don't** make synchronous API calls (use async/await)
+5. **Don't** forget to handle "TBA" rooms in navigation
+
+## Debugging Tips
+
+### Check These First
+1. Is the JWT token valid? Check localStorage
+2. Is WebSocket connected? Check Network tab
+3. Are CORS headers correct? Check console
+4. Is the building ID correct? Check data attributes
+5. Is Three.js scene rendering? Check renderer.info
+
+### Useful Console Commands
+```javascript
+// Check authentication
+localStorage.getItem('access_token')
+
+// Test route calculation
+calculateDashboardRoute({x:0,z:0}, {x:5,z:5})
+
+// List interactive objects
+dashboardInteractiveObjects.map(o => o.userData.name)
+
+// Force WebSocket reconnect
+socket.close(); connectWebSocket();
+```
+
+## Future Considerations
+
+### Planned Features
+- Indoor navigation with floor plans
+- Multi-language support
+- Offline mode with service workers
+- Progressive Web App capabilities
+
+### Technical Debt to Address
+- Modularize frontend JavaScript
+- Add TypeScript for type safety
+- Implement proper state management
+- Add comprehensive test coverage
+
+---
+
+Remember: Unimate's goal is to help students never be late to class. Every feature should support this mission with simplicity and reliability. 
+
+## Project Overview
+Unimate is a campus navigation system combining RFID authentication with 3D visualization. The system helps students navigate between classes by clicking on their timetable.
+
+## Critical Implementation Paths
+
+### Authentication Flow
+1. RFID card scanned → ESP32 sends to `/api/scan/`
+2. Backend validates → Returns JWT token
+3. Frontend stores token in localStorage
+4. All API calls include: `Authorization: Bearer ${token}`
+
+### Navigation Priority
+1. **Primary:** Click timetable class → Navigate to specific room
+2. **Secondary:** Manual building selection as backup
+3. Selected items highlighted in blue (#1f3a93)
+
+### WebSocket Pattern
+- Connect to: `ws://192.168.20.22:8000/ws/kiosk/{kiosk_id}/`
+- Always handle reconnection on disconnect
+- Group messages by kiosk_id for targeted updates
+
+## User Preferences & Workflow
+
+### Code Style
+- Vanilla JavaScript (no frameworks) for frontend
+- Async/await preferred over promises
+- Event delegation for dynamic elements
+- Clear function names describing action
+
+### UI/UX Patterns
+- Collapsible panels save space
+- Loading states for all async operations
+- Status messages appear top-right, auto-hide after 3s
+- Hover effects indicate clickable elements
+
+### Testing Approach
+- Standalone test servers for hardware simulation
+- Visual test files for UI components
+- PowerShell scripts for quick API testing
+- Always test with the 3 valid RFID cards
+
+## Project-Specific Patterns
+
+### 3D Map Conventions
+```javascript
+// Building IDs are lowercase, single words
+buildingId: 'main', 'library', 'science'
+
+// Interactive objects must be added to array
+dashboardInteractiveObjects.push(building);
+
+// Always cleanup when removing objects
+mapScene.remove(object);
+```
+
+### State Management
+```javascript
+// Global variables for dashboard state
+dashboardSelectedBuilding = null;  // Currently selected building
+dashboardSelectedClass = null;     // Currently selected class
+dashboardCurrentRoute = null;      // Active route object
+```
+
+### Error Handling
+```javascript
+// Always show user-friendly messages
+showStatusMessage('Failed to calculate route', true);  // true = error
+
+// Log technical details to console
+console.error('Route calculation error:', error);
+```
+
+## Known Challenges & Solutions
+
+### Challenge: ESP32 Memory Limits
+- Keep HTTP payloads small
+- Use simple JSON structures
+- Test mode for development without hardware
+
+### Challenge: WebSocket Stability
+- Implement reconnection logic
+- Use heartbeat/ping messages
+- Graceful degradation if WebSocket fails
+
+### Challenge: 3D Performance
+- Limit polygon count in buildings
+- Use simple geometries
+- Implement level-of-detail if needed
+
+## Tool Usage Patterns
+
+### File Organization
+```
+frontend/
+  pages/       # Complete HTML pages
+  components/  # Reusable HTML fragments
+  static/      # CSS, JS, images
+  
+backend/
+  api/         # Django apps
+  setup_data.py # Test data creation
+  
+tools/
+  test_*.py    # Testing utilities
+  standalone_*.py # Mock servers
+```
+
+### Development Commands
+```bash
+# Start with WebSocket support
+python run.py --asgi
+
+# Create test data
+python backend/setup_data.py
+
+# Test RFID without hardware
+python tools/standalone_rfid_server.py
+```
+
+## Evolution of Decisions
+
+### Navigation Evolution
+1. Started: Building-only navigation
+2. Added: Room information display
+3. Current: Direct class-to-room navigation
+4. Future: Indoor floor plans
+
+### UI Evolution
+1. Started: Always visible building list
+2. Added: Collapsible panel design
+3. Current: Secondary navigation option
+4. Future: Search-based navigation
+
+### Testing Evolution
+1. Started: Manual RFID testing
+2. Added: Standalone test server
+3. Current: Automated test modes
+4. Future: Full E2E test suite
+
+## Performance Optimizations
+
+### Frontend
+- Debounce search inputs (300ms)
+- Lazy load 3D map after auth
+- Cache timetable data locally
+- Reuse Three.js geometries
+
+### Backend
+- Use select_related for queries
+- Index frequently searched fields
+- Paginate large result sets
+- Cache building/room data
+
+## Security Considerations
+
+### Always Remember
+- Validate RFID format (hex string)
+- Sanitize room numbers
+- Check JWT expiration
+- CORS restricted to campus network
+- No sensitive data in console logs
+
+## Common Pitfalls to Avoid
+
+1. **Don't** modify ESP32 code without testing memory usage
+2. **Don't** create complex 3D geometries (impacts performance)
+3. **Don't** store passwords or sensitive data in frontend
+4. **Don't** make synchronous API calls (use async/await)
+5. **Don't** forget to handle "TBA" rooms in navigation
+
+## Debugging Tips
+
+### Check These First
+1. Is the JWT token valid? Check localStorage
+2. Is WebSocket connected? Check Network tab
+3. Are CORS headers correct? Check console
+4. Is the building ID correct? Check data attributes
+5. Is Three.js scene rendering? Check renderer.info
+
+### Useful Console Commands
+```javascript
+// Check authentication
+localStorage.getItem('access_token')
+
+// Test route calculation
+calculateDashboardRoute({x:0,z:0}, {x:5,z:5})
+
+// List interactive objects
+dashboardInteractiveObjects.map(o => o.userData.name)
+
+// Force WebSocket reconnect
+socket.close(); connectWebSocket();
+```
+
+## Future Considerations
+
+### Planned Features
+- Indoor navigation with floor plans
+- Multi-language support
+- Offline mode with service workers
+- Progressive Web App capabilities
+
+### Technical Debt to Address
+- Modularize frontend JavaScript
+- Add TypeScript for type safety
+- Implement proper state management
+- Add comprehensive test coverage
+
+---
+
+Remember: Unimate's goal is to help students never be late to class. Every feature should support this mission with simplicity and reliability. 

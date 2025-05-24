@@ -298,8 +298,8 @@ function renderTimetable(events) {
 
 // Show event details and route
 function showEventDetails(event) {
-    // Show the event details in a modal or highlight
-    alert(`${event.title}\nLocation: ${event.room ? `${event.room.building} ${event.room.number}` : 'TBA'}\nTime: ${new Date(event.start_time).toLocaleString()} - ${new Date(event.end_time).toLocaleTimeString()}\nLecturer: ${event.lecturer || 'N/A'}`);
+    // Show the event details in a modal
+    openEventDetailsModal(event);
 
     // Get route to the room
     if (event.room) {
@@ -427,11 +427,262 @@ function startIdleTimer() {
 document.addEventListener('mousemove', startIdleTimer);
 document.addEventListener('keypress', startIdleTimer);
 
+// Event Details Modal Functions
+function createEventDetailsModal() {
+    const modal = document.createElement('div');
+    modal.id = 'event-details-modal';
+    modal.className = 'event-details-modal';
+    modal.innerHTML = `
+        <div class="event-details-content">
+            <div class="event-details-header">
+                <button class="event-details-close" onclick="closeEventDetailsModal()">&times;</button>
+                <h2 class="event-details-title" id="modal-event-title"></h2>
+                <div id="modal-event-badges"></div>
+            </div>
+            <div class="event-details-body">
+                <div class="event-details-grid">
+                    <div class="event-details-section">
+                        <h4>📅 Schedule</h4>
+                        <div class="event-details-field">
+                            <span class="event-details-icon">🕐</span>
+                            <span id="modal-event-time" class="event-details-value"></span>
+                        </div>
+                        <div class="event-details-field">
+                            <span class="event-details-icon">📅</span>
+                            <span id="modal-event-date" class="event-details-value"></span>
+                        </div>
+                        <div class="event-details-field">
+                            <span class="event-details-icon">⏱️</span>
+                            <span id="modal-event-duration" class="event-details-value"></span>
+                        </div>
+                    </div>
+                    <div class="event-details-section">
+                        <h4>📍 Location</h4>
+                        <div class="event-details-field">
+                            <span class="event-details-icon">🏢</span>
+                            <span id="modal-event-building" class="event-details-value"></span>
+                        </div>
+                        <div class="event-details-field">
+                            <span class="event-details-icon">🚪</span>
+                            <span id="modal-event-room" class="event-details-value"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="event-details-grid">
+                    <div class="event-details-section">
+                        <h4>📚 Course Information</h4>
+                        <div class="event-details-field">
+                            <span class="event-details-icon">📖</span>
+                            <span id="modal-event-course" class="event-details-value"></span>
+                        </div>
+                        <div class="event-details-field">
+                            <span class="event-details-icon">👨‍🏫</span>
+                            <span id="modal-event-lecturer" class="event-details-value"></span>
+                        </div>
+                    </div>
+                    <div class="event-details-section" id="modal-additional-info">
+                        <h4>ℹ️ Additional Information</h4>
+                        <div id="modal-event-description" class="event-details-description"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="event-details-actions">
+                <button class="event-details-btn event-details-btn-secondary" onclick="closeEventDetailsModal()">Close</button>
+                <button class="event-details-btn event-details-btn-primary" id="modal-navigate-btn" onclick="navigateToEventLocation()">Navigate</button>
+            </div>
+        </div>
+    `;
+
+    // Add click outside to close
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+            closeEventDetailsModal();
+        }
+    });
+
+    document.body.appendChild(modal);
+    return modal;
+}
+
+function openEventDetailsModal(event) {
+    let modal = document.getElementById('event-details-modal');
+    if (!modal) {
+        modal = createEventDetailsModal();
+    }
+
+    // Populate modal with event data
+    populateEventModal(event);
+
+    // Show modal
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+}
+
+function closeEventDetailsModal() {
+    const modal = document.getElementById('event-details-modal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = ''; // Restore scrolling
+    }
+}
+
+function populateEventModal(event) {
+    // Format dates and times
+    const startTime = new Date(event.start_time);
+    const endTime = new Date(event.end_time);
+    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const timeOptions = { hour: '2-digit', minute: '2-digit' };
+
+    // Calculate duration
+    const durationMs = endTime.getTime() - startTime.getTime();
+    const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+    const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+    const durationText = durationHours > 0 ?
+        `${durationHours}h ${durationMinutes}m` :
+        `${durationMinutes}m`;
+
+    // Set title
+    document.getElementById('modal-event-title').textContent = event.title || 'Untitled Event';
+
+    // Set badges
+    const badgesContainer = document.getElementById('modal-event-badges');
+    badgesContainer.innerHTML = '';
+
+    // Event type badge
+    const typeBadge = document.createElement('span');
+    typeBadge.className = `event-details-type ${event.event_type || 'class'}`;
+    typeBadge.textContent = event.event_type === 'exam' ? 'EXAM' : 'CLASS';
+    badgesContainer.appendChild(typeBadge);
+
+    // Urgent badge
+    if (event.is_urgent) {
+        const urgentBadge = document.createElement('span');
+        urgentBadge.className = 'event-details-urgent';
+        urgentBadge.textContent = 'URGENT';
+        badgesContainer.appendChild(urgentBadge);
+    }
+
+    // Set schedule information
+    document.getElementById('modal-event-time').textContent =
+        `${startTime.toLocaleTimeString(undefined, timeOptions)} - ${endTime.toLocaleTimeString(undefined, timeOptions)}`;
+    document.getElementById('modal-event-date').textContent =
+        startTime.toLocaleDateString(undefined, dateOptions);
+    document.getElementById('modal-event-duration').textContent = durationText;
+
+    // Set location information
+    const building = event.room?.building || 'TBA';
+    const roomNumber = event.room?.number || 'TBA';
+    document.getElementById('modal-event-building').textContent = building;
+    document.getElementById('modal-event-room').textContent = roomNumber;
+
+    // Set course information
+    const courseCode = event.course?.code || 'N/A';
+    const courseName = event.course?.name || '';
+    const courseText = courseName ? `${courseCode} - ${courseName}` : courseCode;
+    document.getElementById('modal-event-course').textContent = courseText;
+    document.getElementById('modal-event-lecturer').textContent = event.lecturer || 'Not specified';
+
+    // Set description/additional info
+    const description = event.description || event.course?.description || 'No additional information available.';
+    document.getElementById('modal-event-description').textContent = description;
+
+    // Handle navigate button
+    const navigateBtn = document.getElementById('modal-navigate-btn');
+    if (event.room && event.room.building && event.room.number) {
+        navigateBtn.style.display = 'block';
+        // Store event data for navigation
+        navigateBtn.dataset.building = event.room.building;
+        navigateBtn.dataset.room = event.room.number;
+    } else {
+        navigateBtn.style.display = 'none';
+    }
+}
+
+function navigateToEventLocation() {
+    const navigateBtn = document.getElementById('modal-navigate-btn');
+    const building = navigateBtn.dataset.building;
+    const room = navigateBtn.dataset.room;
+
+    if (building && room) {
+        // Close modal first
+        closeEventDetailsModal();
+
+        // Map building codes to building IDs for navigation
+        let buildingId = '';
+        switch (building.toUpperCase()) {
+            case 'ENG': buildingId = 'engineering'; break;
+            case 'SCI': buildingId = 'science'; break;
+            case 'LIB': buildingId = 'library'; break;
+            case 'BUS': buildingId = 'bizschool'; break;
+            case 'ARTS': buildingId = 'arts'; break;
+            case 'HSB': buildingId = 'health'; break;
+            default: buildingId = 'main';
+        }
+
+        // Navigate to the building (this function should exist in the dashboard)
+        if (typeof navigateToBuilding === 'function') {
+            navigateToBuilding(buildingId);
+        } else {
+            console.log('Navigation function not available, would navigate to:', building, room);
+        }
+    }
+}
+
+// Keyboard event handler for modal
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('event-details-modal');
+        if (modal && modal.classList.contains('show')) {
+            closeEventDetailsModal();
+        }
+    }
+});
+
+// Initialize static event demo handlers
+function initializeStaticEventHandlers() {
+    // Add click handlers to static event items for demo purposes
+    const staticEvents = document.querySelectorAll('.event-item');
+    staticEvents.forEach((eventItem, index) => {
+        eventItem.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const titleElement = eventItem.querySelector('.event-title');
+            const metaElement = eventItem.querySelector('.event-meta');
+
+            if (titleElement) {
+                // Create demo event data
+                const demoEvent = {
+                    id: `demo-${index}`,
+                    title: titleElement.textContent || 'Demo Event',
+                    event_type: titleElement.textContent.includes('URGENT') || eventItem.classList.contains('urgent-event') ? 'exam' : 'class',
+                    is_urgent: titleElement.textContent.includes('URGENT') || eventItem.classList.contains('urgent-event'),
+                    start_time: new Date().toISOString(),
+                    end_time: new Date(Date.now() + 3600000).toISOString(), // 1 hour later
+                    course: {
+                        code: titleElement.textContent.includes('Tech') ? 'TECH101' : 'DEMO202',
+                        name: titleElement.textContent.includes('Tech') ? 'Technology Innovation' : 'Demo Course'
+                    },
+                    room: {
+                        building: 'ENG',
+                        number: Math.floor(Math.random() * 300) + 100
+                    },
+                    lecturer: 'Demo Lecturer',
+                    description: metaElement ? metaElement.textContent : 'This is a demonstration event to showcase the modal functionality.'
+                };
+
+                // Open modal with demo data
+                openEventDetailsModal(demoEvent);
+            }
+        });
+    });
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', function () {
     console.log("DOM loaded - initializing app");
     initWebSocket();
     initMap();
+    initializeStaticEventHandlers(); // Add demo functionality for static events
 
     // Development mode detection
     const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -501,4 +752,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ];
         renderTimetable(demoEvents);
     }
-}); 
+
+    // Initialize static event handlers for demo items
+    initializeStaticEventHandlers();
+});

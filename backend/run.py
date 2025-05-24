@@ -51,14 +51,29 @@ def run_django_server(host='127.0.0.1', port=8000):
 
 def run_asgi_server(server_type='uvicorn', host='0.0.0.0', port=8000):
     """Run ASGI server (Uvicorn or Daphne)"""
-    cmd = [
-        sys.executable, 
-        str(ASGI_SERVER), 
-        f'--server={server_type}',
-        f'--host={host}',
-        f'--port={port}'
-    ]
-    logger.info(f"Starting {server_type.capitalize()} ASGI server on {host}:{port}")
+    # Check if the ASGI server script exists
+    if ASGI_SERVER.exists():
+        cmd = [
+            sys.executable, 
+            str(ASGI_SERVER), 
+            f'--server={server_type}',
+            f'--host={host}',
+            f'--port={port}'
+        ]
+        logger.info(f"Starting {server_type.capitalize()} ASGI server on {host}:{port}")
+    else:
+        # Fallback to direct uvicorn command if script doesn't exist
+        logger.warning(f"ASGI server script not found at {ASGI_SERVER}, using direct uvicorn command")
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.settings')
+        cmd = [
+            sys.executable, "-m", "uvicorn",
+            "app.asgi:application",
+            f"--host={host}",
+            f"--port={port}",
+            "--reload"
+        ]
+        logger.info(f"Starting Uvicorn ASGI server directly on {host}:{port}")
+    
     return subprocess.Popen(cmd)
 
 def run_websocket_server(host='0.0.0.0', port=8765):
@@ -128,6 +143,21 @@ def main():
     logger.info(f"All servers started. Press Ctrl+C to stop.")
     
     # Keep the script running until interrupted
+    try:
+        while all(proc.poll() is None for proc in processes):
+            time.sleep(1)
+        
+        # Check if any process exited
+        for proc in processes:
+            if proc.poll() is not None:
+                logger.error(f"Process exited unexpectedly with code {proc.returncode}")
+        
+    except KeyboardInterrupt:
+        logger.info("Interrupted by user")
+        handle_signal(signal.SIGINT, None)
+
+if __name__ == "__main__":
+    main() 
     try:
         while all(proc.poll() is None for proc in processes):
             time.sleep(1)

@@ -1,45 +1,47 @@
-# UNIMATE Frontend
+# Unimate Frontend
 
-This directory contains all the frontend code for the UNIMATE university wayfinding application.
+This directory contains the web frontend for the Unimate system.
 
-## Directory Structure
+## Structure
 
-The frontend is organized into the following directories:
+- **pages/**: Main HTML pages
+  - **dashboard.html**: User dashboard after login
+  - **index.html**: Public landing page
+  - **test-card.html**: RFID card testing utility
+- **components/**: Reusable UI components
+  - **connected.html**: Default kiosk view
+- **static/**: Static assets
+  - **css/**: Stylesheets
+  - **js/**: JavaScript files
+  - **images/**: Images and icons
+- **server/**: Server-side code
+  - **smart_server.py**: Simple HTTP server for development
 
-- `views/` - Main page templates for the application (index.html, dashboard.html, etc.)
-- `components/` - Reusable UI components (connected.html, standalone.html, etc.)
-- `templates/` - Template files and test files
-  - `tests/` - Test templates for WebSocket and other features
-- `static/` - Static assets (CSS, JS, images)
-- `tests/` - Test scripts and utilities
-  - `websocket/` - WebSocket test scripts and utilities
+## Setup
 
-## Usage
+1. Ensure you have Python 3.7+ installed
+2. Run the server using the main run.py script in the root directory
+3. Access the frontend at http://localhost:8080
 
-The main application can be started by running one of the server scripts:
+## Development
 
-```bash
-python server.py  # Basic HTTP server
-python smart_server.py  # Enhanced server with WebSocket support
-python proxy.py  # Proxy server for development
+The frontend uses vanilla HTML, CSS, and JavaScript without any frameworks.
+
+### Key Features
+
+- RFID card scanning for authentication
+- Interactive map for wayfinding
+- Real-time updates via WebSockets
+- User dashboard with personalized information
+
+### WebSocket Communication
+
+The frontend connects to the backend WebSocket endpoint for real-time updates.
+The WebSocket connection is established using the kiosk ID format:
+
+```javascript
+const ws = new WebSocket(`ws://localhost:8000/ws/kiosk/${kioskId}/`);
 ```
 
-Access the application by navigating to:
-http://localhost:8080/components/connected.html
-
-For direct access to the main application:
-http://localhost:8080/views/index.html 
-
-## Test Utilities
-
-### WebSocket Testing
-
-For testing WebSocket functionality, the frontend includes:
-
-- Web-based test interfaces at:
-  - http://localhost:8080/frontend/templates/tests/websocket_test.html
-  - http://localhost:8080/frontend/templates/tests/advanced_websocket_test.html
-
-- Test scripts:
-  - `tests/websocket/direct_test.py` - Standalone WebSocket server for testing (port 8767)
-  - `tests/websocket/full_test.py` - Comprehensive WebSocket test suite 
+This allows the kiosk to receive notifications specific to its location. 
+This allows the kiosk to receive notifications specific to its location. 

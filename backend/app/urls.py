@@ -4,7 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
 from rest_framework.routers import DefaultRouter
-from unimate.views import EventViewSet, CourseViewSet, rfid_scan, login, route
+from unimate.views import EventViewSet, CourseViewSet, rfid_scan, login, route, user_events
 from django.http import HttpResponse
 import os
 
@@ -34,6 +34,7 @@ urlpatterns = [
     path('api/scan/', rfid_scan),
     path('api/login/', login),
     path('api/route/', route),
+    path('api/user-events/', user_events),
     # Serve index.html for the root path and any other non-api path
     re_path(r'^(?!api/).*$', TemplateView.as_view(template_name='views/index.html')),
     
@@ -47,4 +48,5 @@ urlpatterns = [
 # Serve static files during development
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+    # Note: For production, static files should be handled by a web server like Nginx or WhiteNoise. 
     # Note: For production, static files should be handled by a web server like Nginx or WhiteNoise. 

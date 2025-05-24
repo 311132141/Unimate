@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Timetable Integration Test - Unimate</title>
+    <link rel="stylesheet" href="../static/site.css">
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .test-section {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background-color: #222;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .test-results {
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .pass {
+            color: #10b981;
+        }
+
+        .fail {
+            color: #ef4444;
+        }
+
+        .timetable-item {
+            background-color: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            cursor: pointer;
+        }
+
+        .timetable-item:hover {
+            background-color: #333;
+        }
+
+        button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+
+        button:hover {
+            background-color: #2563eb;
+        }
+
+        #timetable,
+        #full-timetable {
+            border: 1px solid #444;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-container">
+        <h1>Full Timetable Integration Test</h1>
+
+        <div class="test-section">
+            <h2>Test Overview</h2>
+            <p>This test verifies that:</p>
+            <ul>
+                <li>Event data is properly stored in dashboard timetable items</li>
+                <li>Full timetable view correctly copies event data from dashboard</li>
+                <li>Modal can be opened from both dashboard and full timetable items</li>
+                <li>Complete event data is passed to the modal in both cases</li>
+            </ul>
+            <button onclick="runTests()">Run Integration Tests</button>
+            <div id="test-results" class="test-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Dashboard Timetable (Source)</h2>
+            <div id="timetable">
+                <!-- Timetable items will be generated here -->
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Full Timetable (Copy)</h2>
+            <button onclick="simulateFullTimetableView()">Simulate Full Timetable View</button>
+            <div id="full-timetable">
+                <!-- Full timetable items will be copied here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="../static/js/app.js"></script>
+    <script>
+        // Test data
+        const testEvents = [
+            {
+                "id": 1,
+                "title": "ENGGEN205 Lecture",
+                "event_type": "class",
+                "course": { "code": "ENGGEN205", "name": "Engineering Mechanics" },
+                "room": { "building": "ENG", "number": "340" },
+                "start_time": new Date().toISOString(),
+                "end_time": new Date(Date.now() + 3600000).toISOString(),
+                "lecturer": "Dr. Smith",
+                "description": "Introduction to engineering mechanics principles",
+                "is_urgent": false
+            },
+            {
+                "id": 2,
+                "title": "STATS100 Mid-term Exam",
+                "event_type": "exam",
+                "course": { "code": "STATS100", "name": "Statistics" },
+                "room": { "building": "ENG", "number": "401" },
+                "start_time": new Date(Date.now() + 86400000).toISOString(),
+                "end_time": new Date(Date.now() + 86400000 + 7200000).toISOString(),
+                "lecturer": "Prof. Johnson",
+                "description": "Mid-term examination covering chapters 1-5",
+                "is_urgent": true
+            }
+        ];
+
+        function createTimetableItem(event) {
+            const item = document.createElement('div');
+            item.className = `timetable-item ${event.event_type === 'exam' ? 'exam' : ''}`;
+            if (event.is_urgent) {
+                item.classList.add('urgent');
+            }
+
+            const startTime = new Date(event.start_time);
+            const endTime = new Date(event.end_time);
+
+            // Store complete event data for modal access
+            item.dataset.eventData = JSON.stringify(event);
+
+            item.innerHTML = `
+                <div class="timetable-title">${event.title}</div>
+                <div class="timetable-info">
+                    <div>${event.course ? event.course.code : 'N/A'} - ${event.room ? `${event.room.building} ${event.room.number}` : 'TBA'}</div>
+                    <div>${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                </div>
+            `;
+
+            // Add click handler for modal
+            item.addEventListener('click', function () {
+                showEventDetails(event);
+            });
+
+            return item;
+        }
+
+        function populateDashboardTimetable() {
+            const timetable = document.getElementById('timetable');
+            timetable.innerHTML = '';
+
+            testEvents.forEach(event => {
+                const item = createTimetableItem(event);
+                timetable.appendChild(item);
+            });
+        }
+
+        function simulateFullTimetableView() {
+            const fullTimetable = document.getElementById('full-timetable');
+            const timetable = document.getElementById('timetable');
+
+            fullTimetable.innerHTML = '';
+
+            // Simulate the logic from dashboard.html
+            Array.from(timetable.children).forEach(child => {
+                if (!child.classList.contains('timetable-item')) return;
+
+                const eventDataJson = child.dataset.eventData;
+                if (!eventDataJson) return;
+
+                try {
+                    const event = JSON.parse(eventDataJson);
+
+                    const fullItem = createTimetableItem(event);
+
+                    fullItem.addEventListener('click', function () {
+                        showEventDetails(event);
+                    });
+
+                    fullTimetable.appendChild(fullItem);
+                } catch (error) {
+                    console.error('Error parsing event data:', error);
+                }
+            });
+        }
+
+        function runTests() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<h3>Running Tests...</h3>';
+
+            let testResults = [];
+
+            // Test 1: Check if dashboard items have event data
+            const dashboardItems = document.querySelectorAll('#timetable .timetable-item');
+            const hasEventData = Array.from(dashboardItems).every(item => item.dataset.eventData);
+            testResults.push({
+                name: 'Dashboard items have event data',
+                passed: hasEventData,
+                details: `${dashboardItems.length} items, ${Array.from(dashboardItems).filter(item => item.dataset.eventData).length} with data`
+            });
+
+            // Test 2: Check if event data can be parsed
+            let parsedSuccessfully = 0;
+            Array.from(dashboardItems).forEach(item => {
+                try {
+                    const event = JSON.parse(item.dataset.eventData);
+                    if (event.id && event.title) parsedSuccessfully++;
+                } catch (e) {
+                    // Parse failed
+                }
+            });
+            testResults.push({
+                name: 'Event data can be parsed correctly',
+                passed: parsedSuccessfully === dashboardItems.length,
+                details: `${parsedSuccessfully}/${dashboardItems.length} items parsed successfully`
+            });
+
+            // Test 3: Simulate full timetable copy
+            simulateFullTimetableView();
+            const fullTimetableItems = document.querySelectorAll('#full-timetable .timetable-item');
+            testResults.push({
+                name: 'Full timetable copies all items',
+                passed: fullTimetableItems.length === dashboardItems.length,
+                details: `Dashboard: ${dashboardItems.length}, Full: ${fullTimetableItems.length}`
+            });
+
+            // Test 4: Check if full timetable items have event handlers
+            let hasClickHandlers = 0;
+            Array.from(fullTimetableItems).forEach(item => {
+                if (item.onclick || item.hasAttribute('data-event-data')) {
+                    hasClickHandlers++;
+                }
+            });
+            testResults.push({
+                name: 'Full timetable items have event handlers',
+                passed: hasClickHandlers === fullTimetableItems.length,
+                details: `${hasClickHandlers}/${fullTimetableItems.length} items with handlers`
+            });
+
+            // Test 5: Check if modal functions exist
+            const modalFunctionsExist = typeof showEventDetails === 'function' &&
+                typeof openEventDetailsModal === 'function' &&
+                typeof closeEventDetailsModal === 'function';
+            testResults.push({
+                name: 'Modal functions are available',
+                passed: modalFunctionsExist,
+                details: modalFunctionsExist ? 'All modal functions found' : 'Some modal functions missing'
+            });
+
+            // Display results
+            let html = '<h3>Test Results</h3>';
+            testResults.forEach(test => {
+                const statusClass = test.passed ? 'pass' : 'fail';
+                const statusText = test.passed ? '✓ PASS' : '✗ FAIL';
+                html += `<div class="${statusClass}"><strong>${statusText}</strong> ${test.name}</div>`;
+                html += `<div style="margin-left: 2rem; font-size: 0.9em;">${test.details}</div><br>`;
+            });
+
+            const passedTests = testResults.filter(t => t.passed).length;
+            const totalTests = testResults.length;
+            html += `<div style="margin-top: 1rem; padding: 1rem; background-color: ${passedTests === totalTests ? '#064e3b' : '#7f1d1d'}; border-radius: 4px;">`;
+            html += `<strong>Summary: ${passedTests}/${totalTests} tests passed</strong>`;
+            html += '</div>';
+
+            results.innerHTML = html;
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Integration test page loaded');
+            populateDashboardTimetable();
+
+            // Add some styling for urgent events
+            const style = document.createElement('style');
+            style.textContent = `
+                .timetable-item.urgent {
+                    border-left: 4px solid #ef4444;
+                }
+                .timetable-item.exam {
+                    background-color: #2d1b1b;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+
+</html>

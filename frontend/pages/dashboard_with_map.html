@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unimate - Dashboard</title>
+    <link href="../static/site.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        .dashboard-container {
+            display: flex;
+            padding: 1rem;
+            gap: 1rem;
+            flex: 1;
+            overflow: auto;
+        }
+
+        .dashboard-panel {
+            background-color: #222;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.2rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .timetable-panel {
+            flex: 1;
+        }
+
+        .map-panel {
+            flex: 2;
+        }
+
+        #timetable {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .timetable-item {
+            background-color: #1a1a1a;
+            border-radius: 4px;
+            padding: 0.75rem;
+            border-left: 4px solid #3b82f6;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .timetable-item:hover {
+            background-color: #252525;
+        }
+
+        .timetable-item.exam {
+            border-left-color: #f97316;
+        }
+
+        .timetable-item.urgent {
+            border: 1px solid #ef4444;
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .timetable-title {
+            font-weight: 500;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .timetable-info {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        #map-container {
+            width: 100%;
+            height: 500px;
+            background-color: #1a1a1a;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        #user-name {
+            font-weight: 500;
+            color: #ccc;
+        }
+
+        .loading-indicator {
+            color: #888;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        #status-message {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            background-color: #065f46;
+            color: white;
+            z-index: 1000;
+            display: none;
+        }
+
+        #status-message.error {
+            background-color: #7f1d1d;
+        }
+
+        #status-message.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Unimate</h1>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Search for places, events or people">
+        </div>
+        <div class="user-profile">
+            <span id="user-name">User</span>
+            <button class="login-button" id="logout-button">Log out</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="dashboard-container">
+            <div class="dashboard-panel timetable-panel">
+                <h2 class="panel-title">Your Timetable</h2>
+                <div id="timetable">
+                    <div class="loading-indicator">Loading your timetable...</div>
+                </div>
+            </div>
+            <div class="dashboard-panel map-panel">
+                <h2 class="panel-title">Campus Map</h2>
+                <div id="map-container">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="status-message"></div>
+
+    <script>
+        // Global variables
+        let mapScene, mapCamera, mapRenderer;
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let cameraRotation = { x: 0, y: 0 };
+        let dashboardInteractiveObjects = [];
+
+        // Authentication check and initialization
+        document.addEventListener('DOMContentLoaded', function () {
+            const token = localStorage.getItem('access_token');
+            const username = localStorage.getItem('username');
+
+            console.log("Dashboard loaded, checking authentication");
+            console.log("Token exists:", !!token);
+            console.log("Username:", username);
+
+            if (!token) {
+                console.log("No authentication token found, redirecting to home");
+                window.location.href = '/components/connected.html';
+                return;
+            }
+
+            // Set the username in the UI
+            const userNameElement = document.getElementById('user-name');
+            if (userNameElement && username) {
+                userNameElement.textContent = username;
+            }
+
+            console.log("Authentication successful, initializing dashboard");
+
+            // Initialize both timetable and 3D map
+            fetchTimetableData();
+            initDashboardMap();
+
+            // Set up logout functionality
+            document.getElementById('logout-button').addEventListener('click', function () {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                localStorage.removeItem('username');
+                window.location.href = '/components/connected.html';
+            });
+        });
+
+        // Timetable Functions
+        function fetchTimetableData() {
+            const token = localStorage.getItem('access_token');
+            const username = localStorage.getItem('username');
+
+            if (!token || !username) {
+                console.log("No authentication token or username, cannot fetch timetable");
+                renderTimetable([]);
+                return;
+            }
+
+            // Make real API call to get user events
+            axios.get(`http://localhost:8000/api/user-events/?username=${username}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    console.log("Timetable data fetched successfully:", response.data);
+                    const user = response.data.user;
+                    const events = user.events || [];
+
+                    if (events.length > 0) {
+                        console.log(`Found ${events.length} events for ${username}`);
+                        renderTimetable(events);
+                        showStatusMessage(`Loaded ${events.length} events`);
+                    } else {
+                        console.log("No events found for user");
+                        renderTimetable([]);
+                        showStatusMessage("No events scheduled", true);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching timetable data:", error);
+                    showStatusMessage("Failed to load timetable", true);
+
+                    // Show fallback message
+                    const timetable = document.getElementById('timetable');
+                    timetable.innerHTML = '<div class="loading-indicator">Failed to load timetable. Please try refreshing.</div>';
+                });
+        }
+
+        function renderTimetable(events) {
+            const timetable = document.getElementById('timetable');
+            timetable.innerHTML = '';
+
+            if (!events || events.length === 0) {
+                const noEventsMessage = '<div class="loading-indicator">No events scheduled.</div>';
+                timetable.innerHTML = noEventsMessage;
+                return;
+            }
+
+            events.forEach(event => {
+                const item = createTimetableItem(event);
+                timetable.appendChild(item);
+            });
+        }
+
+        function createTimetableItem(event) {
+            const item = document.createElement('div');
+            item.className = `timetable-item ${event.event_type === 'exam' ? 'exam' : ''}`;
+            if (event.is_urgent) {
+                item.classList.add('urgent');
+            }
+
+            const startTime = new Date(event.start_time);
+            const endTime = new Date(event.end_time);
+
+            item.innerHTML = `
+                <div class="timetable-title">${event.title}</div>
+                <div class="timetable-info">
+                    <div>${event.course ? event.course.code : 'N/A'} - ${event.room ? `${event.room.building} ${event.room.number}` : 'TBA'}</div>
+                    <div>${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    <div>Lecturer: ${event.lecturer || 'N/A'}</div>
+                </div>
+            `;
+
+            // Add click handler to show event details
+            item.addEventListener('click', function () {
+                showEventDetails(event);
+            });
+
+            return item;
+        }
+
+        function showEventDetails(event) {
+            const details = `
+Event: ${event.title}
+Course: ${event.course ? event.course.code + ' - ' + event.course.name : 'N/A'}
+Room: ${event.room ? event.room.building + ' ' + event.room.number : 'TBA'}
+Time: ${new Date(event.start_time).toLocaleString()} - ${new Date(event.end_time).toLocaleString()}
+Lecturer: ${event.lecturer || 'N/A'}
+Type: ${event.event_type}
+${event.is_urgent ? 'URGENT EVENT' : ''}
+            `;
+            alert(details);
+        }
+
+        // 3D Map Functions
+        function initDashboardMap() {
+            const container = document.getElementById('map-container');
+
+            // Create scene
+            mapScene = new THREE.Scene();
+            mapScene.background = new THREE.Color(0x1a1a1a);
+
+            // Create camera
+            mapCamera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            mapCamera.position.set(0, 12, 15);
+            mapCamera.lookAt(0, 0, 0);
+
+            // Create renderer
+            mapRenderer = new THREE.WebGLRenderer({ antialias: true });
+            mapRenderer.setSize(container.clientWidth, container.clientHeight);
+            mapRenderer.setPixelRatio(window.devicePixelRatio);
+            mapRenderer.shadowMap.enabled = true;
+            container.appendChild(mapRenderer.domElement);
+
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            mapScene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 5);
+            directionalLight.castShadow = true;
+            mapScene.add(directionalLight);
+
+            // Create campus model
+            createDashboardCampusModel();
+
+            // Add event listeners
+            container.addEventListener('mousedown', onMapMouseDown);
+            document.addEventListener('mousemove', onMapMouseMove);
+            document.addEventListener('mouseup', onMapMouseUp);
+            window.addEventListener('resize', onMapResize);
+
+            // Start animation
+            animateMap();
+
+            showStatusMessage('3D map loaded successfully');
+        }
+
+        function createDashboardCampusModel() {
+            // Floor/ground
+            const floorGeometry = new THREE.PlaneGeometry(40, 40);
+            const floorMaterial = new THREE.MeshStandardMaterial({
+                color: 0x95c795,
+                roughness: 0.8
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -0.1;
+            mapScene.add(floor);
+
+            // Campus buildings
+            const buildings = [
+                { id: 'main', name: 'Main Building', x: 0, z: 0, width: 4, depth: 3, height: 2, color: 0x555555 },
+                { id: 'library', name: 'Library', x: -8, z: 0, width: 3, depth: 3, height: 1.8, color: 0x5A6377 },
+                { id: 'science', name: 'Science Block', x: 6, z: -5, width: 3, depth: 2.5, height: 1.5, color: 0x4C6A73 },
+                { id: 'engineering', name: 'Engineering Building', x: -5, z: 6, width: 4, depth: 2, height: 2, color: 0x5D6854 },
+                { id: 'bizschool', name: 'Business School', x: 8, z: 6, width: 5, depth: 3, height: 3, color: 0x876E58 },
+                { id: 'student_center', name: 'Student Center', x: 0, z: -8, width: 6, depth: 4, height: 1, color: 0x786558 },
+                { id: 'general', name: 'General Building', x: -6, z: -6, width: 3, depth: 5, height: 2, color: 0x606060 },
+                { id: 'arts', name: 'Arts Building', x: 10, z: 0, width: 3, depth: 2, height: 2.2, color: 0x67685D },
+                { id: 'health', name: 'Health Sciences', x: 7, z: -9, width: 2.5, depth: 2.5, height: 2, color: 0x607673 }
+            ];
+
+            // Create buildings
+            buildings.forEach(building => {
+                createDashboardBuilding(
+                    building.x, building.z, building.width, building.depth,
+                    building.height, building.color, building.name, building.id
+                );
+            });
+
+            // Create roads
+            createDashboardRoads();
+        }
+
+        function createDashboardBuilding(x, z, width, depth, height, color, name, id) {
+            // Building geometry
+            const geometry = new THREE.BoxGeometry(width, height, depth);
+            const material = new THREE.MeshStandardMaterial({
+                color: color,
+                metalness: 0.1,
+                roughness: 0.8
+            });
+
+            const building = new THREE.Mesh(geometry, material);
+            building.position.set(x, height / 2, z);
+            building.userData = {
+                originalColor: color,
+                name: name,
+                id: id
+            };
+
+            building.callback = function () {
+                showStatusMessage(`Selected: ${name}`);
+            };
+
+            mapScene.add(building);
+            dashboardInteractiveObjects.push(building);
+
+            return building;
+        }
+
+        function createDashboardRoads() {
+            const roadMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
+
+            // Main roads
+            createDashboardRoad(-15, 0, 30, 2, roadMaterial);
+            createDashboardRoad(0, -15, 2, 30, roadMaterial);
+            createDashboardRoad(-10, 5, 10, 1.5, roadMaterial);
+            createDashboardRoad(5, 5, 10, 1.5, roadMaterial);
+            createDashboardRoad(-10, -7, 15, 1.5, roadMaterial);
+            createDashboardRoad(7, -7, 8, 1.5, roadMaterial);
+        }
+
+        function createDashboardRoad(x, z, width, depth, material) {
+            const roadGeo = new THREE.PlaneGeometry(width, depth);
+            const road = new THREE.Mesh(roadGeo, material);
+            road.rotation.x = -Math.PI / 2;
+            road.position.y = -0.05;
+            road.position.x = x;
+            road.position.z = z;
+            mapScene.add(road);
+        }
+
+        function onMapMouseDown(event) {
+            isDragging = true;
+            previousMousePosition = { x: event.clientX, y: event.clientY };
+
+            // Handle building selection
+            const container = document.getElementById('map-container');
+            const rect = container.getBoundingClientRect();
+            const mouse = new THREE.Vector2();
+            mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
+
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(mouse, mapCamera);
+            const intersects = raycaster.intersectObjects(dashboardInteractiveObjects);
+
+            if (intersects.length > 0 && intersects[0].object.callback) {
+                intersects[0].object.callback();
+            }
+        }
+
+        function onMapMouseMove(event) {
+            if (!isDragging) return;
+
+            const deltaMove = {
+                x: event.clientX - previousMousePosition.x,
+                y: event.clientY - previousMousePosition.y
+            };
+
+            cameraRotation.y += deltaMove.x * 0.01;
+            cameraRotation.x += deltaMove.y * 0.01;
+            cameraRotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraRotation.x));
+
+            const distance = mapCamera.position.length();
+            mapCamera.position.x = distance * Math.sin(cameraRotation.y) * Math.cos(cameraRotation.x);
+            mapCamera.position.z = distance * Math.cos(cameraRotation.y) * Math.cos(cameraRotation.x);
+            mapCamera.position.y = distance * Math.sin(cameraRotation.x);
+
+            mapCamera.lookAt(0, 0, 0);
+
+            previousMousePosition = { x: event.clientX, y: event.clientY };
+        }
+
+        function onMapMouseUp() {
+            isDragging = false;
+        }
+
+        function onMapResize() {
+            const container = document.getElementById('map-container');
+            mapCamera.aspect = container.clientWidth / container.clientHeight;
+            mapCamera.updateProjectionMatrix();
+            mapRenderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        function animateMap() {
+            requestAnimationFrame(animateMap);
+            mapRenderer.render(mapScene, mapCamera);
+        }
+
+        function showStatusMessage(message, isError = false) {
+            const statusEl = document.getElementById('status-message');
+            statusEl.textContent = message;
+            statusEl.classList.toggle('error', isError);
+            statusEl.classList.add('show');
+
+            setTimeout(() => {
+                statusEl.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unimate - Dashboard</title>
+    <link href="../static/site.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        .dashboard-container {
+            display: flex;
+            padding: 1rem;
+            gap: 1rem;
+            flex: 1;
+            overflow: auto;
+        }
+
+        .dashboard-panel {
+            background-color: #222;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.2rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .timetable-panel {
+            flex: 1;
+        }
+
+        .map-panel {
+            flex: 2;
+        }
+
+        #timetable {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .timetable-item {
+            background-color: #1a1a1a;
+            border-radius: 4px;
+            padding: 0.75rem;
+            border-left: 4px solid #3b82f6;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .timetable-item:hover {
+            background-color: #252525;
+        }
+
+        .timetable-item.exam {
+            border-left-color: #f97316;
+        }
+
+        .timetable-item.urgent {
+            border: 1px solid #ef4444;
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .timetable-title {
+            font-weight: 500;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .timetable-info {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        #map-container {
+            width: 100%;
+            height: 500px;
+            background-color: #1a1a1a;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        #user-name {
+            font-weight: 500;
+            color: #ccc;
+        }
+
+        .loading-indicator {
+            color: #888;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        #status-message {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            background-color: #065f46;
+            color: white;
+            z-index: 1000;
+            display: none;
+        }
+
+        #status-message.error {
+            background-color: #7f1d1d;
+        }
+
+        #status-message.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Unimate</h1>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Search for places, events or people">
+        </div>
+        <div class="user-profile">
+            <span id="user-name">User</span>
+            <button class="login-button" id="logout-button">Log out</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="dashboard-container">
+            <div class="dashboard-panel timetable-panel">
+                <h2 class="panel-title">Your Timetable</h2>
+                <div id="timetable">
+                    <div class="loading-indicator">Loading your timetable...</div>
+                </div>
+            </div>
+            <div class="dashboard-panel map-panel">
+                <h2 class="panel-title">Campus Map</h2>
+                <div id="map-container">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="status-message"></div>
+
+    <script>
+        // Global variables
+        let mapScene, mapCamera, mapRenderer;
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let cameraRotation = { x: 0, y: 0 };
+        let dashboardInteractiveObjects = [];
+
+        // Authentication check and initialization
+        document.addEventListener('DOMContentLoaded', function () {
+            const token = localStorage.getItem('access_token');
+            const username = localStorage.getItem('username');
+
+            console.log("Dashboard loaded, checking authentication");
+            console.log("Token exists:", !!token);
+            console.log("Username:", username);
+
+            if (!token) {
+                console.log("No authentication token found, redirecting to home");
+                window.location.href = '/components/connected.html';
+                return;
+            }
+
+            // Set the username in the UI
+            const userNameElement = document.getElementById('user-name');
+            if (userNameElement && username) {
+                userNameElement.textContent = username;
+            }
+
+            console.log("Authentication successful, initializing dashboard");
+
+            // Initialize both timetable and 3D map
+            fetchTimetableData();
+            initDashboardMap();
+
+            // Set up logout functionality
+            document.getElementById('logout-button').addEventListener('click', function () {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                localStorage.removeItem('username');
+                window.location.href = '/components/connected.html';
+            });
+        });
+
+        // Timetable Functions
+        function fetchTimetableData() {
+            const token = localStorage.getItem('access_token');
+            const username = localStorage.getItem('username');
+
+            if (!token || !username) {
+                console.log("No authentication token or username, cannot fetch timetable");
+                renderTimetable([]);
+                return;
+            }
+
+            // Make real API call to get user events
+            axios.get(`http://localhost:8000/api/user-events/?username=${username}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    console.log("Timetable data fetched successfully:", response.data);
+                    const user = response.data.user;
+                    const events = user.events || [];
+
+                    if (events.length > 0) {
+                        console.log(`Found ${events.length} events for ${username}`);
+                        renderTimetable(events);
+                        showStatusMessage(`Loaded ${events.length} events`);
+                    } else {
+                        console.log("No events found for user");
+                        renderTimetable([]);
+                        showStatusMessage("No events scheduled", true);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching timetable data:", error);
+                    showStatusMessage("Failed to load timetable", true);
+
+                    // Show fallback message
+                    const timetable = document.getElementById('timetable');
+                    timetable.innerHTML = '<div class="loading-indicator">Failed to load timetable. Please try refreshing.</div>';
+                });
+        }
+
+        function renderTimetable(events) {
+            const timetable = document.getElementById('timetable');
+            timetable.innerHTML = '';
+
+            if (!events || events.length === 0) {
+                const noEventsMessage = '<div class="loading-indicator">No events scheduled.</div>';
+                timetable.innerHTML = noEventsMessage;
+                return;
+            }
+
+            events.forEach(event => {
+                const item = createTimetableItem(event);
+                timetable.appendChild(item);
+            });
+        }
+
+        function createTimetableItem(event) {
+            const item = document.createElement('div');
+            item.className = `timetable-item ${event.event_type === 'exam' ? 'exam' : ''}`;
+            if (event.is_urgent) {
+                item.classList.add('urgent');
+            }
+
+            const startTime = new Date(event.start_time);
+            const endTime = new Date(event.end_time);
+
+            item.innerHTML = `
+                <div class="timetable-title">${event.title}</div>
+                <div class="timetable-info">
+                    <div>${event.course ? event.course.code : 'N/A'} - ${event.room ? `${event.room.building} ${event.room.number}` : 'TBA'}</div>
+                    <div>${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    <div>Lecturer: ${event.lecturer || 'N/A'}</div>
+                </div>
+            `;
+
+            // Add click handler to show event details
+            item.addEventListener('click', function () {
+                showEventDetails(event);
+            });
+
+            return item;
+        }
+
+        function showEventDetails(event) {
+            const details = `
+Event: ${event.title}
+Course: ${event.course ? event.course.code + ' - ' + event.course.name : 'N/A'}
+Room: ${event.room ? event.room.building + ' ' + event.room.number : 'TBA'}
+Time: ${new Date(event.start_time).toLocaleString()} - ${new Date(event.end_time).toLocaleString()}
+Lecturer: ${event.lecturer || 'N/A'}
+Type: ${event.event_type}
+${event.is_urgent ? 'URGENT EVENT' : ''}
+            `;
+            alert(details);
+        }
+
+        // 3D Map Functions
+        function initDashboardMap() {
+            const container = document.getElementById('map-container');
+
+            // Create scene
+            mapScene = new THREE.Scene();
+            mapScene.background = new THREE.Color(0x1a1a1a);
+
+            // Create camera
+            mapCamera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            mapCamera.position.set(0, 12, 15);
+            mapCamera.lookAt(0, 0, 0);
+
+            // Create renderer
+            mapRenderer = new THREE.WebGLRenderer({ antialias: true });
+            mapRenderer.setSize(container.clientWidth, container.clientHeight);
+            mapRenderer.setPixelRatio(window.devicePixelRatio);
+            mapRenderer.shadowMap.enabled = true;
+            container.appendChild(mapRenderer.domElement);
+
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            mapScene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 5);
+            directionalLight.castShadow = true;
+            mapScene.add(directionalLight);
+
+            // Create campus model
+            createDashboardCampusModel();
+
+            // Add event listeners
+            container.addEventListener('mousedown', onMapMouseDown);
+            document.addEventListener('mousemove', onMapMouseMove);
+            document.addEventListener('mouseup', onMapMouseUp);
+            window.addEventListener('resize', onMapResize);
+
+            // Start animation
+            animateMap();
+
+            showStatusMessage('3D map loaded successfully');
+        }
+
+        function createDashboardCampusModel() {
+            // Floor/ground
+            const floorGeometry = new THREE.PlaneGeometry(40, 40);
+            const floorMaterial = new THREE.MeshStandardMaterial({
+                color: 0x95c795,
+                roughness: 0.8
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -0.1;
+            mapScene.add(floor);
+
+            // Campus buildings
+            const buildings = [
+                { id: 'main', name: 'Main Building', x: 0, z: 0, width: 4, depth: 3, height: 2, color: 0x555555 },
+                { id: 'library', name: 'Library', x: -8, z: 0, width: 3, depth: 3, height: 1.8, color: 0x5A6377 },
+                { id: 'science', name: 'Science Block', x: 6, z: -5, width: 3, depth: 2.5, height: 1.5, color: 0x4C6A73 },
+                { id: 'engineering', name: 'Engineering Building', x: -5, z: 6, width: 4, depth: 2, height: 2, color: 0x5D6854 },
+                { id: 'bizschool', name: 'Business School', x: 8, z: 6, width: 5, depth: 3, height: 3, color: 0x876E58 },
+                { id: 'student_center', name: 'Student Center', x: 0, z: -8, width: 6, depth: 4, height: 1, color: 0x786558 },
+                { id: 'general', name: 'General Building', x: -6, z: -6, width: 3, depth: 5, height: 2, color: 0x606060 },
+                { id: 'arts', name: 'Arts Building', x: 10, z: 0, width: 3, depth: 2, height: 2.2, color: 0x67685D },
+                { id: 'health', name: 'Health Sciences', x: 7, z: -9, width: 2.5, depth: 2.5, height: 2, color: 0x607673 }
+            ];
+
+            // Create buildings
+            buildings.forEach(building => {
+                createDashboardBuilding(
+                    building.x, building.z, building.width, building.depth,
+                    building.height, building.color, building.name, building.id
+                );
+            });
+
+            // Create roads
+            createDashboardRoads();
+        }
+
+        function createDashboardBuilding(x, z, width, depth, height, color, name, id) {
+            // Building geometry
+            const geometry = new THREE.BoxGeometry(width, height, depth);
+            const material = new THREE.MeshStandardMaterial({
+                color: color,
+                metalness: 0.1,
+                roughness: 0.8
+            });
+
+            const building = new THREE.Mesh(geometry, material);
+            building.position.set(x, height / 2, z);
+            building.userData = {
+                originalColor: color,
+                name: name,
+                id: id
+            };
+
+            building.callback = function () {
+                showStatusMessage(`Selected: ${name}`);
+            };
+
+            mapScene.add(building);
+            dashboardInteractiveObjects.push(building);
+
+            return building;
+        }
+
+        function createDashboardRoads() {
+            const roadMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
+
+            // Main roads
+            createDashboardRoad(-15, 0, 30, 2, roadMaterial);
+            createDashboardRoad(0, -15, 2, 30, roadMaterial);
+            createDashboardRoad(-10, 5, 10, 1.5, roadMaterial);
+            createDashboardRoad(5, 5, 10, 1.5, roadMaterial);
+            createDashboardRoad(-10, -7, 15, 1.5, roadMaterial);
+            createDashboardRoad(7, -7, 8, 1.5, roadMaterial);
+        }
+
+        function createDashboardRoad(x, z, width, depth, material) {
+            const roadGeo = new THREE.PlaneGeometry(width, depth);
+            const road = new THREE.Mesh(roadGeo, material);
+            road.rotation.x = -Math.PI / 2;
+            road.position.y = -0.05;
+            road.position.x = x;
+            road.position.z = z;
+            mapScene.add(road);
+        }
+
+        function onMapMouseDown(event) {
+            isDragging = true;
+            previousMousePosition = { x: event.clientX, y: event.clientY };
+
+            // Handle building selection
+            const container = document.getElementById('map-container');
+            const rect = container.getBoundingClientRect();
+            const mouse = new THREE.Vector2();
+            mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
+
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(mouse, mapCamera);
+            const intersects = raycaster.intersectObjects(dashboardInteractiveObjects);
+
+            if (intersects.length > 0 && intersects[0].object.callback) {
+                intersects[0].object.callback();
+            }
+        }
+
+        function onMapMouseMove(event) {
+            if (!isDragging) return;
+
+            const deltaMove = {
+                x: event.clientX - previousMousePosition.x,
+                y: event.clientY - previousMousePosition.y
+            };
+
+            cameraRotation.y += deltaMove.x * 0.01;
+            cameraRotation.x += deltaMove.y * 0.01;
+            cameraRotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraRotation.x));
+
+            const distance = mapCamera.position.length();
+            mapCamera.position.x = distance * Math.sin(cameraRotation.y) * Math.cos(cameraRotation.x);
+            mapCamera.position.z = distance * Math.cos(cameraRotation.y) * Math.cos(cameraRotation.x);
+            mapCamera.position.y = distance * Math.sin(cameraRotation.x);
+
+            mapCamera.lookAt(0, 0, 0);
+
+            previousMousePosition = { x: event.clientX, y: event.clientY };
+        }
+
+        function onMapMouseUp() {
+            isDragging = false;
+        }
+
+        function onMapResize() {
+            const container = document.getElementById('map-container');
+            mapCamera.aspect = container.clientWidth / container.clientHeight;
+            mapCamera.updateProjectionMatrix();
+            mapRenderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        function animateMap() {
+            requestAnimationFrame(animateMap);
+            mapRenderer.render(mapScene, mapCamera);
+        }
+
+        function showStatusMessage(message, isError = false) {
+            const statusEl = document.getElementById('status-message');
+            statusEl.textContent = message;
+            statusEl.classList.toggle('error', isError);
+            statusEl.classList.add('show');
+
+            setTimeout(() => {
+                statusEl.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>

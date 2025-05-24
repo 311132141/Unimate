@@ -1,75 +1,87 @@
-// WebSocket connection
-let ws = null;
-let mapScene = null;
-let mapCamera = null;
-let mapRenderer = null;
+// WebSocket connection for real-time updates
+let socket = null;
 
-// Initialize WebSocket connection
+// Initialize WebSocket
 function initWebSocket() {
-    try {
-        console.log("Attempting WebSocket connection...");
-        // Only attempt WebSocket if in production or specifically enabled
-        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-            ws = new WebSocket(`ws://${window.location.host}/ws/unimate/`);
+    if (!socket) {
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${wsProtocol}//${window.location.host}/ws/unimate/`;
 
-            ws.onmessage = function (event) {
-                const data = JSON.parse(event.data);
-                if (data.type === 'user.login') {
-                    handleUserLogin(data.message);
-                }
-            };
+        socket = new WebSocket(wsUrl);
 
-            ws.onclose = function () {
-                console.log("WebSocket connection closed, will retry in 5s");
-                setTimeout(initWebSocket, 5000);
-            };
+        socket.onopen = function (e) {
+            console.log('WebSocket connected');
+        };
 
-            ws.onerror = function (error) {
-                console.log("WebSocket error, falling back to REST API only mode");
-                ws = null; // Clear the WebSocket object on error
-            };
-        } else {
-            console.log("Development mode - skipping WebSocket initialization");
-        }
-    } catch (error) {
-        console.log("Failed to initialize WebSocket, continuing with REST API only:", error);
+        socket.onmessage = function (event) {
+            console.log('WebSocket message received:', event.data);
+            const data = JSON.parse(event.data);
+
+            // Handle different message types
+            if (data.type === 'user_login' && data.message) {
+                handleUserLogin(data.message);
+            }
+        };
+
+        socket.onclose = function (e) {
+            console.log('WebSocket connection closed');
+            socket = null;
+
+            // Attempt to reconnect after 3 seconds
+            setTimeout(initWebSocket, 3000);
+        };
+
+        socket.onerror = function (error) {
+            console.error('WebSocket error:', error);
+        };
     }
 }
 
+// 3D Map variables
+let mapScene, mapCamera, mapRenderer, mapControls;
+
 // Initialize 3D map
 function initMap() {
-    const container = document.getElementById('map-container');
-
-    // Scene setup
+    // Scene
     mapScene = new THREE.Scene();
-    mapCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-    mapRenderer = new THREE.WebGLRenderer();
-    mapRenderer.setSize(container.clientWidth, container.clientHeight);
-    container.appendChild(mapRenderer.domElement);
+    mapScene.background = new THREE.Color(0x1a1a1a);
 
-    // Add ambient light
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    // Camera
+    mapCamera = new THREE.PerspectiveCamera(75, 400 / 300, 0.1, 1000);
+    mapCamera.position.set(0, 10, 20);
+
+    // Renderer
+    const mapContainer = document.getElementById('map-container');
+    if (!mapContainer) return;
+
+    mapRenderer = new THREE.WebGLRenderer({ antialias: true });
+    mapRenderer.setSize(400, 300);
+    mapContainer.appendChild(mapRenderer.domElement);
+
+    // Controls
+    mapControls = new THREE.OrbitControls(mapCamera, mapRenderer.domElement);
+    mapControls.enableDamping = true;
+    mapControls.dampingFactor = 0.05;
+
+    // Add some basic lighting
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
     mapScene.add(ambientLight);
 
-    // Add directional light
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    directionalLight.position.set(0, 1, 0);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(10, 10, 5);
     mapScene.add(directionalLight);
 
-    // Add a simple floor
-    const floorGeometry = new THREE.PlaneGeometry(10, 10);
-    const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 });
+    // Simple floor
+    const floorGeometry = new THREE.PlaneGeometry(50, 50);
+    const floorMaterial = new THREE.MeshLambertMaterial({ color: 0x333333 });
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
     floor.rotation.x = -Math.PI / 2;
     mapScene.add(floor);
 
-    // Position camera
-    mapCamera.position.set(5, 5, 5);
-    mapCamera.lookAt(0, 0, 0);
-
     // Animation loop
     function animate() {
         requestAnimationFrame(animate);
+        mapControls.update();
         mapRenderer.render(mapScene, mapCamera);
     }
     animate();
@@ -137,37 +149,7 @@ function renderTimetable(events) {
     if (!events || events.length === 0) {
         console.log("No events to display");
         timetable.innerHTML = '<p class="text-gray-500 text-center py-4">No upcoming events found.</p>';
-
-        // Add demo data if in development environment
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            console.log("Adding demo events for development");
-            events = [
-                {
-                    "id": 1,
-                    "title": "ENGGEN205 Lecture",
-                    "event_type": "class",
-                    "course": { "code": "ENGGEN205", "name": "Engineering Mechanics" },
-                    "room": { "building": "ENG", "number": "340" },
-                    "start_time": new Date().toISOString(),
-                    "end_time": new Date(Date.now() + 3600000).toISOString(),
-                    "lecturer": "Dr. Smith",
-                    "is_urgent": false
-                },
-                {
-                    "id": 2,
-                    "title": "STATS100 Mid-term Exam",
-                    "event_type": "exam",
-                    "course": { "code": "STATS100", "name": "Statistics" },
-                    "room": { "building": "ENG", "number": "401" },
-                    "start_time": new Date(Date.now() + 86400000).toISOString(),
-                    "end_time": new Date(Date.now() + 86400000 + 7200000).toISOString(),
-                    "lecturer": "N/A",
-                    "is_urgent": true
-                }
-            ];
-        } else {
-            return; // Exit if no events in production
-        }
+        return;
     }
 
     try {
@@ -299,7 +281,7 @@ function renderTimetable(events) {
 // Show event details and route
 function showEventDetails(event) {
     // Show the event details in a modal or highlight
-    alert(`${event.title}\nLocation: ${event.room ? `${event.room.building} ${event.room.number}` : 'TBA'}\nTime: ${new Date(event.start_time).toLocaleString()} - ${new Date(event.end_time).toLocaleTimeString()}\nLecturer: ${event.lecturer || 'N/A'}`);
+    openEventDetailsModal(event);
 
     // Get route to the room
     if (event.room) {
@@ -367,74 +349,272 @@ function clearRoute() {
     }
 }
 
-// Adjust camera to see the entire route
+// Fit camera to view the route
 function fitCameraToRoute(points) {
     if (!points || points.length === 0) return;
 
-    // Calculate the center of the route
-    const center = new THREE.Vector3();
-    points.forEach(point => {
-        center.add(point);
-    });
-    center.divideScalar(points.length);
+    // Calculate bounding box
+    const box = new THREE.Box3();
+    points.forEach(point => box.expandByPoint(point));
 
-    // Position camera to look at the center from an angle
-    mapCamera.position.set(center.x + 5, center.y + 5, center.z + 5);
+    // Get the size of the bounding box
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+
+    // Set camera position to view the route
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const fov = mapCamera.fov * (Math.PI / 180);
+    const cameraDistance = maxDim / 2 / Math.tan(fov / 2);
+
+    mapCamera.position.copy(center);
+    mapCamera.position.y += cameraDistance * 0.5;
+    mapCamera.position.z += cameraDistance;
+
     mapCamera.lookAt(center);
+    mapControls.target.copy(center);
+    mapControls.update();
 }
 
-// Handle form login
-document.getElementById('login-form').addEventListener('submit', async function (e) {
-    e.preventDefault();
-
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-
-    try {
-        const response = await axios.post('/api/login/', {
-            username,
-            password
-        });
-
-        handleUserLogin(response.data);
-    } catch (error) {
-        alert('Invalid credentials');
-    }
-});
-
-// Handle logout
-document.getElementById('logout-btn').addEventListener('click', function () {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    document.getElementById('dashboard').classList.add('hidden');
-    document.getElementById('login-screen').classList.remove('hidden');
-});
-
-// Idle timer
-let idleTimer = null;
+// Idle timer functionality
+let idleTimer;
+const IDLE_TIME = 30000; // 30 seconds
 
 function startIdleTimer() {
-    if (idleTimer) {
-        clearTimeout(idleTimer);
-    }
-
+    clearTimeout(idleTimer);
     idleTimer = setTimeout(() => {
-        document.getElementById('logout-btn').click();
-    }, 180000); // 3 minutes
+        // Return to login screen
+        document.getElementById('dashboard').classList.add('hidden');
+        document.getElementById('login-screen').classList.remove('hidden');
+
+        // Clear stored tokens
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+
+        // Clear timetable
+        document.getElementById('timetable').innerHTML = '';
+        clearRoute();
+    }, IDLE_TIME);
 }
 
-// Reset idle timer on user activity
-document.addEventListener('mousemove', startIdleTimer);
-document.addEventListener('keypress', startIdleTimer);
+// Event Details Modal
+function createEventDetailsModal() {
+    // Check if modal already exists
+    if (document.getElementById('event-details-modal')) {
+        return;
+    }
+
+    const modalHTML = `
+        <div id="event-details-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-lg max-w-md w-full p-6 relative">
+                    <button id="modal-close-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                    
+                    <div class="mb-4">
+                        <h2 id="modal-event-title" class="text-xl font-bold text-gray-900 mb-2"></h2>
+                        <div id="modal-event-badges" class="flex gap-2 mb-3"></div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Time</h3>
+                                <p id="modal-event-time" class="text-sm text-gray-900"></p>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Date</h3>
+                                <p id="modal-event-date" class="text-sm text-gray-900"></p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500">Duration</h3>
+                            <p id="modal-event-duration" class="text-sm text-gray-900"></p>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Building</h3>
+                                <p id="modal-event-building" class="text-sm text-gray-900"></p>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Room</h3>
+                                <p id="modal-event-room" class="text-sm text-gray-900"></p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500">Course</h3>
+                            <p id="modal-event-course" class="text-sm text-gray-900"></p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500">Lecturer</h3>
+                            <p id="modal-event-lecturer" class="text-sm text-gray-900"></p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500">Description</h3>
+                            <p id="modal-event-description" class="text-sm text-gray-900"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex gap-3">
+                        <button id="modal-navigate-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium">
+                            Navigate to Room
+                        </button>
+                        <button id="modal-close-btn-2" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded text-sm font-medium">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Add event listeners
+    document.getElementById('modal-close-btn').addEventListener('click', closeEventDetailsModal);
+    document.getElementById('modal-close-btn-2').addEventListener('click', closeEventDetailsModal);
+    document.getElementById('modal-navigate-btn').addEventListener('click', navigateToEventLocation);
+
+    // Close on background click
+    document.getElementById('event-details-modal').addEventListener('click', function (e) {
+        if (e.target === this) {
+            closeEventDetailsModal();
+        }
+    });
+}
+
+function openEventDetailsModal(event) {
+    createEventDetailsModal();
+    populateEventModal(event);
+    const modal = document.getElementById('event-details-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('show');
+}
+
+function closeEventDetailsModal() {
+    const modal = document.getElementById('event-details-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('show');
+}
+
+function populateEventModal(event) {
+    // Set title
+    document.getElementById('modal-event-title').textContent = event.title || 'Event Details';
+
+    // Set badges
+    const badgesContainer = document.getElementById('modal-event-badges');
+    badgesContainer.innerHTML = '';
+
+    // Event type badge
+    const typeBadge = document.createElement('span');
+    typeBadge.className = event.event_type === 'exam' ?
+        'bg-orange-100 text-orange-800 text-xs font-medium px-2.5 py-0.5 rounded' :
+        'bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded';
+    typeBadge.textContent = event.event_type === 'exam' ? 'EXAM' : 'CLASS';
+    badgesContainer.appendChild(typeBadge);
+
+    // Urgent badge
+    if (event.is_urgent) {
+        const urgentBadge = document.createElement('span');
+        urgentBadge.className = 'bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded';
+        urgentBadge.textContent = 'URGENT';
+        badgesContainer.appendChild(urgentBadge);
+    }
+
+    // Set schedule information
+    const startTime = new Date(event.start_time);
+    const endTime = new Date(event.end_time);
+    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const timeOptions = { hour: '2-digit', minute: '2-digit' };
+
+    document.getElementById('modal-event-time').textContent =
+        `${startTime.toLocaleTimeString(undefined, timeOptions)} - ${endTime.toLocaleTimeString(undefined, timeOptions)}`;
+    document.getElementById('modal-event-date').textContent =
+        startTime.toLocaleDateString(undefined, dateOptions);
+
+    // Calculate duration
+    const durationMs = endTime.getTime() - startTime.getTime();
+    const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+    const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+    const durationText = durationHours > 0 ?
+        `${durationHours}h ${durationMinutes}m` :
+        `${durationMinutes}m`;
+    document.getElementById('modal-event-duration').textContent = durationText;
+
+    // Set location information
+    const building = event.room?.building || 'TBA';
+    const roomNumber = event.room?.number || 'TBA';
+    document.getElementById('modal-event-building').textContent = building;
+    document.getElementById('modal-event-room').textContent = roomNumber;
+
+    // Set course information
+    const courseCode = event.course?.code || 'N/A';
+    const courseName = event.course?.name || '';
+    const courseText = courseName ? `${courseCode} - ${courseName}` : courseCode;
+    document.getElementById('modal-event-course').textContent = courseText;
+    document.getElementById('modal-event-lecturer').textContent = event.lecturer || 'Not specified';
+
+    // Set description/additional info
+    const description = event.description || event.course?.description || 'No additional information available.';
+    document.getElementById('modal-event-description').textContent = description;
+
+    // Handle navigate button
+    const navigateBtn = document.getElementById('modal-navigate-btn');
+    if (event.room && event.room.building && event.room.number) {
+        navigateBtn.style.display = 'block';
+        navigateBtn.dataset.building = event.room.building;
+        navigateBtn.dataset.room = event.room.number;
+    } else {
+        navigateBtn.style.display = 'none';
+    }
+}
+
+function navigateToEventLocation() {
+    const navigateBtn = document.getElementById('modal-navigate-btn');
+    const building = navigateBtn.dataset.building;
+    const room = navigateBtn.dataset.room;
+
+    if (building && room) {
+        closeEventDetailsModal();
+        // Map building codes to building IDs for navigation
+        let buildingId = '';
+        switch (building.toUpperCase()) {
+            case 'ENG': buildingId = 'engineering'; break;
+            case 'SCI': buildingId = 'science'; break;
+            case 'LIB': buildingId = 'library'; break;
+            case 'BUS': buildingId = 'bizschool'; break;
+            case 'ARTS': buildingId = 'arts'; break;
+            case 'HSB': buildingId = 'health'; break;
+            default: buildingId = 'main';
+        }
+        console.log('Navigation to:', building, room, 'mapped to building:', buildingId);
+    }
+}
+
+// Keyboard event handler for modal
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('event-details-modal');
+        if (modal && modal.classList.contains('show')) {
+            closeEventDetailsModal();
+        }
+    }
+});
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function () {
     console.log("DOM loaded - initializing app");
+
+    // Initialize app components
     initWebSocket();
     initMap();
-
-    // Development mode detection
-    const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
     // Check if we have a stored token and try to auto-load the dashboard
     const token = localStorage.getItem('access_token');
@@ -463,42 +643,11 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch(error => {
                 console.error('Auto-login failed:', error);
-                // Fallback to loading sample data
-                renderTimetable([]);
+                // Show login screen if auto-login fails
+                document.getElementById('dashboard').classList.add('hidden');
+                document.getElementById('login-screen').classList.remove('hidden');
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
             });
-    } else if (isDevelopment) {
-        // If running in development mode, show demo data
-        console.log("Dev mode - showing sample data");
-        // Force-show dashboard in dev mode with sample data
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-        document.getElementById('user-name').textContent = "Demo User";
-
-        // Generate and display some demo data
-        const demoEvents = [
-            {
-                "id": 1,
-                "title": "ENGGEN205 Lecture",
-                "event_type": "class",
-                "course": { "code": "ENGGEN205", "name": "Engineering Mechanics" },
-                "room": { "building": "ENG", "number": "340" },
-                "start_time": new Date().toISOString(),
-                "end_time": new Date(Date.now() + 3600000).toISOString(),
-                "lecturer": "Dr. Smith",
-                "is_urgent": false
-            },
-            {
-                "id": 2,
-                "title": "STATS100 Mid-term Exam",
-                "event_type": "exam",
-                "course": { "code": "STATS100", "name": "Statistics" },
-                "room": { "building": "ENG", "number": "401" },
-                "start_time": new Date(Date.now() + 86400000).toISOString(),
-                "end_time": new Date(Date.now() + 86400000 + 7200000).toISOString(),
-                "lecturer": "N/A",
-                "is_urgent": true
-            }
-        ];
-        renderTimetable(demoEvents);
     }
 }); 

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Modal Test - Unimate</title>
+    <link rel="stylesheet" href="../static/site.css">
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .test-section {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background-color: #222;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .test-section h2 {
+            color: #3b82f6;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .test-section p {
+            color: #ccc;
+            margin-bottom: 1.5rem;
+        }
+
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .test-event {
+            background-color: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .test-event:hover {
+            background-color: #333;
+            border-color: #3b82f6;
+        }
+
+        .test-event.urgent {
+            border-color: #ef4444;
+            background-color: #2d1a1a;
+        }
+
+        .test-event.exam {
+            border-color: #f97316;
+            background-color: #2d2014;
+        }
+
+        .test-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .test-meta {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 0.25rem;
+        }
+
+        .test-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+        }
+
+        .badge-class {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .badge-exam {
+            background-color: #f97316;
+            color: white;
+        }
+
+        .badge-urgent {
+            background-color: #ef4444;
+            color: white;
+            margin-left: 0.5rem;
+        }
+
+        .modal-test-btn {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-right: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-test-btn:hover {
+            background-color: #2563eb;
+        }
+
+        .modal-test-btn.secondary {
+            background-color: #374151;
+            border: 1px solid #4b5563;
+        }
+
+        .modal-test-btn.secondary:hover {
+            background-color: #4b5563;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-container">
+        <h1>Event Details Modal System - Test Page</h1>
+
+        <div class="test-section">
+            <h2>🎯 Modal Functionality Tests</h2>
+            <p>Click any button below to test different modal scenarios:</p>
+
+            <button class="modal-test-btn" onclick="testClassEvent()">Regular Class Event</button>
+            <button class="modal-test-btn" onclick="testExamEvent()">Exam Event</button>
+            <button class="modal-test-btn" onclick="testUrgentEvent()">Urgent Event</button>
+            <button class="modal-test-btn" onclick="testEventWithNavigation()">Event with Navigation</button>
+            <button class="modal-test-btn" onclick="testEventMinimalData()">Minimal Data Event</button>
+            <button class="modal-test-btn secondary" onclick="testKeyboardClose()">Test ESC Key Close</button>
+        </div>
+
+        <div class="test-section">
+            <h2>📅 Sample Timetable Events</h2>
+            <p>These events simulate the main timetable functionality. Click any event to view details in the modal:</p>
+
+            <div class="event-grid">
+                <div class="test-event" data-event-type="class">
+                    <div class="test-title">ENGGEN205 Lecture</div>
+                    <div class="test-meta">Engineering Design • ENG 201</div>
+                    <div class="test-meta">Today 9:00 AM - 10:30 AM</div>
+                    <div class="test-meta">Prof. Sarah Johnson</div>
+                    <span class="test-badge badge-class">CLASS</span>
+                </div>
+
+                <div class="test-event exam" data-event-type="exam">
+                    <div class="test-title">COMPSCI220 Final Exam</div>
+                    <div class="test-meta">Data Structures & Algorithms • SCI 105</div>
+                    <div class="test-meta">Tomorrow 2:00 PM - 5:00 PM</div>
+                    <div class="test-meta">Dr. Michael Chen</div>
+                    <span class="test-badge badge-exam">EXAM</span>
+                </div>
+
+                <div class="test-event urgent" data-event-type="class">
+                    <div class="test-title">URGENT: Schedule Change</div>
+                    <div class="test-meta">MATHS150 Tutorial • LIB 301</div>
+                    <div class="test-meta">Today 3:00 PM - 4:00 PM</div>
+                    <div class="test-meta">Dr. Emma Wilson</div>
+                    <span class="test-badge badge-class">CLASS</span>
+                    <span class="test-badge badge-urgent">URGENT</span>
+                </div>
+
+                <div class="test-event" data-event-type="class">
+                    <div class="test-title">PHYSICS201 Lab Session</div>
+                    <div class="test-meta">Quantum Mechanics Lab • ENG 301</div>
+                    <div class="test-meta">Monday 10:00 AM - 1:00 PM</div>
+                    <div class="test-meta">Prof. David Kim</div>
+                    <span class="test-badge badge-class">CLASS</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎪 Campus Events</h2>
+            <p>These represent campus-wide events and activities:</p>
+
+            <div class="event-grid">
+                <div class="test-event" data-event-type="event">
+                    <div class="test-title">Tech Week Exhibition</div>
+                    <div class="test-meta">Engineering Building Atrium</div>
+                    <div class="test-meta">May 25-27, 9:00 AM - 5:00 PM</div>
+                    <div class="test-meta">Student Innovation Showcase</div>
+                </div>
+
+                <div class="test-event" data-event-type="event">
+                    <div class="test-title">Guest Lecture: AI Ethics</div>
+                    <div class="test-meta">Lecture Theatre 4</div>
+                    <div class="test-meta">June 1, 2:00 PM - 3:30 PM</div>
+                    <div class="test-meta">Prof. Maria Rodriguez (Stanford)</div>
+                </div>
+
+                <div class="test-event urgent" data-event-type="event">
+                    <div class="test-title">URGENT: Library Closure</div>
+                    <div class="test-meta">Central Library</div>
+                    <div class="test-meta">Today 5:00 PM - Tomorrow 8:00 AM</div>
+                    <div class="test-meta">Emergency maintenance</div>
+                    <span class="test-badge badge-urgent">URGENT</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔧 Modal Features</h2>
+            <p>Features implemented in the modal system:</p>
+            <ul style="color: #ccc; line-height: 1.6;">
+                <li>✅ Event type badges (CLASS/EXAM)</li>
+                <li>✅ Urgent event indicators</li>
+                <li>✅ Comprehensive event details display</li>
+                <li>✅ Building and room information</li>
+                <li>✅ Course and lecturer details</li>
+                <li>✅ Navigation functionality</li>
+                <li>✅ Click outside to close</li>
+                <li>✅ ESC key to close</li>
+                <li>✅ Responsive design</li>
+                <li>✅ Dark theme integration</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Include the main app.js for modal functionality -->
+    <script src="../static/js/app.js"></script>
+
+    <script>
+        // Test functions for manual modal testing
+        function testClassEvent() {
+            const event = {
+                id: 'test-class-1',
+                title: 'ENGGEN205 Engineering Design',
+                event_type: 'class',
+                is_urgent: false,
+                start_time: new Date('2025-05-24T09:00:00').toISOString(),
+                end_time: new Date('2025-05-24T10:30:00').toISOString(),
+                course: {
+                    code: 'ENGGEN205',
+                    name: 'Engineering Design Fundamentals'
+                },
+                room: {
+                    building: 'ENG',
+                    number: '201'
+                },
+                lecturer: 'Prof. Sarah Johnson',
+                description: 'Introduction to engineering design principles, covering problem-solving methodologies, design thinking, and project management techniques essential for modern engineering practice.'
+            };
+            openEventDetailsModal(event);
+        }
+
+        function testExamEvent() {
+            const event = {
+                id: 'test-exam-1',
+                title: 'COMPSCI220 Final Examination',
+                event_type: 'exam',
+                is_urgent: false,
+                start_time: new Date('2025-05-25T14:00:00').toISOString(),
+                end_time: new Date('2025-05-25T17:00:00').toISOString(),
+                course: {
+                    code: 'COMPSCI220',
+                    name: 'Data Structures and Algorithms'
+                },
+                room: {
+                    building: 'SCI',
+                    number: '105'
+                },
+                lecturer: 'Dr. Michael Chen',
+                description: 'Comprehensive final examination covering all course material including trees, graphs, sorting algorithms, dynamic programming, and computational complexity analysis.'
+            };
+            openEventDetailsModal(event);
+        }
+
+        function testUrgentEvent() {
+            const event = {
+                id: 'test-urgent-1',
+                title: 'URGENT: Class Venue Changed',
+                event_type: 'class',
+                is_urgent: true,
+                start_time: new Date('2025-05-24T15:00:00').toISOString(),
+                end_time: new Date('2025-05-24T16:00:00').toISOString(),
+                course: {
+                    code: 'MATHS150',
+                    name: 'Calculus and Linear Algebra'
+                },
+                room: {
+                    building: 'LIB',
+                    number: '301'
+                },
+                lecturer: 'Dr. Emma Wilson',
+                description: 'IMPORTANT: Due to maintenance work, this tutorial has been moved from MATHS 201 to LIBRARY 301. Please ensure you attend at the new location.'
+            };
+            openEventDetailsModal(event);
+        }
+
+        function testEventWithNavigation() {
+            const event = {
+                id: 'test-nav-1',
+                title: 'PHYSICS201 Quantum Lab',
+                event_type: 'class',
+                is_urgent: false,
+                start_time: new Date('2025-05-26T10:00:00').toISOString(),
+                end_time: new Date('2025-05-26T13:00:00').toISOString(),
+                course: {
+                    code: 'PHYSICS201',
+                    name: 'Quantum Mechanics Laboratory'
+                },
+                room: {
+                    building: 'ENG',
+                    number: '301'
+                },
+                lecturer: 'Prof. David Kim',
+                description: 'Hands-on laboratory session exploring quantum mechanical phenomena through carefully designed experiments. Students will work with quantum tunneling, wave-particle duality, and entanglement setups.'
+            };
+            openEventDetailsModal(event);
+        }
+
+        function testEventMinimalData() {
+            const event = {
+                id: 'test-minimal-1',
+                title: 'Basic Event',
+                event_type: 'class',
+                is_urgent: false,
+                start_time: new Date().toISOString(),
+                end_time: new Date(Date.now() + 3600000).toISOString()
+            };
+            openEventDetailsModal(event);
+        }
+
+        function testKeyboardClose() {
+            testClassEvent();
+            setTimeout(() => {
+                alert('Modal opened! Now press ESC key to test keyboard close functionality.');
+            }, 500);
+        }
+
+        // Add click handlers to test events
+        document.addEventListener('DOMContentLoaded', function () {
+            const testEvents = document.querySelectorAll('.test-event');
+            testEvents.forEach((eventElement, index) => {
+                eventElement.addEventListener('click', function () {
+                    const title = eventElement.querySelector('.test-title').textContent;
+                    const isUrgent = eventElement.classList.contains('urgent');
+                    const isExam = eventElement.classList.contains('exam');
+                    const eventType = isExam ? 'exam' : 'class';
+
+                    // Extract details from the event element
+                    const metaElements = eventElement.querySelectorAll('.test-meta');
+                    const courseInfo = metaElements[0]?.textContent.split(' • ') || ['Unknown', 'TBA'];
+                    const timeInfo = metaElements[1]?.textContent || 'Time TBA';
+                    const lecturerInfo = metaElements[2]?.textContent || 'Lecturer TBA';
+
+                    const event = {
+                        id: `test-${index}`,
+                        title: title,
+                        event_type: eventType,
+                        is_urgent: isUrgent,
+                        start_time: new Date().toISOString(),
+                        end_time: new Date(Date.now() + 3600000).toISOString(),
+                        course: {
+                            code: courseInfo[0]?.split(' ')[0] || 'DEMO101',
+                            name: courseInfo[0] || 'Demo Course'
+                        },
+                        room: {
+                            building: courseInfo[1]?.split(' ')[0] || 'DEMO',
+                            number: courseInfo[1]?.split(' ')[1] || '101'
+                        },
+                        lecturer: lecturerInfo,
+                        description: `This is a demonstration of the ${title} event. The modal system displays comprehensive event information including course details, scheduling, and location information.`
+                    };
+
+                    openEventDetailsModal(event);
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

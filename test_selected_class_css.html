@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Selected Class CSS</title>
+    <style>
+        body {
+            background-color: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Copy relevant styles from dashboard.html */
+        .timetable-item {
+            background-color: #1a1a1a;
+            border-radius: 4px;
+            padding: 0.75rem;
+            border-left: 4px solid #3b82f6;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .timetable-item:hover {
+            background-color: #252525;
+        }
+
+        .timetable-item.exam {
+            border-left-color: #f97316;
+        }
+
+        .timetable-item.urgent {
+            border: 1px solid #ef4444;
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Selected timetable item styling for class navigation */
+        .timetable-item.selected {
+            background-color: #1f3a93 !important;
+            border-left-color: #60a5fa !important;
+            color: white !important;
+        }
+
+        .timetable-item.selected .timetable-title {
+            color: white;
+        }
+
+        .timetable-item.selected .timetable-info {
+            color: #e5e7eb;
+        }
+
+        .timetable-title {
+            font-weight: 500;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .timetable-info {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+        }
+
+        .test-label {
+            color: #60a5fa;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .toggle-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .toggle-btn:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-container">
+        <h1>🎯 Selected Class CSS Test</h1>
+
+        <div class="test-section">
+            <span class="test-label">1. Normal Class (Default)</span>
+            <div class="timetable-item" id="normal-class">
+                <div class="timetable-title">Advanced Algorithms</div>
+                <div class="timetable-info">
+                    <div>CS301 - Main Building Room 101</div>
+                    <div>09:00 - 10:30</div>
+                    <div>Lecturer: Prof. Smith</div>
+                </div>
+            </div>
+            <button class="toggle-btn" onclick="toggleSelection('normal-class')">Toggle Selection</button>
+        </div>
+
+        <div class="test-section">
+            <span class="test-label">2. Exam Class + Selected</span>
+            <div class="timetable-item exam selected" id="exam-class">
+                <div class="timetable-title">Data Structures Final Exam</div>
+                <div class="timetable-info">
+                    <div>CS201 - Science Block Room 201</div>
+                    <div>14:00 - 16:00</div>
+                    <div>Lecturer: Prof. Johnson</div>
+                </div>
+            </div>
+            <button class="toggle-btn" onclick="toggleSelection('exam-class')">Toggle Selection</button>
+        </div>
+
+        <div class="test-section">
+            <span class="test-label">3. Urgent Class + Selected</span>
+            <div class="timetable-item urgent selected" id="urgent-class">
+                <div class="timetable-title">Machine Learning Lab</div>
+                <div class="timetable-info">
+                    <div>CS401 - Engineering Building Room 401</div>
+                    <div>16:30 - 18:00</div>
+                    <div>Lecturer: Dr. Brown</div>
+                </div>
+            </div>
+            <button class="toggle-btn" onclick="toggleSelection('urgent-class')">Toggle Selection</button>
+        </div>
+
+        <div class="test-section">
+            <span class="test-label">4. Multiple Classes (Test Specificity)</span>
+            <div class="timetable-item" id="class1">
+                <div class="timetable-title">Database Systems</div>
+                <div class="timetable-info">
+                    <div>CS302 - Library Room 301</div>
+                    <div>11:00 - 12:30</div>
+                    <div>Lecturer: Prof. Davis</div>
+                </div>
+            </div>
+            <div class="timetable-item selected" id="class2">
+                <div class="timetable-title">Software Engineering</div>
+                <div class="timetable-info">
+                    <div>CS303 - Business School Room 501</div>
+                    <div>13:30 - 15:00</div>
+                    <div>Lecturer: Dr. Wilson</div>
+                </div>
+            </div>
+            <div class="timetable-item" id="class3">
+                <div class="timetable-title">Computer Networks</div>
+                <div class="timetable-info">
+                    <div>CS304 - Student Center Room 601</div>
+                    <div>15:30 - 17:00</div>
+                    <div>Lecturer: Prof. Miller</div>
+                </div>
+            </div>
+            <button class="toggle-btn" onclick="selectOnly('class1')">Select Class 1</button>
+            <button class="toggle-btn" onclick="selectOnly('class2')">Select Class 2</button>
+            <button class="toggle-btn" onclick="selectOnly('class3')">Select Class 3</button>
+            <button class="toggle-btn" onclick="clearAllSelections()">Clear All</button>
+        </div>
+
+        <div class="test-section">
+            <span class="test-label">✅ Expected Results:</span>
+            <ul style="color: #e5e7eb; line-height: 1.6;">
+                <li><strong>Selected classes:</strong> Blue background (#1f3a93), light blue left border (#60a5fa)</li>
+                <li><strong>Text color:</strong> Title should be white, info should be light gray (#e5e7eb)</li>
+                <li><strong>Priority:</strong> Selected styling should override exam and urgent classes</li>
+                <li><strong>Hover:</strong> Selected classes should not change color on hover due to !important</li>
+                <li><strong>Transitions:</strong> Should maintain smooth transitions when toggling</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function toggleSelection(elementId) {
+            const element = document.getElementById(elementId);
+            element.classList.toggle('selected');
+        }
+
+        function selectOnly(selectedId) {
+            // Clear all selections first
+            clearAllSelections();
+            // Select only the specified element
+            document.getElementById(selectedId).classList.add('selected');
+        }
+
+        function clearAllSelections() {
+            const allItems = document.querySelectorAll('.timetable-item');
+            allItems.forEach(item => {
+                item.classList.remove('selected');
+            });
+        }
+
+        // Test on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('🧪 CSS Test Loaded - Ready for testing selected class styling');
+        });
+    </script>
+</body>
+
+</html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Selected Class CSS</title>
+    <style>
+        body {
+            background-color: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Copy relevant styles from dashboard.html */
+        .timetable-item {
+            background-color: #1a1a1a;
+            border-radius: 4px;
+            padding: 0.75rem;
+            border-left: 4px solid #3b82f6;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .timetable-item:hover {
+            background-color: #252525;
+        }
+
+        .timetable-item.exam {
+            border-left-color: #f97316;
+        }
+
+        .timetable-item.urgent {
+            border: 1px solid #ef4444;
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Selected timetable item styling for class navigation */
+        .timetable-item.selected {
+            background-color: #1f3a93 !important;
+            border-left-color: #60a5fa !important;
+            color: white !important;
+        }
+
+        .timetable-item.selected .timetable-title {
+            color: white;
+        }
+
+        .timetable-item.selected .timetable-info {
+            color: #e5e7eb;
+        }
+
+        .timetable-title {
+            font-weight: 500;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .timetable-info {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+        }
+
+        .test-label {
+            color: #60a5fa;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .toggle-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .toggle-btn:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-container">
+        <h1>🎯 Selected Class CSS Test</h1>
+
+        <div class="test-section">
+            <span class="test-label">1. Normal Class (Default)</span>
+            <div class="timetable-item" id="normal-class">
+                <div class="timetable-title">Advanced Algorithms</div>
+                <div class="timetable-info">
+                    <div>CS301 - Main Building Room 101</div>
+                    <div>09:00 - 10:30</div>
+                    <div>Lecturer: Prof. Smith</div>
+                </div>
+            </div>
+            <button class="toggle-btn" onclick="toggleSelection('normal-class')">Toggle Selection</button>
+        </div>
+
+        <div class="test-section">
+            <span class="test-label">2. Exam Class + Selected</span>
+            <div class="timetable-item exam selected" id="exam-class">
+                <div class="timetable-title">Data Structures Final Exam</div>
+                <div class="timetable-info">
+                    <div>CS201 - Science Block Room 201</div>
+                    <div>14:00 - 16:00</div>
+                    <div>Lecturer: Prof. Johnson</div>
+                </div>
+            </div>
+            <button class="toggle-btn" onclick="toggleSelection('exam-class')">Toggle Selection</button>
+        </div>
+
+        <div class="test-section">
+            <span class="test-label">3. Urgent Class + Selected</span>
+            <div class="timetable-item urgent selected" id="urgent-class">
+                <div class="timetable-title">Machine Learning Lab</div>
+                <div class="timetable-info">
+                    <div>CS401 - Engineering Building Room 401</div>
+                    <div>16:30 - 18:00</div>
+                    <div>Lecturer: Dr. Brown</div>
+                </div>
+            </div>
+            <button class="toggle-btn" onclick="toggleSelection('urgent-class')">Toggle Selection</button>
+        </div>
+
+        <div class="test-section">
+            <span class="test-label">4. Multiple Classes (Test Specificity)</span>
+            <div class="timetable-item" id="class1">
+                <div class="timetable-title">Database Systems</div>
+                <div class="timetable-info">
+                    <div>CS302 - Library Room 301</div>
+                    <div>11:00 - 12:30</div>
+                    <div>Lecturer: Prof. Davis</div>
+                </div>
+            </div>
+            <div class="timetable-item selected" id="class2">
+                <div class="timetable-title">Software Engineering</div>
+                <div class="timetable-info">
+                    <div>CS303 - Business School Room 501</div>
+                    <div>13:30 - 15:00</div>
+                    <div>Lecturer: Dr. Wilson</div>
+                </div>
+            </div>
+            <div class="timetable-item" id="class3">
+                <div class="timetable-title">Computer Networks</div>
+                <div class="timetable-info">
+                    <div>CS304 - Student Center Room 601</div>
+                    <div>15:30 - 17:00</div>
+                    <div>Lecturer: Prof. Miller</div>
+                </div>
+            </div>
+            <button class="toggle-btn" onclick="selectOnly('class1')">Select Class 1</button>
+            <button class="toggle-btn" onclick="selectOnly('class2')">Select Class 2</button>
+            <button class="toggle-btn" onclick="selectOnly('class3')">Select Class 3</button>
+            <button class="toggle-btn" onclick="clearAllSelections()">Clear All</button>
+        </div>
+
+        <div class="test-section">
+            <span class="test-label">✅ Expected Results:</span>
+            <ul style="color: #e5e7eb; line-height: 1.6;">
+                <li><strong>Selected classes:</strong> Blue background (#1f3a93), light blue left border (#60a5fa)</li>
+                <li><strong>Text color:</strong> Title should be white, info should be light gray (#e5e7eb)</li>
+                <li><strong>Priority:</strong> Selected styling should override exam and urgent classes</li>
+                <li><strong>Hover:</strong> Selected classes should not change color on hover due to !important</li>
+                <li><strong>Transitions:</strong> Should maintain smooth transitions when toggling</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function toggleSelection(elementId) {
+            const element = document.getElementById(elementId);
+            element.classList.toggle('selected');
+        }
+
+        function selectOnly(selectedId) {
+            // Clear all selections first
+            clearAllSelections();
+            // Select only the specified element
+            document.getElementById(selectedId).classList.add('selected');
+        }
+
+        function clearAllSelections() {
+            const allItems = document.querySelectorAll('.timetable-item');
+            allItems.forEach(item => {
+                item.classList.remove('selected');
+            });
+        }
+
+        // Test on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('🧪 CSS Test Loaded - Ready for testing selected class styling');
+        });
+    </script>
+</body>
+
+</html>

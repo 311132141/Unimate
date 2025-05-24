@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
         integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- Modal styles and functionality will be included inline -->
     <style>
         /* Base styles from map_offline.html */
         body {
@@ -457,6 +458,175 @@
             display: none !important;
         }
 
+        /* Event Details Modal Styles */
+        .event-details-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .event-details-modal.show {
+            display: flex;
+        }
+
+        .event-details-content {
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .event-details-header {
+            padding: 1.5rem 1.5rem 0 1.5rem;
+            border-bottom: 1px solid #333;
+            margin-bottom: 1.5rem;
+        }
+
+        .event-details-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .event-details-close:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .event-details-title {
+            color: #fff;
+            margin: 0 2rem 1rem 0;
+            font-size: 1.5rem;
+        }
+
+        .event-details-type {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .event-details-type.exam {
+            background-color: #f97316;
+        }
+
+        .event-details-urgent {
+            background-color: #ef4444;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .event-details-body {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+        }
+
+        .event-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .event-details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .event-details-section h4 {
+            color: #fff;
+            margin: 0 0 1rem 0;
+            font-size: 1rem;
+        }
+
+        .event-details-field {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .event-details-icon {
+            width: 24px;
+            margin-right: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .event-details-value {
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        .event-details-description {
+            color: #ccc;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-top: 0.5rem;
+        }
+
+        .event-details-actions {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #333;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .event-details-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .event-details-btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .event-details-btn-primary:hover {
+            background-color: #2563eb;
+        }
+
+        .event-details-btn-secondary {
+            background-color: #444;
+            color: #ccc;
+        }
+
+        .event-details-btn-secondary:hover {
+            background-color: #555;
+            color: #fff;
+        }
+
         /* Print styles adapted for dark theme */
         @media print {
             body {
@@ -608,13 +778,23 @@
         </div>
     </div>
 
-    <div class="login-modal" id="login-modal">
-        <h2>Login</h2>
-        <form class="login-form" id="login-form">
-            <input type="text" placeholder="Username" id="username" required>
-            <input type="password" placeholder="Password" id="password" required>
-            <button type="submit">Login</button>
-        </form>
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="login-modal" style="display: none;">
+        <div class="login-container">
+            <h2 class="login-title">Login to Unimate</h2>
+            <p class="login-subtitle">Enter your credentials to access the dashboard</p>
+            <form class="login-form" id="login-form">
+                <div class="form-group">
+                    <input type="text" class="form-input" placeholder="Username" id="username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-input" placeholder="Password" id="password" required>
+                </div>
+                <button type="submit" class="modal-button modal-button-primary">Login</button>
+                <button type="button" class="modal-button modal-button-secondary"
+                    onclick="document.getElementById('login-modal').style.display='none'">Cancel</button>
+            </form>
+        </div>
     </div>
 
     <!-- Add WebSocket test UI -->
@@ -639,12 +819,17 @@
         // Initialize WebSocket for card scanning notifications
         let ws = null;
         let reconnectAttempts = 0;
-        const maxReconnectAttempts = 5;
+        const maxReconnectAttempts = 2; // Reduced for local development
 
         function connectWebSocket() {
             // Connect to the WebSocket server for kiosk notifications
             const kioskId = "test-kiosk-1";  // Always use the same kiosk ID as in your ESP32 code
-            const wsUrl = `ws://192.168.20.22:8000/ws/kiosk/${kioskId}/`;
+
+            // Use localhost for development, or the specific IP for production
+            const host = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'localhost'
+                : '192.168.20.22';
+            const wsUrl = `ws://${host}:8000/ws/kiosk/${kioskId}/`;
 
             console.log("Connecting to WebSocket at:", wsUrl);
 
@@ -712,14 +897,14 @@
             };
 
             ws.onerror = function (error) {
-                console.error("WebSocket error:", error);
-                addToWsLog('<span style="color:red">WebSocket error</span>');
+                console.warn("WebSocket connection failed (this is normal for local development):", error);
+                addToWsLog('<span style="color:orange">WebSocket connection failed - RFID features disabled</span>');
                 updateWsStatus();
 
                 const wsStatus = document.getElementById('ws-status');
                 if (wsStatus) {
-                    wsStatus.style.backgroundColor = 'red';
-                    wsStatus.textContent = 'WebSocket Error';
+                    wsStatus.style.backgroundColor = 'orange';
+                    wsStatus.textContent = 'WebSocket Offline (Local Dev)';
                 }
             };
 
@@ -740,9 +925,10 @@
                     console.log(`Attempting to reconnect in ${delay / 1000} seconds (attempt ${reconnectAttempts}/${maxReconnectAttempts})...`);
                     setTimeout(connectWebSocket, delay);
                 } else {
-                    console.error("Maximum reconnection attempts reached. Please refresh the page.");
+                    console.log("WebSocket connection unavailable - RFID features will be disabled for this session.");
                     if (wsStatus) {
-                        wsStatus.textContent = 'WebSocket Failed - Refresh Page';
+                        wsStatus.textContent = 'RFID Offline (Local Mode)';
+                        wsStatus.style.backgroundColor = '#6b7280'; // Gray color for inactive
                     }
                 }
             };
@@ -788,7 +974,7 @@
 
         // Show login modal
         document.getElementById('login-button').addEventListener('click', function () {
-            document.getElementById('login-modal').style.display = 'block';
+            document.getElementById('login-modal').style.display = 'flex';
         });
 
         // Handle login form submission
@@ -821,10 +1007,9 @@
         });
 
         // Close modal when clicking outside
-        window.addEventListener('click', function (e) {
-            const modal = document.getElementById('login-modal');
-            if (e.target === modal) {
-                modal.style.display = 'none';
+        document.getElementById('login-modal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                this.style.display = 'none';
             }
         });
 
@@ -909,10 +1094,206 @@
             handleUserLogin(mockLoginData.message);
         }
 
+        // Event Details Modal Functions
+        function createEventDetailsModal() {
+            const modal = document.createElement('div');
+            modal.id = 'event-details-modal';
+            modal.className = 'event-details-modal';
+            modal.innerHTML = `
+                <div class="event-details-content">
+                    <div class="event-details-header">
+                        <button class="event-details-close" onclick="closeEventDetailsModal()">&times;</button>
+                        <h2 class="event-details-title" id="modal-event-title"></h2>
+                        <div id="modal-event-badges"></div>
+                    </div>
+                    <div class="event-details-body">
+                        <div class="event-details-grid">
+                            <div class="event-details-section">
+                                <h4>📅 Schedule</h4>
+                                <div class="event-details-field">
+                                    <span class="event-details-icon">🕐</span>
+                                    <span id="modal-event-time" class="event-details-value"></span>
+                                </div>
+                                <div class="event-details-field">
+                                    <span class="event-details-icon">📅</span>
+                                    <span id="modal-event-date" class="event-details-value"></span>
+                                </div>
+                                <div class="event-details-field">
+                                    <span class="event-details-icon">⏱️</span>
+                                    <span id="modal-event-duration" class="event-details-value"></span>
+                                </div>
+                            </div>
+                            <div class="event-details-section">
+                                <h4>📍 Location</h4>
+                                <div class="event-details-field">
+                                    <span class="event-details-icon">🏢</span>
+                                    <span id="modal-event-building" class="event-details-value"></span>
+                                </div>
+                                <div class="event-details-field">
+                                    <span class="event-details-icon">🚪</span>
+                                    <span id="modal-event-room" class="event-details-value"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="event-details-grid">
+                            <div class="event-details-section">
+                                <h4>📚 Course Information</h4>
+                                <div class="event-details-field">
+                                    <span class="event-details-icon">📖</span>
+                                    <span id="modal-event-course" class="event-details-value"></span>
+                                </div>
+                                <div class="event-details-field">
+                                    <span class="event-details-icon">👨‍🏫</span>
+                                    <span id="modal-event-lecturer" class="event-details-value"></span>
+                                </div>
+                            </div>
+                            <div class="event-details-section">
+                                <h4>ℹ️ Additional Information</h4>
+                                <div id="modal-event-description" class="event-details-description"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="event-details-actions">
+                        <button class="event-details-btn event-details-btn-secondary" onclick="closeEventDetailsModal()">Close</button>
+                    </div>
+                </div>
+            `;
+
+            // Add click outside to close
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) {
+                    closeEventDetailsModal();
+                }
+            });
+
+            // Add ESC key to close
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    closeEventDetailsModal();
+                }
+            });
+
+            document.body.appendChild(modal);
+            return modal;
+        }
+
+        function showEventDetails(event) {
+            let modal = document.getElementById('event-details-modal');
+            if (!modal) {
+                modal = createEventDetailsModal();
+            }
+
+            // Populate modal with event data
+            populateEventModal(event);
+
+            // Show modal
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeEventDetailsModal() {
+            const modal = document.getElementById('event-details-modal');
+            if (modal) {
+                modal.classList.remove('show');
+                document.body.style.overflow = ''; // Restore scrolling
+            }
+        }
+
+        function populateEventModal(event) {
+            // Format dates and times
+            const startTime = new Date(event.start_time);
+            const endTime = new Date(event.end_time);
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit' };
+
+            // Calculate duration
+            const durationMs = endTime.getTime() - startTime.getTime();
+            const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+            const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+            const durationText = durationHours > 0 ?
+                `${durationHours}h ${durationMinutes}m` :
+                `${durationMinutes}m`;
+
+            // Set title
+            document.getElementById('modal-event-title').textContent = event.title || 'Untitled Event';
+
+            // Set badges
+            const badgesContainer = document.getElementById('modal-event-badges');
+            badgesContainer.innerHTML = '';
+
+            // Event type badge
+            const typeBadge = document.createElement('span');
+            typeBadge.className = `event-details-type ${event.event_type || 'class'}`;
+            typeBadge.textContent = event.event_type === 'exam' ? 'EXAM' : 'EVENT';
+            badgesContainer.appendChild(typeBadge);
+
+            // Urgent badge
+            if (event.is_urgent) {
+                const urgentBadge = document.createElement('span');
+                urgentBadge.className = 'event-details-urgent';
+                urgentBadge.textContent = 'URGENT';
+                badgesContainer.appendChild(urgentBadge);
+            }
+
+            // Set schedule information
+            document.getElementById('modal-event-time').textContent =
+                `${startTime.toLocaleTimeString(undefined, timeOptions)} - ${endTime.toLocaleTimeString(undefined, timeOptions)}`;
+            document.getElementById('modal-event-date').textContent =
+                startTime.toLocaleDateString(undefined, dateOptions);
+            document.getElementById('modal-event-duration').textContent = durationText;
+
+            // Set location information
+            const building = event.room?.building || 'TBA';
+            const roomNumber = event.room?.number || 'TBA';
+            document.getElementById('modal-event-building').textContent = building;
+            document.getElementById('modal-event-room').textContent = roomNumber;
+
+            // Set course information
+            const courseCode = event.course?.code || 'N/A';
+            const courseName = event.course?.name || '';
+            const courseText = courseName ? `${courseCode} - ${courseName}` : courseCode;
+            document.getElementById('modal-event-course').textContent = courseText;
+            document.getElementById('modal-event-lecturer').textContent = event.lecturer || 'Not specified';
+
+            // Set description
+            document.getElementById('modal-event-description').textContent = event.description || 'No additional information available.';
+        }
+
+        // Initialize event click handlers
+        function initEventHandlers() {
+            // Add click handlers to all event items
+            const eventItems = document.querySelectorAll('.event-item');
+            eventItems.forEach((item, index) => {
+                // Create mock event data for demonstration
+                const eventData = {
+                    id: index + 1,
+                    title: item.querySelector('.event-title').textContent,
+                    event_type: "event",
+                    course: { code: "TECH101", name: "Technology Events" },
+                    room: { building: "MAIN", number: "101" },
+                    start_time: new Date().toISOString(),
+                    end_time: new Date(Date.now() + 3600000).toISOString(),
+                    lecturer: "Event Organizer",
+                    description: "This is a detailed description of the tech event. Join us for an exciting exploration of the latest technology trends and innovations in the field.",
+                    is_urgent: false
+                };
+
+                // Store event data in the element
+                item.dataset.eventData = JSON.stringify(eventData);
+
+                // Add click handler
+                item.addEventListener('click', function () {
+                    console.log('Event clicked:', eventData.title);
+                    showEventDetails(eventData);
+                });
+            });
+        }
+
         // Initialize when page loads
         window.addEventListener('load', function () {
             initMap();
             connectWebSocket(); // Connect to WebSocket server for card scan events
+            initEventHandlers(); // Initialize event click handlers
 
             // Check if user is already logged in
             const token = localStorage.getItem('access_token');
@@ -922,6 +1303,390 @@
             }
         });
     </script>
+</body>
+
+</html>
+console.log("WebSocket connection unavailable - RFID features will be disabled for this session.");
+if (wsStatus) {
+wsStatus.textContent = 'RFID Offline (Local Mode)';
+wsStatus.style.backgroundColor = '#6b7280'; // Gray color for inactive
+}
+}
+};
+}
+
+// Handle user login from card scan
+function handleUserLogin(userData) {
+console.log("%cHandling user login with data:", "color: green; font-weight: bold", userData);
+
+// Store authentication data
+if (userData.access) {
+console.log("Storing access token");
+localStorage.setItem('access_token', userData.access);
+}
+if (userData.refresh) {
+console.log("Storing refresh token");
+localStorage.setItem('refresh_token', userData.refresh);
+}
+if (userData.user && userData.user.username) {
+console.log("Storing username:", userData.user.username);
+localStorage.setItem('username', userData.user.username);
+}
+
+// Redirect to dashboard
+console.log("Redirecting to dashboard.html");
+window.location.href = '../views/dashboard.html';
+}
+
+// Initialize Map (placeholder for now)
+function initMap() {
+const mapContainer = document.getElementById('map-container');
+
+// Use an iframe to show a Google Maps view for now
+// This is just for demonstration. In production, use the Three.js map or Google Maps API
+const iframe = document.createElement('iframe');
+iframe.src =
+'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5587.867820291437!2d174.76568619358058!3d-36.85292772229561!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6d0d47fb5a9ce6fb%3A0x500ef6143a29917!2sThe%20University%20of%20Auckland!5e0!3m2!1sen!2snz!4v1593482149224!5m2!1sen!2snz';
+iframe.width = '100%';
+iframe.height = '100%';
+iframe.style.border = '0';
+iframe.allowFullscreen = true;
+mapContainer.appendChild(iframe);
+}
+
+// Show login modal
+document.getElementById('login-button').addEventListener('click', function () {
+document.getElementById('login-modal').style.display = 'flex';
+});
+
+// Handle login form submission
+document.getElementById('login-form').addEventListener('submit', function (e) {
+e.preventDefault();
+const username = document.getElementById('username').value;
+const password = document.getElementById('password').value;
+
+// Placeholder for authentication logic
+console.log('Login attempt with:', username);
+
+// Here you would typically call your authentication API
+// For demo purposes, simulate a successful login with mock data
+const mockLoginResponse = {
+access: "mock_access_token_" + Math.random(),
+refresh: "mock_refresh_token_" + Math.random(),
+user: { username: username }
+};
+
+// Store authentication data
+localStorage.setItem('access_token', mockLoginResponse.access);
+localStorage.setItem('refresh_token', mockLoginResponse.refresh);
+localStorage.setItem('username', username);
+
+// Hide the modal
+document.getElementById('login-modal').style.display = 'none';
+
+// Redirect to dashboard
+window.location.href = '../views/dashboard.html';
+});
+
+// Close modal when clicking outside
+document.getElementById('login-modal').addEventListener('click', function (e) {
+if (e.target === this) {
+this.style.display = 'none';
+}
+});
+
+// WebSocket testing functionality
+document.getElementById('test-ws-button').addEventListener('click', function () {
+document.getElementById('ws-test-panel').style.display = 'block';
+updateWsStatus();
+});
+
+document.getElementById('close-ws-panel').addEventListener('click', function () {
+document.getElementById('ws-test-panel').style.display = 'none';
+});
+
+document.getElementById('send-test-msg').addEventListener('click', function () {
+if (ws && ws.readyState === WebSocket.OPEN) {
+const testMsg = JSON.stringify({
+type: 'test',
+message: 'Test message from kiosk',
+timestamp: new Date().toISOString()
+});
+
+ws.send(testMsg);
+addToWsLog('Sent: ' + testMsg);
+} else {
+addToWsLog('ERROR: WebSocket not connected');
+updateWsStatus();
+}
+});
+
+document.getElementById('simulate-scan').addEventListener('click', function () {
+addToWsLog('Simulating card scan...');
+simulateCardScan();
+});
+
+function updateWsStatus() {
+const statusEl = document.getElementById('ws-connection-status');
+if (!ws) {
+statusEl.innerHTML = '<span style="color:red">Not connected</span>';
+return;
+}
+
+switch (ws.readyState) {
+case WebSocket.CONNECTING:
+statusEl.innerHTML = '<span style="color:orange">Connecting...</span>';
+break;
+case WebSocket.OPEN:
+statusEl.innerHTML = '<span style="color:green">Connected</span>';
+break;
+case WebSocket.CLOSING:
+statusEl.innerHTML = '<span style="color:orange">Closing...</span>';
+break;
+case WebSocket.CLOSED:
+statusEl.innerHTML = '<span style="color:red">Closed</span>';
+break;
+}
+}
+
+function addToWsLog(message) {
+const logEl = document.getElementById('ws-log');
+const time = new Date().toLocaleTimeString();
+logEl.innerHTML = `<div><small>[${time}]</small> ${message}</div>` + logEl.innerHTML;
+}
+
+// Manual simulation of card scan for testing
+function simulateCardScan() {
+// Create mock login data similar to what the server would send
+const mockLoginData = {
+type: 'user.login',
+message: {
+access: "mock_access_token_" + Math.random(),
+refresh: "mock_refresh_token_" + Math.random(),
+user: {
+id: 8,
+username: "john",
+events: []
+}
+}
+};
+
+// Directly call the handler as if we received this via WebSocket
+console.log("Simulating card scan with data:", mockLoginData);
+handleUserLogin(mockLoginData.message);
+}
+
+// Event Details Modal Functions
+function createEventDetailsModal() {
+const modal = document.createElement('div');
+modal.id = 'event-details-modal';
+modal.className = 'event-details-modal';
+modal.innerHTML = `
+<div class="event-details-content">
+    <div class="event-details-header">
+        <button class="event-details-close" onclick="closeEventDetailsModal()">&times;</button>
+        <h2 class="event-details-title" id="modal-event-title"></h2>
+        <div id="modal-event-badges"></div>
+    </div>
+    <div class="event-details-body">
+        <div class="event-details-grid">
+            <div class="event-details-section">
+                <h4>📅 Schedule</h4>
+                <div class="event-details-field">
+                    <span class="event-details-icon">🕐</span>
+                    <span id="modal-event-time" class="event-details-value"></span>
+                </div>
+                <div class="event-details-field">
+                    <span class="event-details-icon">📅</span>
+                    <span id="modal-event-date" class="event-details-value"></span>
+                </div>
+                <div class="event-details-field">
+                    <span class="event-details-icon">⏱️</span>
+                    <span id="modal-event-duration" class="event-details-value"></span>
+                </div>
+            </div>
+            <div class="event-details-section">
+                <h4>📍 Location</h4>
+                <div class="event-details-field">
+                    <span class="event-details-icon">🏢</span>
+                    <span id="modal-event-building" class="event-details-value"></span>
+                </div>
+                <div class="event-details-field">
+                    <span class="event-details-icon">🚪</span>
+                    <span id="modal-event-room" class="event-details-value"></span>
+                </div>
+            </div>
+        </div>
+        <div class="event-details-grid">
+            <div class="event-details-section">
+                <h4>📚 Course Information</h4>
+                <div class="event-details-field">
+                    <span class="event-details-icon">📖</span>
+                    <span id="modal-event-course" class="event-details-value"></span>
+                </div>
+                <div class="event-details-field">
+                    <span class="event-details-icon">👨‍🏫</span>
+                    <span id="modal-event-lecturer" class="event-details-value"></span>
+                </div>
+            </div>
+            <div class="event-details-section">
+                <h4>ℹ️ Additional Information</h4>
+                <div id="modal-event-description" class="event-details-description"></div>
+            </div>
+        </div>
+    </div>
+    <div class="event-details-actions">
+        <button class="event-details-btn event-details-btn-secondary" onclick="closeEventDetailsModal()">Close</button>
+    </div>
+</div>
+`;
+
+// Add click outside to close
+modal.addEventListener('click', function (e) {
+if (e.target === modal) {
+closeEventDetailsModal();
+}
+});
+
+// Add ESC key to close
+document.addEventListener('keydown', function (e) {
+if (e.key === 'Escape') {
+closeEventDetailsModal();
+}
+});
+
+document.body.appendChild(modal);
+return modal;
+}
+
+function showEventDetails(event) {
+let modal = document.getElementById('event-details-modal');
+if (!modal) {
+modal = createEventDetailsModal();
+}
+
+// Populate modal with event data
+populateEventModal(event);
+
+// Show modal
+modal.classList.add('show');
+document.body.style.overflow = 'hidden'; // Prevent background scrolling
+}
+
+function closeEventDetailsModal() {
+const modal = document.getElementById('event-details-modal');
+if (modal) {
+modal.classList.remove('show');
+document.body.style.overflow = ''; // Restore scrolling
+}
+}
+
+function populateEventModal(event) {
+// Format dates and times
+const startTime = new Date(event.start_time);
+const endTime = new Date(event.end_time);
+const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+const timeOptions = { hour: '2-digit', minute: '2-digit' };
+
+// Calculate duration
+const durationMs = endTime.getTime() - startTime.getTime();
+const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+const durationText = durationHours > 0 ?
+`${durationHours}h ${durationMinutes}m` :
+`${durationMinutes}m`;
+
+// Set title
+document.getElementById('modal-event-title').textContent = event.title || 'Untitled Event';
+
+// Set badges
+const badgesContainer = document.getElementById('modal-event-badges');
+badgesContainer.innerHTML = '';
+
+// Event type badge
+const typeBadge = document.createElement('span');
+typeBadge.className = `event-details-type ${event.event_type || 'class'}`;
+typeBadge.textContent = event.event_type === 'exam' ? 'EXAM' : 'EVENT';
+badgesContainer.appendChild(typeBadge);
+
+// Urgent badge
+if (event.is_urgent) {
+const urgentBadge = document.createElement('span');
+urgentBadge.className = 'event-details-urgent';
+urgentBadge.textContent = 'URGENT';
+badgesContainer.appendChild(urgentBadge);
+}
+
+// Set schedule information
+document.getElementById('modal-event-time').textContent =
+`${startTime.toLocaleTimeString(undefined, timeOptions)} - ${endTime.toLocaleTimeString(undefined, timeOptions)}`;
+document.getElementById('modal-event-date').textContent =
+startTime.toLocaleDateString(undefined, dateOptions);
+document.getElementById('modal-event-duration').textContent = durationText;
+
+// Set location information
+const building = event.room?.building || 'TBA';
+const roomNumber = event.room?.number || 'TBA';
+document.getElementById('modal-event-building').textContent = building;
+document.getElementById('modal-event-room').textContent = roomNumber;
+
+// Set course information
+const courseCode = event.course?.code || 'N/A';
+const courseName = event.course?.name || '';
+const courseText = courseName ? `${courseCode} - ${courseName}` : courseCode;
+document.getElementById('modal-event-course').textContent = courseText;
+document.getElementById('modal-event-lecturer').textContent = event.lecturer || 'Not specified';
+
+// Set description
+document.getElementById('modal-event-description').textContent = event.description || 'No additional information
+available.';
+}
+
+// Initialize event click handlers
+function initEventHandlers() {
+// Add click handlers to all event items
+const eventItems = document.querySelectorAll('.event-item');
+eventItems.forEach((item, index) => {
+// Create mock event data for demonstration
+const eventData = {
+id: index + 1,
+title: item.querySelector('.event-title').textContent,
+event_type: "event",
+course: { code: "TECH101", name: "Technology Events" },
+room: { building: "MAIN", number: "101" },
+start_time: new Date().toISOString(),
+end_time: new Date(Date.now() + 3600000).toISOString(),
+lecturer: "Event Organizer",
+description: "This is a detailed description of the tech event. Join us for an exciting exploration of the latest
+technology trends and innovations in the field.",
+is_urgent: false
+};
+
+// Store event data in the element
+item.dataset.eventData = JSON.stringify(eventData);
+
+// Add click handler
+item.addEventListener('click', function () {
+console.log('Event clicked:', eventData.title);
+showEventDetails(eventData);
+});
+});
+}
+
+// Initialize when page loads
+window.addEventListener('load', function () {
+initMap();
+connectWebSocket(); // Connect to WebSocket server for card scan events
+initEventHandlers(); // Initialize event click handlers
+
+// Check if user is already logged in
+const token = localStorage.getItem('access_token');
+if (token) {
+// Redirect to dashboard if already logged in
+window.location.href = '../views/dashboard.html';
+}
+});
+</script>
 </body>
 
 </html>

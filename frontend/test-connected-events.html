@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connected.html Event Click Test</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+        }
+
+        .test-result {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .success {
+            background-color: #065f46;
+            border: 1px solid #059669;
+        }
+
+        .error {
+            background-color: #7f1d1d;
+            border: 1px solid #dc2626;
+        }
+
+        .test-button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+
+        .test-button:hover {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🧪 Connected.html Event Click Test</h1>
+
+    <p>This page tests if the event modal functionality works in connected.html</p>
+
+    <div id="test-results"></div>
+
+    <h2>Test Steps:</h2>
+    <ol>
+        <li>Click the button below to open connected.html in a new tab</li>
+        <li>Click on any event in the sidebar (Tech Events or Tech News sections)</li>
+        <li>Check if a popup/modal appears with event details</li>
+        <li>Report back if it works or not</li>
+    </ol>
+
+    <button class="test-button" onclick="openConnectedPage()">
+        🚀 Open Connected.html in New Tab
+    </button>
+
+    <button class="test-button" onclick="runQuickTest()">
+        ⚡ Run Quick Test
+    </button>
+
+    <div id="quick-test-result"></div>
+
+    <script>
+        function openConnectedPage() {
+            const connectedUrl = '/components/connected.html';
+            window.open(connectedUrl, '_blank');
+
+            document.getElementById('test-results').innerHTML = `
+                <div class="test-result success">
+                    ✅ Opened connected.html in new tab.<br>
+                    Now click on any event in the sidebar to test the modal functionality.
+                </div>
+            `;
+        }
+
+        function runQuickTest() {
+            const resultDiv = document.getElementById('quick-test-result');
+
+            // Test if we can load app.js functions
+            const script = document.createElement('script');
+            script.src = '/static/js/app.js';
+            script.onload = function () {
+                setTimeout(() => {
+                    if (typeof window.showEventDetails === 'function') {
+                        resultDiv.innerHTML = `
+                            <div class="test-result success">
+                                ✅ app.js loaded successfully and showEventDetails function is available
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="test-result error">
+                                ❌ showEventDetails function not found in app.js
+                            </div>
+                        `;
+                    }
+                }, 100);
+            };
+            script.onerror = function () {
+                resultDiv.innerHTML = `
+                    <div class="test-result error">
+                        ❌ Failed to load app.js
+                    </div>
+                `;
+            };
+            document.head.appendChild(script);
+        }
+    </script>
+</body>
+
+</html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connected.html Event Click Test</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+        }
+
+        .test-result {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .success {
+            background-color: #065f46;
+            border: 1px solid #059669;
+        }
+
+        .error {
+            background-color: #7f1d1d;
+            border: 1px solid #dc2626;
+        }
+
+        .test-button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+
+        .test-button:hover {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🧪 Connected.html Event Click Test</h1>
+
+    <p>This page tests if the event modal functionality works in connected.html</p>
+
+    <div id="test-results"></div>
+
+    <h2>Test Steps:</h2>
+    <ol>
+        <li>Click the button below to open connected.html in a new tab</li>
+        <li>Click on any event in the sidebar (Tech Events or Tech News sections)</li>
+        <li>Check if a popup/modal appears with event details</li>
+        <li>Report back if it works or not</li>
+    </ol>
+
+    <button class="test-button" onclick="openConnectedPage()">
+        🚀 Open Connected.html in New Tab
+    </button>
+
+    <button class="test-button" onclick="runQuickTest()">
+        ⚡ Run Quick Test
+    </button>
+
+    <div id="quick-test-result"></div>
+
+    <script>
+        function openConnectedPage() {
+            const connectedUrl = '/components/connected.html';
+            window.open(connectedUrl, '_blank');
+
+            document.getElementById('test-results').innerHTML = `
+                <div class="test-result success">
+                    ✅ Opened connected.html in new tab.<br>
+                    Now click on any event in the sidebar to test the modal functionality.
+                </div>
+            `;
+        }
+
+        function runQuickTest() {
+            const resultDiv = document.getElementById('quick-test-result');
+
+            // Test if we can load app.js functions
+            const script = document.createElement('script');
+            script.src = '/static/js/app.js';
+            script.onload = function () {
+                setTimeout(() => {
+                    if (typeof window.showEventDetails === 'function') {
+                        resultDiv.innerHTML = `
+                            <div class="test-result success">
+                                ✅ app.js loaded successfully and showEventDetails function is available
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="test-result error">
+                                ❌ showEventDetails function not found in app.js
+                            </div>
+                        `;
+                    }
+                }, 100);
+            };
+            script.onerror = function () {
+                resultDiv.innerHTML = `
+                    <div class="test-result error">
+                        ❌ Failed to load app.js
+                    </div>
+                `;
+            };
+            document.head.appendChild(script);
+        }
+    </script>
+</body>
+
+</html>

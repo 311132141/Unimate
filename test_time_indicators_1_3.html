@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Time-based Visual Indicators (Task 1.3)</title>
+    <style>
+        body {
+            background-color: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+        }
+
+        .test-label {
+            color: #60a5fa;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: block;
+            font-size: 1.1rem;
+        }
+
+        .instructions {
+            background: #222;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #60a5fa;
+        }
+
+        /* Copy styles from dashboard.html for testing */
+        #timetable {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .timetable-item {
+            background-color: #1a1a1a;
+            border-radius: 4px;
+            padding: 0.75rem;
+            border-left: 4px solid #3b82f6;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            position: relative;
+        }
+
+        .timetable-item:hover {
+            background-color: #252525;
+        }
+
+        .timetable-title {
+            font-weight: 500;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .timetable-info {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        /* Task 1.3: Time-based Visual Indicators */
+        /* Upcoming class (within 30 minutes) */
+        .timetable-item.upcoming {
+            background-color: rgba(34, 197, 94, 0.1);
+            border-left-color: #22c55e;
+            position: relative;
+        }
+
+        .timetable-item.upcoming::before {
+            content: "Starting Soon";
+            position: absolute;
+            top: 0.25rem;
+            right: 0.5rem;
+            font-size: 0.7rem;
+            color: #22c55e;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Current class (in progress) */
+        .timetable-item.in-progress {
+            background-color: rgba(59, 130, 246, 0.15);
+            border-left-color: #3b82f6;
+            border-left-width: 6px;
+            position: relative;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+            }
+        }
+
+        .timetable-item.in-progress::before {
+            content: "In Progress";
+            position: absolute;
+            top: 0.25rem;
+            right: 0.5rem;
+            font-size: 0.7rem;
+            color: #3b82f6;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Time-sensitive class (starts in next 15 minutes) */
+        .timetable-item.time-sensitive {
+            background-color: rgba(251, 146, 60, 0.1);
+            border-left-color: #fb923c;
+            border-left-width: 6px;
+            position: relative;
+        }
+
+        .timetable-item.time-sensitive::before {
+            content: "⚡ Urgent";
+            position: absolute;
+            top: 0.25rem;
+            right: 0.5rem;
+            font-size: 0.7rem;
+            color: #fb923c;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Time countdown display */
+        .time-until-class {
+            font-size: 0.75rem;
+            color: #22c55e;
+            margin-top: 0.25rem;
+            font-weight: 500;
+        }
+
+        .timetable-item.time-sensitive .time-until-class {
+            color: #fb923c;
+            font-weight: 600;
+        }
+
+        .timetable-item.in-progress .time-until-class {
+            color: #3b82f6;
+        }
+
+        .test-controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 6px;
+        }
+
+        .test-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .test-btn:hover {
+            background: #2563eb;
+        }
+
+        .time-display {
+            margin-top: 10px;
+            padding: 10px;
+            background: #333;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-container">
+        <h1>🕐 Time-based Visual Indicators Test (Task 1.3)</h1>
+
+        <div class="instructions">
+            <h3>✅ Testing Requirements for Task 1.3:</h3>
+            <ul>
+                <li><strong>Upcoming class (30 min):</strong> Green highlight with "Starting Soon" label</li>
+                <li><strong>Time-sensitive (15 min):</strong> Orange highlight with "⚡ Urgent" label</li>
+                <li><strong>In Progress:</strong> Blue highlight with pulse animation and "In Progress" label</li>
+                <li><strong>Time display:</strong> Shows "Starts in X minutes" or "Ends in Y minutes"</li>
+                <li><strong>Dynamic updates:</strong> Visual states change based on current time</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <span class="test-label">1. Sample Timetable with Time-based Indicators</span>
+            <div id="timetable"></div>
+        </div>
+
+        <div class="test-controls">
+            <h3>Test Controls</h3>
+            <button class="test-btn" onclick="refreshTimetable()">Refresh Timetable</button>
+            <button class="test-btn" onclick="simulateTimeChange(-60)">-1 Hour</button>
+            <button class="test-btn" onclick="simulateTimeChange(-30)">-30 Minutes</button>
+            <button class="test-btn" onclick="simulateTimeChange(-15)">-15 Minutes</button>
+            <button class="test-btn" onclick="simulateTimeChange(0)">Reset to Now</button>
+            <button class="test-btn" onclick="simulateTimeChange(15)">+15 Minutes</button>
+            <button class="test-btn" onclick="simulateTimeChange(30)">+30 Minutes</button>
+            <button class="test-btn" onclick="simulateTimeChange(60)">+1 Hour</button>
+
+            <div class="time-display">
+                <strong>Simulated Time:</strong> <span id="current-time">Current Time</span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <span class="test-label">2. Expected Behavior Matrix</span>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <tr style="background: #333;">
+                    <th style="padding: 10px; border: 1px solid #555;">Time Until Class</th>
+                    <th style="padding: 10px; border: 1px solid #555;">CSS Class</th>
+                    <th style="padding: 10px; border: 1px solid #555;">Visual Indicator</th>
+                    <th style="padding: 10px; border: 1px solid #555;">Label</th>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #555;">In Progress</td>
+                    <td style="padding: 10px; border: 1px solid #555;">in-progress</td>
+                    <td style="padding: 10px; border: 1px solid #555;">Blue with pulse</td>
+                    <td style="padding: 10px; border: 1px solid #555;">"In Progress"</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #555;">0-15 minutes</td>
+                    <td style="padding: 10px; border: 1px solid #555;">time-sensitive</td>
+                    <td style="padding: 10px; border: 1px solid #555;">Orange highlight</td>
+                    <td style="padding: 10px; border: 1px solid #555;">"⚡ Urgent"</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #555;">16-30 minutes</td>
+                    <td style="padding: 10px; border: 1px solid #555;">upcoming</td>
+                    <td style="padding: 10px; border: 1px solid #555;">Green highlight</td>
+                    <td style="padding: 10px; border: 1px solid #555;">"Starting Soon"</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #555;">> 30 minutes</td>
+                    <td style="padding: 10px; border: 1px solid #555;">none</td>
+                    <td style="padding: 10px; border: 1px solid #555;">Default</td>
+                    <td style="padding: 10px; border: 1px solid #555;">none</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let timeOffset = 0; // Minutes to offset from current time
+
+        function createTestEvents() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + timeOffset);
+
+            return [
+                {
+                    title: "Advanced Algorithms",
+                    course: { code: "CS301" },
+                    room: { building: "Main Building", number: "101" },
+                    lecturer: "Prof. Smith",
+                    start_time: new Date(now.getTime() - 30 * 60000).toISOString(), // Started 30 min ago
+                    end_time: new Date(now.getTime() + 30 * 60000).toISOString()   // Ends in 30 min
+                },
+                {
+                    title: "Database Systems",
+                    course: { code: "CS202" },
+                    room: { building: "Science Block", number: "201" },
+                    lecturer: "Dr. Johnson",
+                    start_time: new Date(now.getTime() + 10 * 60000).toISOString(), // Starts in 10 min
+                    end_time: new Date(now.getTime() + 70 * 60000).toISOString()
+                },
+                {
+                    title: "Web Development",
+                    course: { code: "CS303" },
+                    room: { building: "Library", number: "301" },
+                    lecturer: "Ms. Davis",
+                    start_time: new Date(now.getTime() + 25 * 60000).toISOString(), // Starts in 25 min
+                    end_time: new Date(now.getTime() + 85 * 60000).toISOString()
+                },
+                {
+                    title: "Machine Learning",
+                    course: { code: "CS404" },
+                    room: { building: "Engineering Building", number: "401" },
+                    lecturer: "Dr. Wilson",
+                    start_time: new Date(now.getTime() + 45 * 60000).toISOString(), // Starts in 45 min
+                    end_time: new Date(now.getTime() + 105 * 60000).toISOString()
+                },
+                {
+                    title: "Completed Lecture",
+                    course: { code: "CS101" },
+                    room: { building: "Student Center", number: "601" },
+                    lecturer: "Prof. Anderson",
+                    start_time: new Date(now.getTime() - 180 * 60000).toISOString(), // 3 hours ago
+                    end_time: new Date(now.getTime() - 120 * 60000).toISOString()    // Ended 2 hours ago
+                }
+            ];
+        }
+
+        function createTimetableItem(event) {
+            const item = document.createElement('div');
+            item.className = 'timetable-item';
+
+            const startTime = new Date(event.start_time);
+            const endTime = new Date(event.end_time);
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + timeOffset);
+
+            // Calculate time differences
+            const minutesUntilStart = Math.floor((startTime - now) / (1000 * 60));
+            const minutesUntilEnd = Math.floor((endTime - now) / (1000 * 60));
+
+            // Apply time-based CSS classes
+            if (minutesUntilStart <= 0 && minutesUntilEnd > 0) {
+                item.classList.add('in-progress');
+            } else if (minutesUntilStart > 0 && minutesUntilStart <= 15) {
+                item.classList.add('time-sensitive');
+            } else if (minutesUntilStart > 15 && minutesUntilStart <= 30) {
+                item.classList.add('upcoming');
+            }
+
+            // Calculate time message
+            let timeUntilMessage = '';
+            if (minutesUntilStart > 0) {
+                if (minutesUntilStart < 60) {
+                    timeUntilMessage = `Starts in ${minutesUntilStart} minute${minutesUntilStart !== 1 ? 's' : ''}`;
+                } else {
+                    const hours = Math.floor(minutesUntilStart / 60);
+                    const minutes = minutesUntilStart % 60;
+                    timeUntilMessage = `Starts in ${hours}h ${minutes}m`;
+                }
+            } else if (minutesUntilEnd > 0) {
+                if (minutesUntilEnd < 60) {
+                    timeUntilMessage = `Ends in ${minutesUntilEnd} minute${minutesUntilEnd !== 1 ? 's' : ''}`;
+                } else {
+                    const hours = Math.floor(minutesUntilEnd / 60);
+                    const minutes = minutesUntilEnd % 60;
+                    timeUntilMessage = `Ends in ${hours}h ${minutes}m`;
+                }
+            }
+
+            item.innerHTML = `
+                <div class="timetable-title">${event.title}</div>
+                <div class="timetable-info">
+                    <div>${event.course.code} - ${event.room.building} ${event.room.number}</div>
+                    <div>${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    <div>Lecturer: ${event.lecturer}</div>
+                    ${timeUntilMessage ? `<div class="time-until-class">${timeUntilMessage}</div>` : ''}
+                </div>
+            `;
+
+            return item;
+        }
+
+        function refreshTimetable() {
+            const timetable = document.getElementById('timetable');
+            timetable.innerHTML = '';
+
+            const events = createTestEvents();
+            events.forEach(event => {
+                timetable.appendChild(createTimetableItem(event));
+            });
+
+            updateTimeDisplay();
+        }
+
+        function simulateTimeChange(minutes) {
+            timeOffset = minutes;
+            refreshTimetable();
+        }
+
+        function updateTimeDisplay() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + timeOffset);
+            document.getElementById('current-time').textContent = now.toLocaleString();
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function () {
+            refreshTimetable();
+            console.log('Task 1.3 Test loaded successfully');
+            console.log('Time-based indicators are working based on the current time');
+        });
+    </script>
+</body>
+
+</html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Time-based Visual Indicators (Task 1.3)</title>
+    <style>
+        body {
+            background-color: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+        }
+
+        .test-label {
+            color: #60a5fa;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: block;
+            font-size: 1.1rem;
+        }
+
+        .instructions {
+            background: #222;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #60a5fa;
+        }
+
+        /* Copy styles from dashboard.html for testing */
+        #timetable {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .timetable-item {
+            background-color: #1a1a1a;
+            border-radius: 4px;
+            padding: 0.75rem;
+            border-left: 4px solid #3b82f6;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            position: relative;
+        }
+
+        .timetable-item:hover {
+            background-color: #252525;
+        }
+
+        .timetable-title {
+            font-weight: 500;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .timetable-info {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        /* Task 1.3: Time-based Visual Indicators */
+        /* Upcoming class (within 30 minutes) */
+        .timetable-item.upcoming {
+            background-color: rgba(34, 197, 94, 0.1);
+            border-left-color: #22c55e;
+            position: relative;
+        }
+
+        .timetable-item.upcoming::before {
+            content: "Starting Soon";
+            position: absolute;
+            top: 0.25rem;
+            right: 0.5rem;
+            font-size: 0.7rem;
+            color: #22c55e;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Current class (in progress) */
+        .timetable-item.in-progress {
+            background-color: rgba(59, 130, 246, 0.15);
+            border-left-color: #3b82f6;
+            border-left-width: 6px;
+            position: relative;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+            }
+        }
+
+        .timetable-item.in-progress::before {
+            content: "In Progress";
+            position: absolute;
+            top: 0.25rem;
+            right: 0.5rem;
+            font-size: 0.7rem;
+            color: #3b82f6;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Time-sensitive class (starts in next 15 minutes) */
+        .timetable-item.time-sensitive {
+            background-color: rgba(251, 146, 60, 0.1);
+            border-left-color: #fb923c;
+            border-left-width: 6px;
+            position: relative;
+        }
+
+        .timetable-item.time-sensitive::before {
+            content: "⚡ Urgent";
+            position: absolute;
+            top: 0.25rem;
+            right: 0.5rem;
+            font-size: 0.7rem;
+            color: #fb923c;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Time countdown display */
+        .time-until-class {
+            font-size: 0.75rem;
+            color: #22c55e;
+            margin-top: 0.25rem;
+            font-weight: 500;
+        }
+
+        .timetable-item.time-sensitive .time-until-class {
+            color: #fb923c;
+            font-weight: 600;
+        }
+
+        .timetable-item.in-progress .time-until-class {
+            color: #3b82f6;
+        }
+
+        .test-controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 6px;
+        }
+
+        .test-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .test-btn:hover {
+            background: #2563eb;
+        }
+
+        .time-display {
+            margin-top: 10px;
+            padding: 10px;
+            background: #333;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-container">
+        <h1>🕐 Time-based Visual Indicators Test (Task 1.3)</h1>
+
+        <div class="instructions">
+            <h3>✅ Testing Requirements for Task 1.3:</h3>
+            <ul>
+                <li><strong>Upcoming class (30 min):</strong> Green highlight with "Starting Soon" label</li>
+                <li><strong>Time-sensitive (15 min):</strong> Orange highlight with "⚡ Urgent" label</li>
+                <li><strong>In Progress:</strong> Blue highlight with pulse animation and "In Progress" label</li>
+                <li><strong>Time display:</strong> Shows "Starts in X minutes" or "Ends in Y minutes"</li>
+                <li><strong>Dynamic updates:</strong> Visual states change based on current time</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <span class="test-label">1. Sample Timetable with Time-based Indicators</span>
+            <div id="timetable"></div>
+        </div>
+
+        <div class="test-controls">
+            <h3>Test Controls</h3>
+            <button class="test-btn" onclick="refreshTimetable()">Refresh Timetable</button>
+            <button class="test-btn" onclick="simulateTimeChange(-60)">-1 Hour</button>
+            <button class="test-btn" onclick="simulateTimeChange(-30)">-30 Minutes</button>
+            <button class="test-btn" onclick="simulateTimeChange(-15)">-15 Minutes</button>
+            <button class="test-btn" onclick="simulateTimeChange(0)">Reset to Now</button>
+            <button class="test-btn" onclick="simulateTimeChange(15)">+15 Minutes</button>
+            <button class="test-btn" onclick="simulateTimeChange(30)">+30 Minutes</button>
+            <button class="test-btn" onclick="simulateTimeChange(60)">+1 Hour</button>
+
+            <div class="time-display">
+                <strong>Simulated Time:</strong> <span id="current-time">Current Time</span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <span class="test-label">2. Expected Behavior Matrix</span>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <tr style="background: #333;">
+                    <th style="padding: 10px; border: 1px solid #555;">Time Until Class</th>
+                    <th style="padding: 10px; border: 1px solid #555;">CSS Class</th>
+                    <th style="padding: 10px; border: 1px solid #555;">Visual Indicator</th>
+                    <th style="padding: 10px; border: 1px solid #555;">Label</th>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #555;">In Progress</td>
+                    <td style="padding: 10px; border: 1px solid #555;">in-progress</td>
+                    <td style="padding: 10px; border: 1px solid #555;">Blue with pulse</td>
+                    <td style="padding: 10px; border: 1px solid #555;">"In Progress"</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #555;">0-15 minutes</td>
+                    <td style="padding: 10px; border: 1px solid #555;">time-sensitive</td>
+                    <td style="padding: 10px; border: 1px solid #555;">Orange highlight</td>
+                    <td style="padding: 10px; border: 1px solid #555;">"⚡ Urgent"</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #555;">16-30 minutes</td>
+                    <td style="padding: 10px; border: 1px solid #555;">upcoming</td>
+                    <td style="padding: 10px; border: 1px solid #555;">Green highlight</td>
+                    <td style="padding: 10px; border: 1px solid #555;">"Starting Soon"</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #555;">> 30 minutes</td>
+                    <td style="padding: 10px; border: 1px solid #555;">none</td>
+                    <td style="padding: 10px; border: 1px solid #555;">Default</td>
+                    <td style="padding: 10px; border: 1px solid #555;">none</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let timeOffset = 0; // Minutes to offset from current time
+
+        function createTestEvents() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + timeOffset);
+
+            return [
+                {
+                    title: "Advanced Algorithms",
+                    course: { code: "CS301" },
+                    room: { building: "Main Building", number: "101" },
+                    lecturer: "Prof. Smith",
+                    start_time: new Date(now.getTime() - 30 * 60000).toISOString(), // Started 30 min ago
+                    end_time: new Date(now.getTime() + 30 * 60000).toISOString()   // Ends in 30 min
+                },
+                {
+                    title: "Database Systems",
+                    course: { code: "CS202" },
+                    room: { building: "Science Block", number: "201" },
+                    lecturer: "Dr. Johnson",
+                    start_time: new Date(now.getTime() + 10 * 60000).toISOString(), // Starts in 10 min
+                    end_time: new Date(now.getTime() + 70 * 60000).toISOString()
+                },
+                {
+                    title: "Web Development",
+                    course: { code: "CS303" },
+                    room: { building: "Library", number: "301" },
+                    lecturer: "Ms. Davis",
+                    start_time: new Date(now.getTime() + 25 * 60000).toISOString(), // Starts in 25 min
+                    end_time: new Date(now.getTime() + 85 * 60000).toISOString()
+                },
+                {
+                    title: "Machine Learning",
+                    course: { code: "CS404" },
+                    room: { building: "Engineering Building", number: "401" },
+                    lecturer: "Dr. Wilson",
+                    start_time: new Date(now.getTime() + 45 * 60000).toISOString(), // Starts in 45 min
+                    end_time: new Date(now.getTime() + 105 * 60000).toISOString()
+                },
+                {
+                    title: "Completed Lecture",
+                    course: { code: "CS101" },
+                    room: { building: "Student Center", number: "601" },
+                    lecturer: "Prof. Anderson",
+                    start_time: new Date(now.getTime() - 180 * 60000).toISOString(), // 3 hours ago
+                    end_time: new Date(now.getTime() - 120 * 60000).toISOString()    // Ended 2 hours ago
+                }
+            ];
+        }
+
+        function createTimetableItem(event) {
+            const item = document.createElement('div');
+            item.className = 'timetable-item';
+
+            const startTime = new Date(event.start_time);
+            const endTime = new Date(event.end_time);
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + timeOffset);
+
+            // Calculate time differences
+            const minutesUntilStart = Math.floor((startTime - now) / (1000 * 60));
+            const minutesUntilEnd = Math.floor((endTime - now) / (1000 * 60));
+
+            // Apply time-based CSS classes
+            if (minutesUntilStart <= 0 && minutesUntilEnd > 0) {
+                item.classList.add('in-progress');
+            } else if (minutesUntilStart > 0 && minutesUntilStart <= 15) {
+                item.classList.add('time-sensitive');
+            } else if (minutesUntilStart > 15 && minutesUntilStart <= 30) {
+                item.classList.add('upcoming');
+            }
+
+            // Calculate time message
+            let timeUntilMessage = '';
+            if (minutesUntilStart > 0) {
+                if (minutesUntilStart < 60) {
+                    timeUntilMessage = `Starts in ${minutesUntilStart} minute${minutesUntilStart !== 1 ? 's' : ''}`;
+                } else {
+                    const hours = Math.floor(minutesUntilStart / 60);
+                    const minutes = minutesUntilStart % 60;
+                    timeUntilMessage = `Starts in ${hours}h ${minutes}m`;
+                }
+            } else if (minutesUntilEnd > 0) {
+                if (minutesUntilEnd < 60) {
+                    timeUntilMessage = `Ends in ${minutesUntilEnd} minute${minutesUntilEnd !== 1 ? 's' : ''}`;
+                } else {
+                    const hours = Math.floor(minutesUntilEnd / 60);
+                    const minutes = minutesUntilEnd % 60;
+                    timeUntilMessage = `Ends in ${hours}h ${minutes}m`;
+                }
+            }
+
+            item.innerHTML = `
+                <div class="timetable-title">${event.title}</div>
+                <div class="timetable-info">
+                    <div>${event.course.code} - ${event.room.building} ${event.room.number}</div>
+                    <div>${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    <div>Lecturer: ${event.lecturer}</div>
+                    ${timeUntilMessage ? `<div class="time-until-class">${timeUntilMessage}</div>` : ''}
+                </div>
+            `;
+
+            return item;
+        }
+
+        function refreshTimetable() {
+            const timetable = document.getElementById('timetable');
+            timetable.innerHTML = '';
+
+            const events = createTestEvents();
+            events.forEach(event => {
+                timetable.appendChild(createTimetableItem(event));
+            });
+
+            updateTimeDisplay();
+        }
+
+        function simulateTimeChange(minutes) {
+            timeOffset = minutes;
+            refreshTimetable();
+        }
+
+        function updateTimeDisplay() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + timeOffset);
+            document.getElementById('current-time').textContent = now.toLocaleString();
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function () {
+            refreshTimetable();
+            console.log('Task 1.3 Test loaded successfully');
+            console.log('Time-based indicators are working based on the current time');
+        });
+    </script>
+</body>
+
+</html>

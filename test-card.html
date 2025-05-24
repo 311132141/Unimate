@@ -213,3 +213,217 @@
 </body>
 
 </html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RFID Card Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        pre {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+            overflow: auto;
+        }
+
+        .log {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .success {
+            color: #2e7d32;
+        }
+
+        .error {
+            color: #c62828;
+        }
+
+        .info {
+            color: #1565c0;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .button-container {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>RFID Card Test Page</h1>
+
+    <div class="button-container">
+        <button id="testWebsocket">Test WebSocket</button>
+        <button id="clearLog">Clear Log</button>
+    </div>
+
+    <div class="card">
+        <h2>WebSocket Status</h2>
+        <div id="wsStatus">Disconnected</div>
+    </div>
+
+    <div class="card">
+        <h2>Log</h2>
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const wsStatusEl = document.getElementById('wsStatus');
+        const logEl = document.getElementById('log');
+        const testWebsocketBtn = document.getElementById('testWebsocket');
+        const clearLogBtn = document.getElementById('clearLog');
+
+        // WebSocket connection
+        let ws = null;
+
+        // Kiosk ID to use consistently
+        const KIOSK_ID = "test-kiosk-1";
+
+        // Connect to WebSocket
+        function connectWebSocket() {
+            const wsUrl = `ws://192.168.20.22:8000/ws/kiosk/${KIOSK_ID}/`;
+            log('info', `Connecting to WebSocket at ${wsUrl}...`);
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = function () {
+                log('success', 'WebSocket connection established');
+                wsStatusEl.textContent = 'Connected';
+                wsStatusEl.className = 'success';
+
+                // Register this kiosk
+                const registerMsg = {
+                    type: 'register_kiosk',
+                    kiosk_id: KIOSK_ID
+                };
+
+                ws.send(JSON.stringify(registerMsg));
+                log('info', `Sent registration message: ${JSON.stringify(registerMsg)}`);
+            };
+
+            ws.onmessage = function (event) {
+                const data = event.data;
+                log('info', `Received message: ${data}`);
+
+                try {
+                    const parsed = JSON.parse(data);
+
+                    if (parsed.type === 'user.login') {
+                        log('success', 'User login event received');
+                        log('info', `User data: ${JSON.stringify(parsed.message)}`);
+
+                        // Store auth data
+                        if (parsed.message && parsed.message.access) {
+                            localStorage.setItem('access_token', parsed.message.access);
+                            localStorage.setItem('refresh_token', parsed.message.refresh);
+                            if (parsed.message.user && parsed.message.user.username) {
+                                localStorage.setItem('username', parsed.message.user.username);
+                            }
+
+                            log('success', `Authentication data stored for user: ${parsed.message.user.username}`);
+                        }
+                    }
+                } catch (error) {
+                    log('error', `Error parsing message: ${error.message}`);
+                }
+            };
+
+            ws.onerror = function (error) {
+                log('error', `WebSocket error: ${error}`);
+                wsStatusEl.textContent = 'Error';
+                wsStatusEl.className = 'error';
+            };
+
+            ws.onclose = function () {
+                log('info', 'WebSocket connection closed');
+                wsStatusEl.textContent = 'Disconnected';
+                wsStatusEl.className = '';
+
+                // Try to reconnect after a delay
+                setTimeout(connectWebSocket, 5000);
+            };
+        }
+
+        // Log messages to the UI
+        function log(type, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${timestamp}] ${message}`;
+            logEl.insertBefore(entry, logEl.firstChild);
+        }
+
+        // Test WebSocket connection
+        testWebsocketBtn.addEventListener('click', function () {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const testMessage = {
+                    type: 'test',
+                    message: 'Test message from card test page',
+                    timestamp: new Date().toISOString()
+                };
+
+                ws.send(JSON.stringify(testMessage));
+                log('info', `Sent test message: ${JSON.stringify(testMessage)}`);
+            } else {
+                log('error', 'WebSocket not connected. Attempting to connect...');
+                connectWebSocket();
+            }
+        });
+
+        // Clear log
+        clearLogBtn.addEventListener('click', function () {
+            logEl.innerHTML = '';
+            log('info', 'Log cleared');
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            log('info', 'Page loaded');
+            connectWebSocket();
+        });
+    </script>
+</body>
+
+</html>

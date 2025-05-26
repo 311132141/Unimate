@@ -1113,28 +1113,21 @@
         }
 
         function createFullscreenCampusModel() {
-            // Floor/ground - matching campus layout from image
-            const floorGeometry = new THREE.PlaneGeometry(40, 40);
-            const floorMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x95c795,
-                roughness: 0.8
-            });
-            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-            floor.rotation.x = -Math.PI / 2;
-            floor.position.y = -0.1;
-            fullscreenMapScene.add(floor);
+            // Create more realistic ground with grass texture
+            createDetailedGround();
             
             // Campus buildings - layout matching the provided image
             const buildings = [
-                { id: 'main', name: 'Main Building', x: 0, z: 0, width: 4, depth: 3, height: 2, color: 0x555555 },
-                { id: 'library', name: 'Library', x: -8, z: 0, width: 3, depth: 3, height: 1.8, color: 0x5A6377 },
-                { id: 'science', name: 'Science Block', x: 6, z: -5, width: 3, depth: 2.5, height: 1.5, color: 0x4C6A73 },
-                { id: 'engineering', name: 'Engineering Building', x: -5, z: 6, width: 4, depth: 2, height: 2, color: 0x5D6854 },
-                { id: 'bizschool', name: 'Business School', x: 8, z: 6, width: 5, depth: 3, height: 3, color: 0x876E58 },
-                { id: 'student_center', name: 'Student Center', x: 0, z: -8, width: 6, depth: 4, height: 1, color: 0x786558 },
-                { id: 'general', name: 'General Building', x: -6, z: -6, width: 3, depth: 5, height: 2, color: 0x606060 },
-                { id: 'arts', name: 'Arts Building', x: 10, z: 0, width: 3, depth: 2, height: 2.2, color: 0x67685D },
-                { id: 'health', name: 'Health Sciences', x: 7, z: -9, width: 2.5, depth: 2.5, height: 2, color: 0x607673 }
+                { id: 'main', name: 'Main Building', x: 0, z: 0, width: 4, depth: 3, height: 2, color: 0xedeade, style: 'modern' },
+                { id: 'library', name: 'Joseph G. Jabbra Library', x: -8, z: 0, width: 3, depth: 3, height: 1.8, color: 0xeae6ca, style: 'classic' },
+                { id: 'science', name: 'Science Building', x: 6, z: -5, width: 3, depth: 2.5, height: 1.5, color: 0xe8e4c9, style: 'modern' },
+                { id: 'engineering', name: 'Engineering Laboratories', x: -5, z: 6, width: 4, depth: 2, height: 2, color: 0xece5ce, style: 'complex' },
+                { id: 'bizschool', name: 'Business School', x: 8, z: 6, width: 5, depth: 3, height: 3, color: 0xeee9d9, style: 'modern' },
+                { id: 'student_center', name: 'Student Center', x: 0, z: -8, width: 6, depth: 4, height: 1, color: 0xebe3cf, style: 'modern' },
+                { id: 'admin', name: 'Central Administration', x: -6, z: -6, width: 3, depth: 5, height: 2, color: 0xeae3d0, style: 'classic' },
+                { id: 'architecture', name: 'Architecture Hall', x: 10, z: 0, width: 3, depth: 2, height: 2.2, color: 0xe5dfd0, style: 'complex' },
+                { id: 'health', name: 'Health Sciences Center', x: 7, z: -9, width: 2.5, depth: 2.5, height: 2, color: 0xe9e4d1, style: 'modern' },
+                { id: 'residence', name: 'Residence Hall Block B', x: 5, z: 12, width: 7, depth: 3, height: 1.5, color: 0xeee5d0, style: 'residential' }
             ];
             
             // Store building references for interaction
@@ -1150,7 +1143,8 @@
                     building.height, 
                     building.color, 
                     building.name,
-                    building.id
+                    building.id,
+                    building.style
                 );
                 
                 // Store reference for interaction
@@ -1160,156 +1154,268 @@
                 };
             });
             
+            // Add landscape elements
+            addLandscapeElements();
+            
             // Roads - create paths between buildings as in the image
             createCampusRoads();
         }
 
-        function createCampusRoads() {
-            const roadMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
+        function createDetailedGround() {
+            // Main ground plane with grass texture
+            const groundSize = 60;
+            const textureLoader = new THREE.TextureLoader();
             
-            // Main horizontal road
-            createRoad(-15, 0, 30, 2, roadMaterial);
+            // Create a canvas for the ground texture
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 512;
+            canvas.height = 512;
             
-            // Main vertical road
-            createRoad(0, -15, 2, 30, roadMaterial);
+            // Fill with base color
+            ctx.fillStyle = '#8BC34A';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Secondary roads
-            createRoad(-10, 5, 10, 1.5, roadMaterial);
-            createRoad(5, 5, 10, 1.5, roadMaterial);
-            createRoad(-10, -7, 15, 1.5, roadMaterial);
-            createRoad(7, -7, 8, 1.5, roadMaterial);
-        }
-        
-        function createRoad(x, z, width, depth, material) {
-            const roadGeo = new THREE.PlaneGeometry(width, depth);
-            const road = new THREE.Mesh(roadGeo, material);
-            road.rotation.x = -Math.PI / 2;
-            road.position.y = -0.05;
-            road.position.x = x;
-            road.position.z = z;
-            fullscreenMapScene.add(road);
-            return road;
-        }
-
-        function createFullscreenBuilding(x, z, width, depth, height, color, name, id) {
-            // Create a group to hold the building and its details
-            const buildingGroup = new THREE.Group();
-            buildingGroup.position.set(x, 0, z);
-            
-            // Create layers for the building
-            const numLayers = 3; // Number of layers per building
-            const layerHeight = height / numLayers;
-            const layers = [];
-            
-            // Create each layer with slightly different colors
-            for (let i = 0; i < numLayers; i++) {
-                const layerGeometry = new THREE.BoxGeometry(width, layerHeight, depth);
+            // Add some texture/noise
+            for (let i = 0; i < 5000; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const radius = Math.random() * 2 + 1;
+                const color = Math.random() > 0.5 ? '#7CB342' : '#9CCC65';
                 
-                // Create a slightly different color for each layer
-                const layerColor = new THREE.Color(color);
-                layerColor.r *= (1 - (i * 0.1)); // Darken each layer slightly
-                layerColor.g *= (1 - (i * 0.1));
-                layerColor.b *= (1 - (i * 0.1));
-                
-                const layerMaterial = new THREE.MeshStandardMaterial({ 
-                    color: layerColor,
-                    metalness: 0.1 + (i * 0.1), // Increase metalness for higher layers
-                    roughness: 0.8 - (i * 0.1)  // Decrease roughness for higher layers
-                });
-                
-                const layer = new THREE.Mesh(layerGeometry, layerMaterial);
-                layer.position.y = (i * layerHeight) + (layerHeight / 2);
-                
-                // Add a thin border between layers
-                if (i < numLayers - 1) {
-                    const borderGeometry = new THREE.BoxGeometry(width + 0.1, 0.05, depth + 0.1);
-                    const borderMaterial = new THREE.MeshStandardMaterial({ 
-                        color: 0x333333,
-                        metalness: 0.5,
-                        roughness: 0.5
-                    });
-                    const border = new THREE.Mesh(borderGeometry, borderMaterial);
-                    border.position.y = layerHeight;
-                    layer.add(border);
-                }
-                
-                // Store layer data
-                layer.userData = {
-                    originalColor: layerColor,
-                    name: name,
-                    id: id,
-                    layerIndex: i,
-                    originalY: layer.position.y,
-                    expandedY: layer.position.y + (i * 0.5), // Each layer will expand upward
-                    isExpanded: false
-                };
-                
-                buildingGroup.add(layer);
-                layers.push(layer);
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
             }
             
-            // Store building data
-            buildingGroup.userData = {
-                name: name,
-                id: id,
-                layers: layers,
-                isExpanded: false
-            };
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(10, 10);
             
-            // Add the building group to the scene
-            fullscreenMapScene.add(buildingGroup);
+            const groundMaterial = new THREE.MeshStandardMaterial({
+                map: texture,
+                roughness: 0.8,
+                metalness: 0.1
+            });
             
-            // Add text label above building
-            createBuildingLabel(x, height + 0.8, z, name);
+            const groundGeometry = new THREE.PlaneGeometry(groundSize, groundSize, 32, 32);
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = -0.1;
+            fullscreenMapScene.add(ground);
             
-            // Make building interactive (use the first layer for interaction)
-            layers[0].callback = function() {
-                toggleBuildingExpansion(buildingGroup);
-            };
+            // Add terrain variations
+            const heightField = new Float32Array(33 * 33);
+            let i = 0;
+            for (let y = 0; y < 33; y++) {
+                for (let x = 0; x < 33; x++) {
+                    const distance = Math.sqrt(Math.pow(x - 16, 2) + Math.pow(y - 16, 2));
+                    const height = Math.max(0, 1 - distance / 16) * 0.5;
+                    heightField[i++] = height;
+                }
+            }
             
-            // Add to interactive objects array
-            interactiveObjects.push(layers[0]);
+            const terrainGeometry = new THREE.PlaneGeometry(groundSize, groundSize, 32, 32);
+            const vertices = terrainGeometry.attributes.position.array;
             
-            return layers[0];
+            for (let i = 0, j = 0; i < vertices.length; i += 3, j++) {
+                vertices[i + 2] = heightField[j] * 1.5;
+            }
+            
+            terrainGeometry.computeVertexNormals();
+            
+            const terrainMaterial = new THREE.MeshStandardMaterial({
+                map: texture,
+                roughness: 0.9,
+                metalness: 0.1,
+                wireframe: false
+            });
+            
+            const terrain = new THREE.Mesh(terrainGeometry, terrainMaterial);
+            terrain.rotation.x = -Math.PI / 2;
+            terrain.position.y = -0.2;
+            fullscreenMapScene.add(terrain);
         }
-        
+
+        function addWindowsToFloor(floorGroup, width, depth, height) {
+            // Window material
+            const windowMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x90BBDB, 
+                metalness: 0.9,
+                roughness: 0.1,
+                transparent: true,
+                opacity: 0.7
+            });
+            
+            // Window dimensions
+            const windowWidth = 0.3;
+            const windowHeight = 0.4;
+            const windowDepth = 0.05;
+            
+            const frontWindowZ = depth / 2 + 0.01;
+            const backWindowZ = -depth / 2 - 0.01;
+            
+            // Add windows on all sides
+            for (let i = -1; i <= 1; i += 0.5) {
+                // Skip center window on front side
+                if (i !== 0) {
+                    // Front windows
+                    const frontWindowGeometry = new THREE.BoxGeometry(windowWidth, windowHeight, windowDepth);
+                    const frontWindow = new THREE.Mesh(frontWindowGeometry, windowMaterial);
+                    frontWindow.position.set(i * (width * 0.3), height * 0.5, frontWindowZ);
+                    floorGroup.add(frontWindow);
+                    
+                    // Back windows
+                    const backWindowGeometry = new THREE.BoxGeometry(windowWidth, windowHeight, windowDepth);
+                    const backWindow = new THREE.Mesh(backWindowGeometry, windowMaterial);
+                    backWindow.position.set(i * (width * 0.3), height * 0.5, backWindowZ);
+                    floorGroup.add(backWindow);
+                }
+                
+                // Side windows (only on sides)
+                if (i !== 0) {
+                    const rightWindowX = width / 2 + 0.01;
+                    const leftWindowX = -width / 2 - 0.01;
+                    
+                    // Right windows
+                    const rightWindowGeometry = new THREE.BoxGeometry(windowDepth, windowHeight, windowWidth);
+                    const rightWindow = new THREE.Mesh(rightWindowGeometry, windowMaterial);
+                    rightWindow.position.set(rightWindowX, height * 0.5, i * (depth * 0.3));
+                    floorGroup.add(rightWindow);
+                    
+                    // Left windows
+                    const leftWindowGeometry = new THREE.BoxGeometry(windowDepth, windowHeight, windowWidth);
+                    const leftWindow = new THREE.Mesh(leftWindowGeometry, windowMaterial);
+                    leftWindow.position.set(leftWindowX, height * 0.5, i * (depth * 0.3));
+                    floorGroup.add(leftWindow);
+                }
+            }
+        }
+
+        function toggleFloorVisibility(buildingGroup, floorIndex) {
+            // Only work if building is expanded
+            if (!buildingGroup.userData.isExpanded) {
+                toggleBuildingExpansion(buildingGroup);
+                return;
+            }
+            
+            const floor = buildingGroup.userData.floors[floorIndex];
+            const floorMesh = floor.children[0];
+            
+            // Toggle visibility of this floor's rooms
+            const isCurrentlyVisible = floorMesh.userData.isVisible;
+            
+            // Find all room meshes in this floor
+            floor.traverse(child => {
+                if (child.userData && child.userData.type === 'room') {
+                    child.visible = !isCurrentlyVisible;
+                }
+            });
+            
+            // Update state
+            floorMesh.userData.isVisible = !isCurrentlyVisible;
+            
+            // Show status message
+            showStatusMessage(isCurrentlyVisible ? 
+                `Hiding rooms on Floor ${floorIndex + 1}` : 
+                `Showing rooms on Floor ${floorIndex + 1}`);
+        }
+
         function toggleBuildingExpansion(buildingGroup) {
             const buildingData = buildingGroup.userData;
             const isExpanding = !buildingData.isExpanded;
+            const expandedScale = buildingData.expandedScale;
+            const duration = 1000; // 1 second animation
             
-            // Animate each layer
-            buildingData.layers.forEach(layer => {
-                const targetY = isExpanding ? layer.userData.expandedY : layer.userData.originalY;
-                
-                // Create animation
-                const startY = layer.position.y;
-                const duration = 1000; // 1 second
-                const startTime = Date.now();
-                
-                function animateLayer() {
-                    const elapsed = Date.now() - startTime;
-                    const progress = Math.min(elapsed / duration, 1);
+            // Set new target positions for floors
+            if (isExpanding) {
+                // When expanding, spread floors vertically
+                buildingData.floors.forEach((floor, i) => {
+                    const targetY = i * expandedScale;
                     
-                    // Ease in-out function
-                    const easeProgress = progress < 0.5 
-                        ? 2 * progress * progress 
-                        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                    // Animate floor position
+                    const startY = floor.position.y;
+                    const startTime = Date.now();
                     
-                    layer.position.y = startY + (targetY - startY) * easeProgress;
-                    
-                    if (progress < 1) {
-                        requestAnimationFrame(animateLayer);
-                    } else {
-                        layer.userData.isExpanded = isExpanding;
+                    function animateFloorExpand() {
+                        const elapsed = Date.now() - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        
+                        // Ease in-out function
+                        const easeProgress = progress < 0.5 
+                            ? 2 * progress * progress 
+                            : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                        
+                        floor.position.y = startY + (targetY - startY) * easeProgress;
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(animateFloorExpand);
+                        } else {
+                            // Animation complete
+                            floor.position.y = targetY;
+                        }
                     }
-                }
-                
-                animateLayer();
-            });
+                    
+                    animateFloorExpand();
+                });
+            } else {
+                // When collapsing, return floors to original positions
+                buildingData.floors.forEach((floor, i) => {
+                    const targetY = i * (buildingData.floors[0].children[0].geometry.parameters.height * 0.95);
+                    
+                    // Animate floor position
+                    const startY = floor.position.y;
+                    const startTime = Date.now();
+                    
+                    function animateFloorCollapse() {
+                        const elapsed = Date.now() - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        
+                        // Ease in-out function
+                        const easeProgress = progress < 0.5 
+                            ? 2 * progress * progress 
+                            : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                        
+                        floor.position.y = startY + (targetY - startY) * easeProgress;
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(animateFloorCollapse);
+                        } else {
+                            // Animation complete
+                            floor.position.y = targetY;
+                            
+                            // Hide all room meshes when collapsed
+                            floor.traverse(child => {
+                                if (child.userData && child.userData.type === 'room') {
+                                    child.visible = false;
+                                }
+                            });
+                        }
+                    }
+                    
+                    animateFloorCollapse();
+                });
+            }
             
+            // Update building state
             buildingData.isExpanded = isExpanding;
+            
+            // Update tooltip with new state
+            const tooltip = document.getElementById('map-tooltip');
+            if (tooltip && tooltip.style.display === 'block') {
+                const buildingName = buildingData.name;
+                const expansionState = isExpanding ? "Expanded" : "Collapsed";
+                tooltip.textContent = `${buildingName} (${expansionState})`;
+            }
+            
+            // Show status message
+            showStatusMessage(isExpanding ? 
+                `Expanded ${buildingData.name}` : 
+                `Collapsed ${buildingData.name}`);
         }
-        
+
         function createBuildingLabel(x, y, z, text) {
             // Create canvas for text
             const canvas = document.createElement('canvas');
@@ -1646,7 +1752,6 @@
             }
         }
 
-        // Add tooltip system for hovering over buildings
         function onFullscreenMapMouseMove(event) {
             // Handle camera rotation if dragging
             if (isFullscreenDragging) {
@@ -1687,49 +1792,96 @@
             raycaster.setFromCamera(mouse, fullscreenMapCamera);
             
             // Check for intersections with interactive objects
-            const intersects = raycaster.intersectObjects(interactiveObjects);
+            const intersects = raycaster.intersectObjects(interactiveObjects, true);
             
             // Reset all buildings to original color (except selected)
             interactiveObjects.forEach(obj => {
-                if (selectedBuilding && obj.userData.id === selectedBuilding) return;
-                obj.material.emissive.setHex(0x000000);
+                if (selectedBuilding && obj.userData && obj.userData.id === selectedBuilding) return;
+                if (obj.material) obj.material.emissive.setHex(0x000000);
             });
             
-            // Show tooltip and highlight hovered building
+            // Hide tooltip by default
+            const tooltip = document.getElementById('map-tooltip');
+            if (tooltip) {
+                tooltip.style.display = 'none';
+            }
+            
+            // Show tooltip and highlight hovered object
             if (intersects.length > 0) {
                 document.body.style.cursor = 'pointer';
-                
                 const intersectedObject = intersects[0].object;
-                const buildingGroup = intersectedObject.parent;
-                const buildingData = buildingGroup.userData;
                 
-                // Don't highlight if it's the selected building
-                if (!selectedBuilding || intersectedObject.userData.id !== selectedBuilding) {
-                    // Highlight all layers of the building
-                    buildingData.layers.forEach(layer => {
-                        layer.material.emissive.setHex(0x333333);
-                    });
+                // Get parent building if it's a floor or room
+                let building = intersectedObject;
+                
+                // Find the parent building group
+                let parentGroup = intersectedObject;
+                while (parentGroup && !(parentGroup.userData && parentGroup.userData.floors)) {
+                    parentGroup = parentGroup.parent;
                 }
                 
-                // Update tooltip with layer information
-                const tooltip = document.getElementById('map-tooltip');
-                if (tooltip) {
-                    const layerInfo = buildingData.isExpanded 
-                        ? `\nLayers: ${buildingData.layers.length} (Expanded)`
-                        : `\nLayers: ${buildingData.layers.length} (Click to expand)`;
-                    tooltip.textContent = `${intersectedObject.userData.name}${layerInfo}`;
-                    tooltip.style.left = (event.clientX + 10) + 'px';
-                    tooltip.style.top = (event.clientY + 10) + 'px';
-                    tooltip.style.display = 'block';
+                // If we found a building group
+                if (parentGroup && parentGroup.userData) {
+                    const buildingData = parentGroup.userData;
+                    
+                    // Don't highlight if it's the selected building
+                    if (!selectedBuilding || intersectedObject.userData.id !== selectedBuilding) {
+                        // Highlight the object or building component
+                        if (intersectedObject.material) {
+                            intersectedObject.material.emissive.setHex(0x333333);
+                        }
+                    }
+                    
+                    // Different tooltip info based on what was intersected
+                    if (tooltip) {
+                        let tooltipContent = '';
+                        
+                        // If it's a room
+                        if (intersectedObject.userData && intersectedObject.userData.type === 'room') {
+                            tooltipContent = `${intersectedObject.userData.name}<br>Building: ${buildingData.name}`;
+                        }
+                        // If it's a floor
+                        else if (intersectedObject.userData && intersectedObject.userData.floorIndex !== undefined) {
+                            const floorIndex = intersectedObject.userData.floorIndex;
+                            const isExpanded = buildingData.isExpanded;
+                            const roomVisibility = intersectedObject.userData.isVisible ? 'Visible' : 'Hidden';
+                            
+                            tooltipContent = `${buildingData.name} - Floor ${floorIndex+1}<br>`;
+                            
+                            if (isExpanded) {
+                                tooltipContent += `Rooms: ${roomVisibility} (Click to toggle)`;
+                            } else {
+                                tooltipContent += `Click to expand building`;
+                            }
+                        }
+                        // Otherwise it's the building itself
+                        else {
+                            const expansionState = buildingData.isExpanded ? "Expanded" : "Click to expand";
+                            tooltipContent = `${buildingData.name}<br>${expansionState}`;
+                        }
+                        
+                        tooltip.innerHTML = tooltipContent;
+                        tooltip.style.left = (event.clientX + 10) + 'px';
+                        tooltip.style.top = (event.clientY + 10) + 'px';
+                        tooltip.style.display = 'block';
+                    }
+                } else {
+                    // Standard behavior for non-building objects
+                    if (intersectedObject.userData && intersectedObject.userData.name) {
+                        if (tooltip) {
+                            tooltip.innerHTML = intersectedObject.userData.name;
+                            tooltip.style.left = (event.clientX + 10) + 'px';
+                            tooltip.style.top = (event.clientY + 10) + 'px';
+                            tooltip.style.display = 'block';
+                        }
+                        
+                        if (intersectedObject.material) {
+                            intersectedObject.material.emissive.setHex(0x333333);
+                        }
+                    }
                 }
             } else {
                 document.body.style.cursor = 'default';
-                
-                // Hide tooltip
-                const tooltip = document.getElementById('map-tooltip');
-                if (tooltip) {
-                    tooltip.style.display = 'none';
-                }
             }
         }
 
@@ -2554,6 +2706,723 @@
             }
             
             return routeLine;
+        }
+
+        function addLandscapeElements() {
+            // Add trees
+            const treePositions = [
+                { x: -15, z: -15 }, { x: -12, z: -10 }, { x: -18, z: -5 },
+                { x: 15, z: 15 }, { x: 12, z: 10 }, { x: 18, z: 5 },
+                { x: -15, z: 15 }, { x: -12, z: 10 }, { x: -18, z: 5 },
+                { x: 15, z: -15 }, { x: 12, z: -10 }, { x: 18, z: -5 },
+                { x: -5, z: -15 }, { x: 5, z: 15 }, { x: -5, z: 15 }, { x: 5, z: -15 }
+            ];
+            
+            treePositions.forEach(pos => {
+                createTree(pos.x, pos.z);
+            });
+            
+            // Add benches and other elements
+            const benchPositions = [
+                { x: 2, z: -5, rotation: 0 },
+                { x: -2, z: 3, rotation: Math.PI / 2 },
+                { x: 4, z: 7, rotation: Math.PI / 4 }
+            ];
+            
+            benchPositions.forEach(pos => {
+                createBench(pos.x, pos.z, pos.rotation);
+            });
+            
+            // Add water feature
+            createWaterFeature(0, -4, 2);
+        }
+
+        function createTree(x, z) {
+            const trunkGeometry = new THREE.CylinderGeometry(0.2, 0.3, 0.8, 8);
+            const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+            trunk.position.set(x, 0.4, z);
+            
+            // Create foliage
+            const foliageGeometry = new THREE.ConeGeometry(1, 1.5, 8);
+            const foliageMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x228B22,
+                roughness: 0.8
+            });
+            
+            const foliage = new THREE.Mesh(foliageGeometry, foliageMaterial);
+            foliage.position.y = 1.3;
+            trunk.add(foliage);
+            
+            // Add to scene
+            fullscreenMapScene.add(trunk);
+        }
+
+        function createBench(x, z, rotation) {
+            const benchGroup = new THREE.Group();
+            benchGroup.position.set(x, 0.25, z);
+            benchGroup.rotation.y = rotation;
+            
+            // Create bench seat
+            const seatGeometry = new THREE.BoxGeometry(1.2, 0.1, 0.4);
+            const seatMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+            const seat = new THREE.Mesh(seatGeometry, seatMaterial);
+            seat.position.y = 0.25;
+            benchGroup.add(seat);
+            
+            // Create bench legs
+            const legGeometry = new THREE.BoxGeometry(0.1, 0.5, 0.4);
+            const legMaterial = new THREE.MeshStandardMaterial({ color: 0x696969 });
+            
+            const leg1 = new THREE.Mesh(legGeometry, legMaterial);
+            leg1.position.set(0.5, 0, 0);
+            benchGroup.add(leg1);
+            
+            const leg2 = new THREE.Mesh(legGeometry, legMaterial);
+            leg2.position.set(-0.5, 0, 0);
+            benchGroup.add(leg2);
+            
+            // Add to scene
+            fullscreenMapScene.add(benchGroup);
+        }
+
+        function createWaterFeature(x, z, radius) {
+            // Create pool
+            const poolGeometry = new THREE.CircleGeometry(radius, 32);
+            const poolMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x4fc3f7,
+                metalness: 0.9,
+                roughness: 0.1,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            const pool = new THREE.Mesh(poolGeometry, poolMaterial);
+            pool.rotation.x = -Math.PI / 2;
+            pool.position.set(x, 0.01, z);
+            
+            // Add to scene
+            fullscreenMapScene.add(pool);
+        }
+
+        function createCampusRoads() {
+            const roadMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
+            
+            // Main horizontal road
+            createRoad(-15, 0, 30, 2, roadMaterial);
+            
+            // Main vertical road
+            createRoad(0, -15, 2, 30, roadMaterial);
+            
+            // Secondary roads
+            createRoad(-10, 5, 10, 1.5, roadMaterial);
+            createRoad(5, 5, 10, 1.5, roadMaterial);
+            createRoad(-10, -7, 15, 1.5, roadMaterial);
+            createRoad(7, -7, 8, 1.5, roadMaterial);
+        }
+
+        function createRoad(x, z, width, depth, material) {
+            const roadGeo = new THREE.PlaneGeometry(width, depth);
+            const road = new THREE.Mesh(roadGeo, material);
+            road.rotation.x = -Math.PI / 2;
+            road.position.y = -0.05;
+            road.position.x = x;
+            road.position.z = z;
+            fullscreenMapScene.add(road);
+            return road;
+        }
+
+        function createFullscreenBuilding(x, z, width, depth, height, color, name, id, style = 'modern') {
+            // Create a group to hold the building and its details
+            const buildingGroup = new THREE.Group();
+            buildingGroup.position.set(x, 0, z);
+            
+            // Create layers for the building (floors)
+            const numFloors = 3; // Number of floors per building
+            const floorHeight = height / numFloors;
+            const floors = [];
+            
+            // Store building data
+            buildingGroup.userData = {
+                name: name,
+                id: id,
+                floors: floors,
+                isExpanded: false,
+                originalPosition: new THREE.Vector3(x, 0, z),
+                expandedScale: 1.5 // How much to scale when expanding
+            };
+            
+            // Apply building style variations
+            applyBuildingStyle(buildingGroup, style, width, depth, height);
+            
+            // Create each floor with rooms
+            for (let i = 0; i < numFloors; i++) {
+                // Create floor container
+                const floorGroup = new THREE.Group();
+                floorGroup.position.y = i * floorHeight;
+                
+                // Create floor base with slightly different color for each floor
+                const floorColor = new THREE.Color(color);
+                floorColor.r *= (1 - (i * 0.05)); // Subtle darkening for higher floors
+                floorColor.g *= (1 - (i * 0.05));
+                floorColor.b *= (1 - (i * 0.05));
+                
+                const floorGeometry = new THREE.BoxGeometry(width, floorHeight * 0.95, depth);
+                
+                // Create custom texture for the floor
+                const floorTexture = createBuildingTexture(style, floorColor);
+                
+                const floorMaterial = new THREE.MeshStandardMaterial({ 
+                    color: floorColor,
+                    map: floorTexture,
+                    metalness: 0.1 + (i * 0.05),
+                    roughness: 0.8 - (i * 0.05)
+                });
+                
+                const floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
+                floorMesh.position.y = floorHeight / 2;
+                floorGroup.add(floorMesh);
+                
+                // Store floor data
+                floorMesh.userData = {
+                    originalColor: floorColor,
+                    name: `${name} - Floor ${i+1}`,
+                    id: id,
+                    floorIndex: i,
+                    isVisible: true
+                };
+                
+                // Create rooms for this floor
+                createRoomsForFloor(floorGroup, width, depth, floorHeight, id, i);
+                
+                // Add windows for this floor
+                addWindowsToFloor(floorGroup, width, depth, floorHeight);
+                
+                // Add the floor to the building group
+                buildingGroup.add(floorGroup);
+                floors.push(floorGroup);
+                
+                // Make floor interactive
+                floorMesh.callback = function() {
+                    toggleFloorVisibility(buildingGroup, i);
+                };
+                
+                // Add to interactive objects array
+                interactiveObjects.push(floorMesh);
+            }
+            
+            // Add the building group to the scene
+            fullscreenMapScene.add(buildingGroup);
+            
+            // Add text label above building
+            createBuildingLabel(x, height + 0.8, z, name);
+            
+            // Make building interactive (whole building click expands/collapses)
+            const mainFloorMesh = floors[0].children[0];
+            mainFloorMesh.callback = function() {
+                toggleBuildingExpansion(buildingGroup);
+            };
+            
+            return mainFloorMesh;
+        }
+
+        function applyBuildingStyle(buildingGroup, style, width, depth, height) {
+            const x = 0;
+            const z = 0;
+            
+            switch (style) {
+                case 'modern':
+                    // Add a flat roof with details
+                    const roofGeometry = new THREE.BoxGeometry(width * 1.05, height * 0.05, depth * 1.05);
+                    const roofMaterial = new THREE.MeshStandardMaterial({ 
+                        color: 0x333333,
+                        roughness: 0.7
+                    });
+                    const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+                    roof.position.set(x, height + height * 0.025, z);
+                    buildingGroup.add(roof);
+                    
+                    // Add glass panels on sides
+                    const glassGeometry = new THREE.PlaneGeometry(width * 0.9, height * 0.7);
+                    const glassMaterial = new THREE.MeshStandardMaterial({
+                        color: 0x88ccee,
+                        metalness: 0.9,
+                        roughness: 0.1,
+                        transparent: true,
+                        opacity: 0.4,
+                        side: THREE.DoubleSide
+                    });
+                    
+                    // Front glass
+                    const frontGlass = new THREE.Mesh(glassGeometry, glassMaterial);
+                    frontGlass.position.set(x, height * 0.5, depth/2 + 0.01);
+                    buildingGroup.add(frontGlass);
+                    
+                    // Back glass
+                    const backGlass = new THREE.Mesh(glassGeometry, glassMaterial);
+                    backGlass.position.set(x, height * 0.5, -depth/2 - 0.01);
+                    buildingGroup.add(backGlass);
+                    break;
+                    
+                case 'classic':
+                    // Add a sloped roof
+                    const classicRoofGeometry = new THREE.ConeGeometry(Math.max(width, depth) * 0.7, height * 0.4, 4);
+                    const classicRoofMaterial = new THREE.MeshStandardMaterial({ 
+                        color: 0x8B4513,
+                        roughness: 0.8
+                    });
+                    const classicRoof = new THREE.Mesh(classicRoofGeometry, classicRoofMaterial);
+                    classicRoof.position.set(x, height + height * 0.2, z);
+                    classicRoof.rotation.y = Math.PI / 4;
+                    buildingGroup.add(classicRoof);
+                    
+                    // Add pillars
+                    const pillarGeometry = new THREE.CylinderGeometry(0.2, 0.2, height * 0.9, 12);
+                    const pillarMaterial = new THREE.MeshStandardMaterial({ 
+                        color: 0xEEE8AA,
+                        roughness: 0.6
+                    });
+                    
+                    const spacing = width / 3;
+                    for (let i = -1; i <= 1; i++) {
+                        const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
+                        pillar.position.set(i * spacing, height * 0.45, depth / 2 + 0.1);
+                        buildingGroup.add(pillar);
+                    }
+                    break;
+                    
+                case 'complex':
+                    // Add a central dome
+                    const domeGeometry = new THREE.SphereGeometry(width * 0.3, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.5);
+                    const domeMaterial = new THREE.MeshStandardMaterial({
+                        color: 0xC0C0C0,
+                        metalness: 0.5,
+                        roughness: 0.5
+                    });
+                    const dome = new THREE.Mesh(domeGeometry, domeMaterial);
+                    dome.position.set(x, height, z);
+                    buildingGroup.add(dome);
+                    
+                    // Add corner towers
+                    const towerGeometry = new THREE.CylinderGeometry(0.4, 0.4, height * 1.5, 8);
+                    const towerMaterial = new THREE.MeshStandardMaterial({
+                        color: 0xEEE8AA,
+                        roughness: 0.7
+                    });
+                    
+                    // Four corner towers
+                    const cornerPositions = [
+                        { x: width/2 - 0.2, z: depth/2 - 0.2 },
+                        { x: width/2 - 0.2, z: -depth/2 + 0.2 },
+                        { x: -width/2 + 0.2, z: depth/2 - 0.2 },
+                        { x: -width/2 + 0.2, z: -depth/2 + 0.2 }
+                    ];
+                    
+                    cornerPositions.forEach(pos => {
+                        const tower = new THREE.Mesh(towerGeometry, towerMaterial);
+                        tower.position.set(pos.x, height * 0.75, pos.z);
+                        buildingGroup.add(tower);
+                    });
+                    break;
+                    
+                case 'residential':
+                    // Add a flat roof with small details
+                    const resRoofGeometry = new THREE.BoxGeometry(width, height * 0.05, depth);
+                    const resRoofMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+                    const resRoof = new THREE.Mesh(resRoofGeometry, resRoofMaterial);
+                    resRoof.position.set(x, height + height * 0.025, z);
+                    buildingGroup.add(resRoof);
+                    
+                    // Add balconies
+                    for (let i = -width*0.4; i <= width*0.4; i += width*0.2) {
+                        const balconyGeometry = new THREE.BoxGeometry(width * 0.15, height * 0.05, depth * 0.3);
+                        const balconyMaterial = new THREE.MeshStandardMaterial({ color: 0xA9A9A9 });
+                        
+                        const balconyFront = new THREE.Mesh(balconyGeometry, balconyMaterial);
+                        balconyFront.position.set(i, height * 0.5, depth/2 + depth*0.15);
+                        buildingGroup.add(balconyFront);
+                        
+                        const balconyBack = new THREE.Mesh(balconyGeometry, balconyMaterial);
+                        balconyBack.position.set(i, height * 0.5, -depth/2 - depth*0.15);
+                        buildingGroup.add(balconyBack);
+                        
+                        // Balcony railings
+                        const railingGeometry = new THREE.BoxGeometry(width * 0.15, height * 0.15, 0.05);
+                        const railingMaterial = new THREE.MeshStandardMaterial({ 
+                            color: 0x333333,
+                            transparent: true,
+                            opacity: 0.7
+                        });
+                        
+                        const railingFront = new THREE.Mesh(railingGeometry, railingMaterial);
+                        railingFront.position.set(0, height * 0.075, depth*0.15);
+                        balconyFront.add(railingFront);
+                        
+                        const railingBack = new THREE.Mesh(railingGeometry, railingMaterial);
+                        railingBack.position.set(0, height * 0.075, -depth*0.15);
+                        balconyBack.add(railingBack);
+                    }
+                    break;
+                    
+                default:
+                    // Default style (no additional elements)
+                    break;
+            }
+        }
+
+        function createBuildingTexture(style, baseColor) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 256;
+            canvas.height = 256;
+            
+            // Convert Three.js color to CSS color
+            const r = Math.floor(baseColor.r * 255);
+            const g = Math.floor(baseColor.g * 255);
+            const b = Math.floor(baseColor.b * 255);
+            const baseColorCSS = `rgb(${r},${g},${b})`;
+            
+            // Fill with base color
+            ctx.fillStyle = baseColorCSS;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            switch (style) {
+                case 'modern':
+                    // Add horizontal window lines
+                    ctx.fillStyle = 'rgba(100, 170, 220, 0.7)';
+                    for (let y = 20; y < canvas.height; y += 40) {
+                        ctx.fillRect(0, y, canvas.width, 15);
+                    }
+                    break;
+                    
+                case 'classic':
+                    // Add brick pattern
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                    ctx.lineWidth = 1;
+                    
+                    // Horizontal lines
+                    for (let y = 0; y < canvas.height; y += 10) {
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(canvas.width, y);
+                        ctx.stroke();
+                    }
+                    
+                    // Vertical lines with offset for each row
+                    for (let y = 0; y < canvas.height; y += 20) {
+                        const offset = (y % 40 === 0) ? 0 : 10;
+                        for (let x = offset; x < canvas.width; x += 20) {
+                            ctx.beginPath();
+                            ctx.moveTo(x, y);
+                            ctx.lineTo(x, y + 10);
+                            ctx.stroke();
+                        }
+                    }
+                    break;
+                    
+                case 'complex':
+                    // Add ornate pattern
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+                    ctx.lineWidth = 2;
+                    
+                    // Grid pattern
+                    for (let x = 0; x < canvas.width; x += 32) {
+                        ctx.beginPath();
+                        ctx.moveTo(x, 0);
+                        ctx.lineTo(x, canvas.height);
+                        ctx.stroke();
+                    }
+                    
+                    for (let y = 0; y < canvas.height; y += 32) {
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(canvas.width, y);
+                        ctx.stroke();
+                    }
+                    
+                    // Add decorative elements
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                    for (let x = 16; x < canvas.width; x += 32) {
+                        for (let y = 16; y < canvas.height; y += 32) {
+                            ctx.beginPath();
+                            ctx.arc(x, y, 5, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                    break;
+                    
+                case 'residential':
+                    // Add window pattern
+                    ctx.fillStyle = 'rgba(100, 170, 220, 0.7)';
+                    for (let x = 16; x < canvas.width; x += 48) {
+                        for (let y = 16; y < canvas.height; y += 48) {
+                            ctx.fillRect(x, y, 32, 32);
+                            
+                            // Window frame
+                            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                            ctx.lineWidth = 2;
+                            ctx.strokeRect(x, y, 32, 32);
+                            
+                            // Window divider
+                            ctx.beginPath();
+                            ctx.moveTo(x + 16, y);
+                            ctx.lineTo(x + 16, y + 32);
+                            ctx.stroke();
+                            
+                            ctx.beginPath();
+                            ctx.moveTo(x, y + 16);
+                            ctx.lineTo(x + 32, y + 16);
+                            ctx.stroke();
+                        }
+                    }
+                    break;
+                    
+                default:
+                    // Simple window pattern
+                    ctx.fillStyle = 'rgba(100, 170, 220, 0.5)';
+                    for (let y = 10; y < canvas.height; y += 30) {
+                        for (let x = 10; x < canvas.width; x += 30) {
+                            ctx.fillRect(x, y, 15, 20);
+                        }
+                    }
+            }
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            return texture;
+        }
+
+        function createRoomsForFloor(floorGroup, width, depth, height, buildingId, floorIndex) {
+            const roomMaterial = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                metalness: 0.1,
+                roughness: 0.8,
+                transparent: true,
+                opacity: 0.7
+            });
+            
+            // Room dimensions (will vary based on building type and floor)
+            const wallThickness = 0.05;
+            
+            // Floor-specific room layouts
+            let rooms = [];
+            
+            // Determine room layout based on building and floor
+            switch(buildingId) {
+                case 'main':
+                    if (floorIndex === 0) { // Ground floor - lobby and reception
+                        rooms = [
+                            { name: 'Lobby', x: 0, z: 0, width: width * 0.5, depth: depth * 0.6, color: 0xe1f5fe },
+                            { name: 'Reception', x: -width * 0.2, z: depth * 0.2, width: width * 0.2, depth: depth * 0.2, color: 0xffecb3 },
+                            { name: 'Meeting Room', x: width * 0.2, z: depth * 0.2, width: width * 0.2, depth: depth * 0.2, color: 0xe8f5e9 }
+                        ];
+                    } else if (floorIndex === 1) { // First floor - offices
+                        rooms = [
+                            { name: 'Office 101', x: -width * 0.25, z: -depth * 0.25, width: width * 0.3, depth: depth * 0.3, color: 0xffe0b2 },
+                            { name: 'Office 102', x: width * 0.25, z: -depth * 0.25, width: width * 0.3, depth: depth * 0.3, color: 0xffe0b2 },
+                            { name: 'Office 103', x: -width * 0.25, z: depth * 0.25, width: width * 0.3, depth: depth * 0.3, color: 0xffe0b2 },
+                            { name: 'Office 104', x: width * 0.25, z: depth * 0.25, width: width * 0.3, depth: depth * 0.3, color: 0xffe0b2 }
+                        ];
+                    } else { // Top floor - conference rooms
+                        rooms = [
+                            { name: 'Conference A', x: -width * 0.2, z: 0, width: width * 0.4, depth: depth * 0.7, color: 0xd1c4e9 },
+                            { name: 'Conference B', x: width * 0.2, z: 0, width: width * 0.4, depth: depth * 0.7, color: 0xd1c4e9 }
+                        ];
+                    }
+                    break;
+                    
+                case 'library':
+                    if (floorIndex === 0) { // Ground floor - reception and reading areas
+                        rooms = [
+                            { name: 'Reception', x: 0, z: depth * 0.3, width: width * 0.5, depth: depth * 0.3, color: 0xffecb3 },
+                            { name: 'Reading Area', x: 0, z: -depth * 0.2, width: width * 0.8, depth: depth * 0.5, color: 0xe8f5e9 }
+                        ];
+                    } else if (floorIndex === 1) { // First floor - book stacks
+                        rooms = [
+                            { name: 'Book Stacks A', x: -width * 0.25, z: 0, width: width * 0.4, depth: depth * 0.8, color: 0xd7ccc8 },
+                            { name: 'Book Stacks B', x: width * 0.25, z: 0, width: width * 0.4, depth: depth * 0.8, color: 0xd7ccc8 }
+                        ];
+                    } else { // Top floor - study areas
+                        rooms = [
+                            { name: 'Study Area 1', x: -width * 0.3, z: 0, width: width * 0.3, depth: depth * 0.6, color: 0xbbdefb },
+                            { name: 'Study Area 2', x: 0, z: 0, width: width * 0.3, depth: depth * 0.6, color: 0xbbdefb },
+                            { name: 'Study Area 3', x: width * 0.3, z: 0, width: width * 0.3, depth: depth * 0.6, color: 0xbbdefb }
+                        ];
+                    }
+                    break;
+                    
+                case 'engineering':
+                    if (floorIndex === 0) { // Ground floor - labs
+                        rooms = [
+                            { name: 'Lab 1', x: -width * 0.25, z: 0, width: width * 0.4, depth: depth * 0.8, color: 0xb2dfdb },
+                            { name: 'Lab 2', x: width * 0.25, z: 0, width: width * 0.4, depth: depth * 0.8, color: 0xb2dfdb }
+                        ];
+                    } else if (floorIndex === 1) { // First floor - classrooms
+                        rooms = [
+                            { name: 'Classroom A', x: -width * 0.25, z: 0, width: width * 0.4, depth: depth * 0.6, color: 0xc5cae9 },
+                            { name: 'Classroom B', x: width * 0.25, z: 0, width: width * 0.4, depth: depth * 0.6, color: 0xc5cae9 }
+                        ];
+                    } else { // Top floor - faculty offices
+                        rooms = [
+                            { name: 'Office 301', x: -width * 0.35, z: -depth * 0.25, width: width * 0.2, depth: depth * 0.2, color: 0xffe0b2 },
+                            { name: 'Office 302', x: -width * 0.15, z: -depth * 0.25, width: width * 0.2, depth: depth * 0.2, color: 0xffe0b2 },
+                            { name: 'Office 303', x: width * 0.15, z: -depth * 0.25, width: width * 0.2, depth: depth * 0.2, color: 0xffe0b2 },
+                            { name: 'Office 304', x: width * 0.35, z: -depth * 0.25, width: width * 0.2, depth: depth * 0.2, color: 0xffe0b2 },
+                            { name: 'Office 305', x: -width * 0.35, z: depth * 0.25, width: width * 0.2, depth: depth * 0.2, color: 0xffe0b2 },
+                            { name: 'Office 306', x: -width * 0.15, z: depth * 0.25, width: width * 0.2, depth: depth * 0.2, color: 0xffe0b2 },
+                            { name: 'Office 307', x: width * 0.15, z: depth * 0.25, width: width * 0.2, depth: depth * 0.2, color: 0xffe0b2 },
+                            { name: 'Office 308', x: width * 0.35, z: depth * 0.25, width: width * 0.2, depth: depth * 0.2, color: 0xffe0b2 }
+                        ];
+                    }
+                    break;
+                    
+                default:
+                    // Default room layout for other buildings
+                    if (floorIndex === 0) { // Ground floor - lobby and main areas
+                        rooms = [
+                            { name: 'Lobby', x: 0, z: depth * 0.3, width: width * 0.6, depth: depth * 0.3, color: 0xe1f5fe },
+                            { name: 'Main Hall', x: 0, z: -depth * 0.2, width: width * 0.8, depth: depth * 0.4, color: 0xf5f5f5 }
+                        ];
+                    } else { // Upper floors - various rooms
+                        const numRooms = 4; // 2x2 grid of rooms
+                        const roomWidth = width * 0.4;
+                        const roomDepth = depth * 0.4;
+                        
+                        for (let row = 0; row < 2; row++) {
+                            for (let col = 0; col < 2; col++) {
+                                const roomX = (col === 0 ? -1 : 1) * (width * 0.2);
+                                const roomZ = (row === 0 ? -1 : 1) * (depth * 0.2);
+                                const roomNum = row * 2 + col + 1;
+                                
+                                rooms.push({
+                                    name: `Room ${floorIndex}${roomNum}`,
+                                    x: roomX,
+                                    z: roomZ,
+                                    width: roomWidth,
+                                    depth: roomDepth,
+                                    color: 0xf5f5f5
+                                });
+                            }
+                        }
+                    }
+            }
+            
+            // Create room meshes
+            rooms.forEach(room => {
+                const roomGeometry = new THREE.BoxGeometry(room.width, height * 0.7, room.depth);
+                const roomMat = new THREE.MeshStandardMaterial({
+                    color: room.color,
+                    transparent: true,
+                    opacity: 0.7,
+                    metalness: 0.1,
+                    roughness: 0.8
+                });
+                
+                const roomMesh = new THREE.Mesh(roomGeometry, roomMat);
+                roomMesh.position.set(room.x, height * 0.35, room.z);
+                
+                // Create a frame for the room outline
+                const edgesGeometry = new THREE.EdgesGeometry(roomGeometry);
+                const edgesMaterial = new THREE.LineBasicMaterial({ 
+                    color: 0x000000,
+                    linewidth: 1
+                });
+                const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+                roomMesh.add(edges);
+                
+                // Add room label
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = 128;
+                canvas.height = 64;
+                
+                context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                
+                context.font = 'bold 14px Arial';
+                context.fillStyle = 'white';
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillText(room.name, canvas.width / 2, canvas.height / 2);
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                const labelMaterial = new THREE.SpriteMaterial({ 
+                    map: texture,
+                    transparent: true,
+                    opacity: 0.9
+                });
+                
+                const label = new THREE.Sprite(labelMaterial);
+                label.position.set(0, height * 0.4, 0);
+                label.scale.set(1.2, 0.6, 1);
+                roomMesh.add(label);
+                
+                // Make rooms hidden by default
+                roomMesh.visible = false;
+                
+                // Store room data and add to floor
+                roomMesh.userData = {
+                    name: room.name,
+                    type: 'room',
+                    floor: floorIndex
+                };
+                
+                floorGroup.add(roomMesh);
+            });
+        }
+
+        function addWindowsToFloor(floorGroup, width, depth, height) {
+            // Window material
+            const windowMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x90BBDB, 
+                metalness: 0.9,
+                roughness: 0.1,
+                transparent: true,
+                opacity: 0.7
+            });
+            
+            // Window dimensions
+            const windowWidth = 0.3;
+            const windowHeight = 0.4;
+            const windowDepth = 0.05;
+            
+            const frontWindowZ = depth / 2 + 0.01;
+            const backWindowZ = -depth / 2 - 0.01;
+            
+            // Add windows on all sides
+            for (let i = -1; i <= 1; i += 0.5) {
+                // Skip center window on front side
+                if (i !== 0) {
+                    // Front windows
+                    const frontWindowGeometry = new THREE.BoxGeometry(windowWidth, windowHeight, windowDepth);
+                    const frontWindow = new THREE.Mesh(frontWindowGeometry, windowMaterial);
+                    frontWindow.position.set(i * (width * 0.3), height * 0.5, frontWindowZ);
+                    floorGroup.add(frontWindow);
+                    
+                    // Back windows
+                    const backWindowGeometry = new THREE.BoxGeometry(windowWidth, windowHeight, windowDepth);
+                    const backWindow = new THREE.Mesh(backWindowGeometry, windowMaterial);
+                    backWindow.position.set(i * (width * 0.3), height * 0.5, backWindowZ);
+                    floorGroup.add(backWindow);
+                }
+                
+                // Side windows (only on sides)
+                if (i !== 0) {
+                    const rightWindowX = width / 2 + 0.01;
+                    const leftWindowX = -width / 2 - 0.01;
+                    
+                    // Right windows
+                    const rightWindowGeometry = new THREE.BoxGeometry(windowDepth, windowHeight, windowWidth);
+                    const rightWindow = new THREE.Mesh(rightWindowGeometry, windowMaterial);
+                    rightWindow.position.set(rightWindowX, height * 0.5, i * (depth * 0.3));
+                    floorGroup.add(rightWindow);
+                    
+                    // Left windows
+                    const leftWindowGeometry = new THREE.BoxGeometry(windowDepth, windowHeight, windowWidth);
+                    const leftWindow = new THREE.Mesh(leftWindowGeometry, windowMaterial);
+                    leftWindow.position.set(leftWindowX, height * 0.5, i * (depth * 0.3));
+                    floorGroup.add(leftWindow);
+                }
+            }
         }
     </script>
 </body>

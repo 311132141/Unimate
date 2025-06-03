@@ -449,6 +449,8 @@
         let interactiveObjects = [];
         let isDragging = false;
         let previousMousePosition = { x: 0, y: 0 };
+        let mouseDownPosition = { x: 0, y: 0 };
+        let raycaster = new THREE.Raycaster();
 
         // Initialize 3D Map
         function initMap() {
@@ -518,32 +520,337 @@
             ];
 
             buildings.forEach(building => {
-                const buildingGeometry = new THREE.BoxGeometry(building.width, building.height, building.depth);
-                const buildingMaterial = new THREE.MeshStandardMaterial({ 
-                    color: building.color,
-                    roughness: 0.7,
-                    metalness: 0.3
+                createExpandableBuilding(building.x, building.z, building.width, building.depth, building.height, building.color, building.name, building.id);
+            });
+        }
+
+        function createExpandableBuilding(x, z, width, depth, height, color, name, id, style = 'modern') {
+            // Create a group to hold the building and its details
+            const buildingGroup = new THREE.Group();
+            buildingGroup.position.set(x, 0, z);
+            
+            // Create layers for the building (floors)
+            const numFloors = 3; // Number of floors per building
+            const floorHeight = height / numFloors;
+            const floors = [];
+            
+            // Store building data
+            buildingGroup.userData = {
+                name: name,
+                id: id,
+                floors: floors,
+                isExpanded: false,
+                originalPosition: new THREE.Vector3(x, 0, z),
+                expandedScale: 1.5 // How much to scale when expanding
+            };
+            
+            // Create each floor with rooms
+            for (let i = 0; i < numFloors; i++) {
+                // Create floor container
+                const floorGroup = new THREE.Group();
+                floorGroup.position.y = i * floorHeight;
+                
+                // Create floor base with slightly different color for each floor
+                const floorColor = new THREE.Color(color);
+                floorColor.r *= (1 - (i * 0.05)); // Subtle darkening for higher floors
+                floorColor.g *= (1 - (i * 0.05));
+                floorColor.b *= (1 - (i * 0.05));
+                
+                const floorGeometry = new THREE.BoxGeometry(width, floorHeight * 0.95, depth);
+                
+                const floorMaterial = new THREE.MeshStandardMaterial({ 
+                    color: floorColor,
+                    metalness: 0.1 + (i * 0.05),
+                    roughness: 0.8 - (i * 0.05)
                 });
                 
-                const buildingMesh = new THREE.Mesh(buildingGeometry, buildingMaterial);
-                buildingMesh.position.set(building.x, building.height / 2, building.z);
-                buildingMesh.castShadow = true;
-                buildingMesh.receiveShadow = true;
+                const floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
+                floorMesh.position.y = floorHeight / 2;
+                floorMesh.castShadow = true;
+                floorMesh.receiveShadow = true;
+                floorGroup.add(floorMesh);
                 
-                // Store building data for interaction
-                buildingMesh.userData = {
-                    id: building.id,
-                    name: building.name,
-                    type: 'building'
+                // Store floor data
+                floorMesh.userData = {
+                    originalColor: floorColor,
+                    name: `${name} - Floor ${i+1}`,
+                    id: id,
+                    floorIndex: i,
+                    isVisible: true
                 };
                 
-                mapScene.add(buildingMesh);
-                interactiveObjects.push(buildingMesh);
+                // Create rooms for this floor
+                createRoomsForFloor(floorGroup, width, depth, floorHeight, id, i);
+                
+                // Add windows for this floor
+                addWindowsToFloor(floorGroup, width, depth, floorHeight);
+                
+                // Add the floor to the building group
+                buildingGroup.add(floorGroup);
+                floors.push(floorGroup);
+                
+                // Make floor interactive
+                floorMesh.callback = function() {
+                    toggleFloorVisibility(buildingGroup, i);
+                };
+                
+                // Add to interactive objects array
+                interactiveObjects.push(floorMesh);
+            }
+            
+            // Add the building group to the scene
+            mapScene.add(buildingGroup);
+            
+            // Make building interactive (whole building click expands/collapses)
+            const mainFloorMesh = floors[0].children[0];
+            mainFloorMesh.callback = function() {
+                toggleBuildingExpansion(buildingGroup);
+            };
+            
+            return mainFloorMesh;
+        }
+
+        function toggleFloorVisibility(buildingGroup, floorIndex) {
+            // Only work if building is expanded
+            if (!buildingGroup.userData.isExpanded) {
+                toggleBuildingExpansion(buildingGroup);
+                return;
+            }
+            
+            const floor = buildingGroup.userData.floors[floorIndex];
+            const floorMesh = floor.children[0];
+            
+            // Toggle visibility of this floor's rooms
+            const isCurrentlyVisible = floorMesh.userData.isVisible;
+            
+            // Find all room meshes in this floor
+            floor.traverse(child => {
+                if (child.userData && child.userData.type === 'room') {
+                    child.visible = !isCurrentlyVisible;
+                }
             });
+            
+            // Update state
+            floorMesh.userData.isVisible = !isCurrentlyVisible;
+        }
+
+        function toggleBuildingExpansion(buildingGroup) {
+            const buildingData = buildingGroup.userData;
+            const isExpanding = !buildingData.isExpanded;
+            const expandedScale = buildingData.expandedScale;
+            const duration = 1000; // 1 second animation
+            
+            // Set new target positions for floors
+            if (isExpanding) {
+                // When expanding, spread floors vertically
+                buildingData.floors.forEach((floor, i) => {
+                    const targetY = i * expandedScale;
+                    
+                    // Animate floor position
+                    const startY = floor.position.y;
+                    const startTime = Date.now();
+                    
+                    function animateFloorExpand() {
+                        const elapsed = Date.now() - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        
+                        // Ease in-out function
+                        const easeProgress = progress < 0.5 
+                            ? 2 * progress * progress 
+                            : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                        
+                        floor.position.y = startY + (targetY - startY) * easeProgress;
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(animateFloorExpand);
+                        } else {
+                            // Animation complete
+                            floor.position.y = targetY;
+                        }
+                    }
+                    
+                    animateFloorExpand();
+                });
+            } else {
+                // When collapsing, return floors to original positions
+                buildingData.floors.forEach((floor, i) => {
+                    const targetY = i * (buildingData.floors[0].children[0].geometry.parameters.height * 0.95);
+                    
+                    // Animate floor position
+                    const startY = floor.position.y;
+                    const startTime = Date.now();
+                    
+                    function animateFloorCollapse() {
+                        const elapsed = Date.now() - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        
+                        // Ease in-out function
+                        const easeProgress = progress < 0.5 
+                            ? 2 * progress * progress 
+                            : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                        
+                        floor.position.y = startY + (targetY - startY) * easeProgress;
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(animateFloorCollapse);
+                        } else {
+                            // Animation complete
+                            floor.position.y = targetY;
+                            
+                            // Hide all room meshes when collapsed
+                            floor.traverse(child => {
+                                if (child.userData && child.userData.type === 'room') {
+                                    child.visible = false;
+                                }
+                            });
+                        }
+                    }
+                    
+                    animateFloorCollapse();
+                });
+            }
+            
+            // Update building state
+            buildingData.isExpanded = isExpanding;
+        }
+
+        function createRoomsForFloor(floorGroup, width, depth, height, buildingId, floorIndex) {
+            // Room material with transparency for windows effect
+            const roomMaterial = new THREE.MeshStandardMaterial({
+                transparent: true,
+                opacity: 0.7
+            });
+            
+            // Room dimensions (will vary based on building type and floor)
+            const wallThickness = 0.05;
+            
+            // Floor-specific room layouts
+            let rooms = [];
+            
+            // Determine room layout based on building and floor
+            switch(buildingId) {
+                case 'main':
+                    if (floorIndex === 0) { // Ground floor - lobby and reception
+                        rooms = [
+                            { name: 'Lobby', x: 0, z: 0, width: width * 0.5, depth: depth * 0.6, color: 0xe1f5fe },
+                            { name: 'Reception', x: -width * 0.2, z: depth * 0.2, width: width * 0.2, depth: depth * 0.2, color: 0xffecb3 }
+                        ];
+                    } else if (floorIndex === 1) { // First floor - offices
+                        rooms = [
+                            { name: 'Office 101', x: -width * 0.25, z: -depth * 0.25, width: width * 0.3, depth: depth * 0.3, color: 0xffe0b2 },
+                            { name: 'Office 102', x: width * 0.25, z: -depth * 0.25, width: width * 0.3, depth: depth * 0.3, color: 0xffe0b2 }
+                        ];
+                    } else { // Top floor - conference rooms
+                        rooms = [
+                            { name: 'Conference A', x: -width * 0.2, z: 0, width: width * 0.4, depth: depth * 0.7, color: 0xd1c4e9 },
+                            { name: 'Conference B', x: width * 0.2, z: 0, width: width * 0.4, depth: depth * 0.7, color: 0xd1c4e9 }
+                        ];
+                    }
+                    break;
+                    
+                default:
+                    // Default room layout for other buildings
+                    if (floorIndex === 0) { // Ground floor - lobby and main areas
+                        rooms = [
+                            { name: 'Lobby', x: 0, z: depth * 0.3, width: width * 0.6, depth: depth * 0.3, color: 0xe1f5fe },
+                            { name: 'Main Hall', x: 0, z: -depth * 0.2, width: width * 0.8, depth: depth * 0.4, color: 0xf5f5f5 }
+                        ];
+                    } else { // Upper floors - various rooms
+                        const roomWidth = width * 0.4;
+                        const roomDepth = depth * 0.4;
+                        
+                        for (let row = 0; row < 2; row++) {
+                            for (let col = 0; col < 2; col++) {
+                                const roomX = (col === 0 ? -1 : 1) * (width * 0.2);
+                                const roomZ = (row === 0 ? -1 : 1) * (depth * 0.2);
+                                const roomNum = row * 2 + col + 1;
+                                
+                                rooms.push({
+                                    name: `Room ${floorIndex}${roomNum}`,
+                                    x: roomX,
+                                    z: roomZ,
+                                    width: roomWidth,
+                                    depth: roomDepth,
+                                    color: 0xf5f5f5
+                                });
+                            }
+                        }
+                    }
+            }
+            
+            // Create room meshes
+            rooms.forEach(room => {
+                const roomGeometry = new THREE.BoxGeometry(room.width, height * 0.7, room.depth);
+                const roomMat = new THREE.MeshStandardMaterial({
+                    color: room.color,
+                    transparent: true,
+                    opacity: 0.7,
+                    metalness: 0.1,
+                    roughness: 0.8
+                });
+                
+                const roomMesh = new THREE.Mesh(roomGeometry, roomMat);
+                roomMesh.position.set(room.x, height * 0.35, room.z);
+                
+                // Create a frame for the room outline
+                const edgesGeometry = new THREE.EdgesGeometry(roomGeometry);
+                const edgesMaterial = new THREE.LineBasicMaterial({ 
+                    color: 0x000000,
+                    linewidth: 1
+                });
+                const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+                roomMesh.add(edges);
+                
+                // Make rooms hidden by default
+                roomMesh.visible = false;
+                
+                // Store room data and add to floor
+                roomMesh.userData = {
+                    name: room.name,
+                    type: 'room',
+                    floor: floorIndex
+                };
+                
+                floorGroup.add(roomMesh);
+            });
+        }
+
+        function addWindowsToFloor(floorGroup, width, depth, height) {
+            // Window material
+            const windowMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x90BBDB, 
+                metalness: 0.9,
+                roughness: 0.1,
+                transparent: true,
+                opacity: 0.7
+            });
+            
+            // Window dimensions
+            const windowWidth = 0.3;
+            const windowHeight = 0.4;
+            const windowDepth = 0.05;
+            
+            const frontWindowZ = depth / 2 + 0.01;
+            
+            // Add windows on front side
+            for (let i = -1; i <= 1; i += 0.5) {
+                // Skip center window on front side
+                if (i !== 0) {
+                    // Front windows
+                    const frontWindowGeometry = new THREE.BoxGeometry(windowWidth, windowHeight, windowDepth);
+                    const frontWindow = new THREE.Mesh(frontWindowGeometry, windowMaterial);
+                    frontWindow.position.set(i * (width * 0.3), height * 0.5, frontWindowZ);
+                    floorGroup.add(frontWindow);
+                }
+            }
         }
 
         function onMapMouseDown(event) {
             isDragging = true;
+            mouseDownPosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
             previousMousePosition = {
                 x: event.clientX,
                 y: event.clientY
@@ -570,8 +877,42 @@
             }
         }
 
-        function onMapMouseUp() {
+        function onMapMouseUp(event) {
+            // Check if this was a click (mouse didn't move much)
+            const deltaX = Math.abs(event.clientX - mouseDownPosition.x);
+            const deltaY = Math.abs(event.clientY - mouseDownPosition.y);
+            const isClick = deltaX < 5 && deltaY < 5;
+            
+            if (isClick) {
+                handleMapClick(event);
+            }
+            
             isDragging = false;
+        }
+
+        function handleMapClick(event) {
+            const container = document.getElementById('map-container');
+            const rect = container.getBoundingClientRect();
+            
+            // Calculate mouse coordinates relative to the canvas
+            const mouse = new THREE.Vector2();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            
+            // Update the raycaster
+            raycaster.setFromCamera(mouse, mapCamera);
+            
+            // Check for intersections with interactive objects
+            const intersects = raycaster.intersectObjects(interactiveObjects);
+            
+            if (intersects.length > 0) {
+                const intersectedObject = intersects[0].object;
+                
+                // Call the callback function if it exists
+                if (intersectedObject.callback) {
+                    intersectedObject.callback();
+                }
+            }
         }
 
         function onMapResize() {

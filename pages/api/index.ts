@@ -30,6 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } catch (error) {
     console.error('Proxy error:', error)
-    res.status(500).json({ error: 'Proxy error', details: error.message })
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    res.status(500).json({ error: 'Proxy error', details: errorMessage })
   }
 }

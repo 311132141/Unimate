@@ -333,66 +333,20 @@
         </form>
     </div>
 
-    <script>
-        // Initialize WebSocket for card scanning notifications
-        let ws = null;
-        
-        function connectWebSocket() {
-            // Connect to the WebSocket server for kiosk notifications
-            const kioskId = "kiosk-" + Math.floor(Math.random() * 1000);
-            ws = new WebSocket(`ws://localhost:8000/ws/kiosk/${kioskId}/`);
-            
-            ws.onopen = function() {
-                console.log("WebSocket connection established");
-            };
-            
-            ws.onmessage = function(event) {
-                console.log("WebSocket message received:", event.data);
-                const data = JSON.parse(event.data);
-                
-                // Handle login event from card scan
-                if (data.type === "user.login") {
-                    handleUserLogin(data.message);
-                }
-            };
-            
-            ws.onerror = function(error) {
-                console.error("WebSocket error:", error);
-            };
-            
-            ws.onclose = function() {
-                console.log("WebSocket connection closed");
-                // Try to reconnect after a delay
-                setTimeout(connectWebSocket, 5000);
-            };
-        }
-        
-        // Handle user login (both from form and card scan)
-        function handleUserLogin(userData) {
-            // Store authentication data
-            if (userData.access) {
-                localStorage.setItem('access_token', userData.access);
-            }
-            if (userData.refresh) {
-                localStorage.setItem('refresh_token', userData.refresh);
-            }
-            if (userData.user && userData.user.username) {
-                localStorage.setItem('username', userData.user.username);
-            }
-            
-            // Hide the modal if it's open
-            document.getElementById('loginModal').style.display = 'none';
-            
-            // Redirect to dashboard
-            window.location.href = 'dashboard.html';
-        }
+    <!-- Unimate Modular JavaScript Components -->
+    <script src="../static/js/modules/websocket.js"></script>
+    <script src="../static/js/modules/map.js"></script>
+    <script src="../static/js/modules/auth.js"></script>
+    <script src="../static/js/modules/timetable.js"></script>
+    <script src="../static/js/modules/app.js"></script>
 
-        // Initialize Map (placeholder for now)
-        function initMap() {
+    <script>
+        // Custom initialization for index page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Use the modular map initialization but with a simple iframe for now
             const mapContainer = document.getElementById('map-container');
             
-            // Use an iframe to show a Google Maps view for now
-            // This is just for demonstration. In production, use the Three.js map or Google Maps API
+            // For the index page, use a simple map embed
             const iframe = document.createElement('iframe');
             iframe.src = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5587.867820291437!2d174.76568619358058!3d-36.85292772229561!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6d0d47fb5a9ce6fb%3A0x500ef6143a29917!2sThe%20University%20of%20Auckland!5e0!3m2!1sen!2snz!4v1593482149224!5m2!1sen!2snz';
             iframe.width = '100%';
@@ -400,51 +354,51 @@
             iframe.style.border = '0';
             iframe.allowFullscreen = true;
             mapContainer.appendChild(iframe);
-        }
 
-        // Show login modal
-        document.getElementById('showLogin').addEventListener('click', function() {
-            document.getElementById('loginModal').style.display = 'block';
-            document.getElementById('loginError').style.display = 'none';
-        });
+            // Show login modal
+            document.getElementById('showLogin').addEventListener('click', function() {
+                document.getElementById('loginModal').style.display = 'block';
+                document.getElementById('loginError').style.display = 'none';
+            });
 
-        // Handle login form submission
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorElement = document.getElementById('loginError');
-            
-            try {
-                const response = await axios.post('/api/login/', {
-                    username: username,
-                    password: password
-                });
+            // Handle login form submission
+            document.getElementById('loginForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const errorElement = document.getElementById('loginError');
                 
-                // Handle successful login
-                handleUserLogin(response.data);
-            } catch (error) {
-                console.error('Login error:', error);
-                
-                // Display error message
-                errorElement.textContent = error.response?.data?.error || 'Invalid credentials';
-                errorElement.style.display = 'block';
-            }
-        });
+                try {
+                    const response = await axios.post('/api/login/', {
+                        username: username,
+                        password: password
+                    });
+                    
+                    // Use modular auth system for login
+                    if (window.authManagerInstance) {
+                        window.authManagerInstance.handleUserLogin(response.data);
+                    }
+                    
+                    // Hide the modal and redirect to dashboard
+                    document.getElementById('loginModal').style.display = 'none';
+                    window.location.href = 'dashboard.html';
+                } catch (error) {
+                    console.error('Login error:', error);
+                    
+                    // Display error message
+                    errorElement.textContent = error.response?.data?.error || 'Invalid credentials';
+                    errorElement.style.display = 'block';
+                }
+            });
 
-        // Close modal when clicking outside
-        window.addEventListener('click', function(e) {
-            const modal = document.getElementById('loginModal');
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                const modal = document.getElementById('loginModal');
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
 
-        // Initialize when page loads
-        window.addEventListener('load', function() {
-            initMap();
-            connectWebSocket();
-            
             // Check if user is already logged in
             const token = localStorage.getItem('access_token');
             if (token) {

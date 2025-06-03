@@ -1,7 +1,54 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Head from 'next/head'
+import Header from '../components/Header'
+import Sidebar from '../components/Sidebar'
+import MapContainer from '../components/MapContainer'
+import LoginModal from '../components/LoginModal'
+
+const mockEvents = [
+  { id: 1, title: 'Event 1', meta: '2 hours ago · By Mechatronics' },
+  { id: 2, title: 'URGENT: System Maintenance', meta: '2 hours ago · By IT Services', isUrgent: true },
+  { id: 3, title: 'Event 2', meta: '2 hours ago · By Mechatronics' },
+  { id: 4, title: 'Event 3', meta: '2 hours ago · By Mechatronics' }
+];
+
+const mockNews = [
+  { id: 5, title: 'Event 4', meta: '2 hours ago · By Mechatronics' },
+  { id: 6, title: 'Event 5', meta: '2 hours ago · By Mechatronics' },
+  { id: 7, title: 'Event 6', meta: '2 hours ago · By Mechatronics' }
+];
 
 export default function Home() {
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const handleLogin = async (username: string, password: string) => {
+    // Mock login - in real implementation, this would call the Django API
+    try {
+      const response = await fetch('/api/login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Store tokens
+        localStorage.setItem('access_token', data.access);
+        localStorage.setItem('refresh_token', data.refresh);
+        
+        // Close modal and redirect
+        setShowLoginModal(false);
+        window.location.href = '/dashboard';
+      } else {
+        throw new Error('Invalid credentials');
+      }
+    } catch (error) {
+      throw new Error('Login failed');
+    }
+  };
+
   return (
     <>
       <Head>
@@ -10,108 +57,31 @@ export default function Home() {
         <meta charSet="UTF-8" />
       </Head>
 
-      <header style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        padding: '0.5rem 1rem', 
-        backgroundColor: '#1a1a1a', 
-        borderBottom: '1px solid #333', 
-        color: '#fff' 
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        backgroundColor: '#1a1a1a',
+        color: '#fff',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
       }}>
-        <h1 style={{ fontSize: '1.8rem', margin: 0 }}>Map</h1>
-        
-        <div style={{ flexGrow: 1, maxWidth: '600px', margin: '0 1rem' }}>
-          <input
-            type="text"
-            placeholder="Find place"
-            style={{
-              width: '100%',
-              padding: '0.5rem 1rem',
-              borderRadius: '50px',
-              border: 'none',
-              backgroundColor: '#333',
-              color: '#fff',
-              outline: 'none'
-            }}
-          />
-        </div>
-        
-        <button style={{
-          backgroundColor: '#5473e8',
-          color: 'white',
-          border: 'none',
-          padding: '0.5rem 1.5rem',
-          borderRadius: '50px',
-          cursor: 'pointer',
-          fontWeight: '500'
-        }}>
-          Log in
-        </button>
-      </header>
-
-      <div style={{ 
-        display: 'flex', 
-        flex: 1, 
-        overflow: 'hidden',
-        height: 'calc(100vh - 80px)',
-        backgroundColor: '#1a1a1a'
-      }}>
-        <div style={{
-          width: '300px',
-          backgroundColor: '#1a1a1a',
-          borderRight: '1px solid #333',
-          padding: '1rem',
-          overflowY: 'auto',
-          color: '#fff'
-        }}>
-          <h2 style={{ fontSize: '1.2rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
-            Tech Events
-          </h2>
-          <div style={{ padding: '1rem 0' }}>
-            <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#252525', borderRadius: '4px' }}>
-              <div style={{ fontWeight: '500', marginBottom: '0.5rem' }}>Event 1</div>
-              <div style={{ fontSize: '0.8rem', color: '#888' }}>2 hours ago · By Mechatronics</div>
-            </div>
-            <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: 'rgba(255, 50, 50, 0.1)', borderLeft: '3px solid #ff5555', borderRadius: '4px' }}>
-              <div style={{ fontWeight: '500', marginBottom: '0.5rem' }}>URGENT: System Maintenance</div>
-              <div style={{ fontSize: '0.8rem', color: '#888' }}>2 hours ago · By IT Services</div>
-            </div>
-          </div>
-          
-          <h2 style={{ fontSize: '1.2rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
-            Tech News
-          </h2>
-          <div style={{ padding: '1rem 0' }}>
-            <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#252525', borderRadius: '4px' }}>
-              <div style={{ fontWeight: '500', marginBottom: '0.5rem' }}>Event 4</div>
-              <div style={{ fontSize: '0.8rem', color: '#888' }}>2 hours ago · By Mechatronics</div>
-            </div>
-          </div>
-        </div>
+        <Header onLoginClick={() => setShowLoginModal(true)} />
 
         <div style={{ 
+          display: 'flex', 
           flex: 1, 
-          height: '100%', 
-          backgroundColor: '#222', 
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#fff'
+          overflow: 'hidden',
+          height: 'calc(100vh - 80px)'
         }}>
-          <div style={{ textAlign: 'center' }}>
-            <h2>🎯 Next.js Migration Complete!</h2>
-            <p>This page has been successfully converted from pure HTML/CSS/JS to Next.js</p>
-            <p>✅ Same visual design and layout</p>
-            <p>✅ React components and TypeScript</p>
-            <p>✅ Compatible with existing Django backend</p>
-            <p>✅ Ready for 3D map integration with Three.js</p>
-            <div style={{ marginTop: '2rem', fontSize: '0.9rem', color: '#888' }}>
-              Original map container area - Three.js 3D map will render here
-            </div>
-          </div>
+          <Sidebar events={mockEvents} news={mockNews} />
+          <MapContainer />
         </div>
+
+        <LoginModal
+          isVisible={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          onLogin={handleLogin}
+        />
       </div>
     </>
   )

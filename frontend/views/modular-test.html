@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unimate - Modular Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        .test-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background-color: #222;
+        }
+        .test-result {
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+        }
+        .success { background-color: rgba(0, 255, 0, 0.1); border: 1px solid #00ff00; }
+        .error { background-color: rgba(255, 0, 0, 0.1); border: 1px solid #ff0000; }
+        button {
+            background-color: #5473e8;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.25rem;
+        }
+        button:hover { background-color: #435ecc; }
+        #map-container-test {
+            width: 400px;
+            height: 300px;
+            background-color: #333;
+            border: 1px solid #555;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Unimate Modular System Test</h1>
+    <p>This page tests that the modular architecture is working correctly.</p>
+
+    <div class="test-section">
+        <h2>📦 Module Loading</h2>
+        <div id="module-loading-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔗 WebSocket Manager</h2>
+        <div id="websocket-results"></div>
+        <button onclick="testWebSocket()">Test WebSocket</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🗺️ Map Manager</h2>
+        <div id="map-results"></div>
+        <div id="map-container-test"></div>
+        <button onclick="testMap()">Initialize Map</button>
+        <button onclick="testClearRoute()">Clear Route</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🔐 Auth Manager</h2>
+        <div id="auth-results"></div>
+        <button onclick="testAuth()">Test Authentication</button>
+        <button onclick="testLogout()">Test Logout</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📅 Timetable Manager</h2>
+        <div id="timetable-results"></div>
+        <div id="timetable"></div>
+        <button onclick="testTimetable()">Test Timetable</button>
+    </div>
+
+    <!-- Load external dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- Load modular components -->
+    <script src="../static/js/modules/websocket.js"></script>
+    <script src="../static/js/modules/map.js"></script>
+    <script src="../static/js/modules/auth.js"></script>
+    <script src="../static/js/modules/timetable.js"></script>
+    <script src="../static/js/modules/app.js"></script>
+
+    <script>
+        // Test utilities
+        function logResult(containerId, message, isSuccess = true) {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = `test-result ${isSuccess ? 'success' : 'error'}`;
+            div.textContent = `${isSuccess ? '✅' : '❌'} ${message}`;
+            container.appendChild(div);
+        }
+
+        function clearResults(containerId) {
+            document.getElementById(containerId).innerHTML = '';
+        }
+
+        // Test module loading
+        function testModuleLoading() {
+            clearResults('module-loading-results');
+            
+            const modules = [
+                { name: 'WebSocketManager', class: window.WebSocketManager },
+                { name: 'MapManager', class: window.MapManager },
+                { name: 'AuthManager', class: window.AuthManager },
+                { name: 'TimetableManager', class: window.TimetableManager },
+                { name: 'AppManager', class: window.AppManager }
+            ];
+
+            modules.forEach(module => {
+                if (module.class) {
+                    logResult('module-loading-results', `${module.name} loaded successfully`);
+                } else {
+                    logResult('module-loading-results', `${module.name} failed to load`, false);
+                }
+            });
+
+            // Test instances
+            const instances = [
+                { name: 'webSocketManagerInstance', instance: window.webSocketManagerInstance },
+                { name: 'mapManagerInstance', instance: window.mapManagerInstance },
+                { name: 'authManagerInstance', instance: window.authManagerInstance },
+                { name: 'timetableManagerInstance', instance: window.timetableManagerInstance },
+                { name: 'appManagerInstance', instance: window.appManagerInstance }
+            ];
+
+            instances.forEach(inst => {
+                if (inst.instance) {
+                    logResult('module-loading-results', `${inst.name} initialized successfully`);
+                } else {
+                    logResult('module-loading-results', `${inst.name} not initialized`, false);
+                }
+            });
+        }
+
+        // Test WebSocket
+        function testWebSocket() {
+            clearResults('websocket-results');
+            if (window.webSocketManagerInstance) {
+                try {
+                    logResult('websocket-results', 'WebSocket manager available');
+                    logResult('websocket-results', 'WebSocket connection test (dev mode - will skip actual connection)');
+                } catch (error) {
+                    logResult('websocket-results', `WebSocket test failed: ${error.message}`, false);
+                }
+            } else {
+                logResult('websocket-results', 'WebSocket manager not available', false);
+            }
+        }
+
+        // Test Map
+        function testMap() {
+            clearResults('map-results');
+            if (window.mapManagerInstance) {
+                try {
+                    // Set up test container
+                    const testContainer = document.getElementById('map-container-test');
+                    testContainer.id = 'map-container';
+                    
+                    window.mapManagerInstance.init();
+                    logResult('map-results', 'Map initialized successfully');
+                    
+                    // Restore original id
+                    testContainer.id = 'map-container-test';
+                } catch (error) {
+                    logResult('map-results', `Map test failed: ${error.message}`, false);
+                }
+            } else {
+                logResult('map-results', 'Map manager not available', false);
+            }
+        }
+
+        function testClearRoute() {
+            if (window.mapManagerInstance) {
+                try {
+                    window.mapManagerInstance.clearRoute();
+                    logResult('map-results', 'Route cleared successfully');
+                } catch (error) {
+                    logResult('map-results', `Clear route failed: ${error.message}`, false);
+                }
+            }
+        }
+
+        // Test Auth
+        function testAuth() {
+            clearResults('auth-results');
+            if (window.authManagerInstance) {
+                try {
+                    logResult('auth-results', 'Auth manager available');
+                    logResult('auth-results', `Authentication status: ${window.authManagerInstance.isAuthenticated()}`);
+                    
+                    const token = window.authManagerInstance.getToken();
+                    if (token) {
+                        logResult('auth-results', 'Token found in storage');
+                    } else {
+                        logResult('auth-results', 'No token in storage');
+                    }
+                } catch (error) {
+                    logResult('auth-results', `Auth test failed: ${error.message}`, false);
+                }
+            } else {
+                logResult('auth-results', 'Auth manager not available', false);
+            }
+        }
+
+        function testLogout() {
+            if (window.authManagerInstance) {
+                try {
+                    window.authManagerInstance.logout();
+                    logResult('auth-results', 'Logout test completed');
+                } catch (error) {
+                    logResult('auth-results', `Logout test failed: ${error.message}`, false);
+                }
+            }
+        }
+
+        // Test Timetable
+        function testTimetable() {
+            clearResults('timetable-results');
+            if (window.timetableManagerInstance) {
+                try {
+                    const testEvents = [
+                        {
+                            id: 1,
+                            title: "Test Event 1",
+                            event_type: "class",
+                            course: { code: "TEST101", name: "Test Course" },
+                            room: { building: "TEST", number: "101" },
+                            start_time: new Date().toISOString(),
+                            end_time: new Date(Date.now() + 3600000).toISOString(),
+                            lecturer: "Test Lecturer",
+                            is_urgent: false
+                        }
+                    ];
+                    
+                    window.timetableManagerInstance.renderTimetable(testEvents);
+                    logResult('timetable-results', 'Timetable rendered successfully');
+                } catch (error) {
+                    logResult('timetable-results', `Timetable test failed: ${error.message}`, false);
+                }
+            } else {
+                logResult('timetable-results', 'Timetable manager not available', false);
+            }
+        }
+
+        // Run tests when page loads
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                testModuleLoading();
+            }, 500); // Give modules time to initialize
+        });
+    </script>
+</body>
+</html>

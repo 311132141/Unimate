@@ -40,8 +40,20 @@ Unimate is a mobile kiosk solution that lets university students tap their ID ca
 
 - **backend/** - Django + Channels backend with fixture data
 - **frontend/** - Original HTML, CSS (Tailwind), JS, Three.js assets (preserved for reference)
+  - **frontend/static/js/modules/** - Modular JavaScript architecture
+    - **websocket.js** - WebSocket connection management
+    - **map.js** - 3D Map visualization with Three.js
+    - **auth.js** - Authentication and session management
+    - **timetable.js** - Timetable rendering and events
+    - **app.js** - Main application coordinator
 - **pages/** - Next.js pages (main frontend)
-- **components/** - React components
+- **components/** - React components (modular UI components)
+  - **Header.tsx** - Navigation header component
+  - **Sidebar.tsx** - Sidebar with events/news
+  - **MapContainer.tsx** - 3D map container component
+  - **EventList.tsx** - Reusable event list component
+  - **LoginModal.tsx** - Login modal component
+- **types/** - TypeScript type definitions
 - **styles/** - CSS files for Next.js
 - **hooks/** - Custom React hooks
 - **hardware/** - ESP32 Arduino sketch + wiring diagram for RFID scanner
@@ -49,7 +61,16 @@ Unimate is a mobile kiosk solution that lets university students tap their ID ca
 
 ## Frontend Architecture
 
-The frontend has been migrated from pure HTML/CSS/JavaScript to **Next.js with React and TypeScript**:
+The frontend now uses **modular programming principles** with both legacy compatibility and modern React components:
+
+### Modular JavaScript Architecture (Legacy Frontend):
+- **Component-based modules** with clear separation of concerns
+- **WebSocket Module** - Handles real-time communication
+- **Map Module** - Manages Three.js 3D visualization
+- **Authentication Module** - Handles login/logout and session management
+- **Timetable Module** - Manages event display and interactions
+- **App Module** - Coordinates all modules and handles initialization
+- **Legacy compatibility layer** - Ensures existing code continues to work
 
 ### Next.js Features:
 - **Server-side rendering** for better performance
@@ -58,15 +79,74 @@ The frontend has been migrated from pure HTML/CSS/JavaScript to **Next.js with R
 - **Hot reload** for development
 - **Optimized builds** for production
 - **API route proxying** to Django backend
+- **Modular React components** for reusable UI elements
 
 ### Migration Details:
 - ✅ All original functionality preserved
+- ✅ Modular architecture implemented
 - ✅ Same visual design and layout
 - ✅ WebSocket integration for RFID scanning
 - ✅ Three.js 3D map support
 - ✅ Authentication flows maintained
 - ✅ API compatibility with Django backend
 - ✅ Multiple view types (dashboard, kiosk, standalone)
+- ✅ Component reusability and maintainability
+
+## Modular Architecture
+
+Unimate now implements a **modular programming architecture** that divides functionality into focused, reusable components:
+
+### JavaScript Modules (Legacy Frontend)
+
+#### 🔌 WebSocket Module (`websocket.js`)
+- Manages WebSocket connections for real-time features
+- Handles reconnection logic and error handling
+- Dispatches custom events for inter-module communication
+
+#### 🗺️ Map Module (`map.js`) 
+- Three.js 3D map initialization and rendering
+- Route visualization and navigation
+- Camera controls and scene management
+
+#### 🔐 Authentication Module (`auth.js`)
+- User login/logout functionality
+- Session management and token storage
+- Idle timer and automatic logout
+- Development mode detection and demo data
+
+#### 📅 Timetable Module (`timetable.js`)
+- Event rendering and display
+- Timetable interactions and navigation
+- Print and refresh functionality
+- Event detail modals
+
+#### 🚀 App Module (`app.js`)
+- Central coordinator for all modules
+- Module initialization and lifecycle management
+- Inter-module event handling
+- Global state management
+
+### React Components (Next.js Frontend)
+
+#### 🧩 Component Breakdown
+- **Header** - Navigation and search functionality
+- **Sidebar** - Event lists and news display
+- **MapContainer** - 3D map integration wrapper
+- **EventList** - Reusable event display component
+- **LoginModal** - Authentication interface
+
+### Benefits
+
+- **Separation of Concerns** - Each module has a single responsibility
+- **Reusability** - Components can be used across different pages
+- **Maintainability** - Easy to update and debug individual modules
+- **Testability** - Modules can be tested independently
+- **Scalability** - New features can be added as new modules
+- **Legacy Compatibility** - Existing code continues to work
+
+### Testing
+
+Visit `/frontend/views/modular-test.html` to test the modular system functionality.
 
 ## Quick Start
 

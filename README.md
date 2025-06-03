@@ -39,9 +39,70 @@ Unimate is a mobile kiosk solution that lets university students tap their ID ca
 ## Project Structure
 
 - **backend/** - Django + Channels backend with fixture data
-- **frontend/** - HTML, CSS (Tailwind), JS, Three.js assets
+- **frontend/** - Original HTML, CSS (Tailwind), JS, Three.js assets (preserved for reference)
+- **pages/** - Next.js pages (main frontend)
+- **components/** - React components
+- **styles/** - CSS files for Next.js
+- **hooks/** - Custom React hooks
 - **hardware/** - ESP32 Arduino sketch + wiring diagram for RFID scanner
 - **docs/** - Design documentation
+
+## Frontend Architecture
+
+The frontend has been migrated from pure HTML/CSS/JavaScript to **Next.js with React and TypeScript**:
+
+### Next.js Features:
+- **Server-side rendering** for better performance
+- **Component-based architecture** with React
+- **TypeScript support** for better development experience
+- **Hot reload** for development
+- **Optimized builds** for production
+- **API route proxying** to Django backend
+
+### Migration Details:
+- ✅ All original functionality preserved
+- ✅ Same visual design and layout
+- ✅ WebSocket integration for RFID scanning
+- ✅ Three.js 3D map support
+- ✅ Authentication flows maintained
+- ✅ API compatibility with Django backend
+- ✅ Multiple view types (dashboard, kiosk, standalone)
+
+## Quick Start
+
+### Running the Application with Next.js Frontend
+
+To run the full application with the new Next.js frontend:
+
+```bash
+# Start Django backend with WebSocket support
+python run.py --backend --asgi
+
+# In another terminal, start Next.js frontend
+npm run dev
+```
+
+This will:
+1. Start the Django backend with ASGI server on port 8000
+2. Start the Next.js frontend on port 3000
+3. Set up WebSocket endpoints for real-time features
+4. Create a test user (username: testuser, password: password123)
+
+### Legacy Frontend (Original)
+
+The original HTML/CSS/JS frontend is preserved in the `frontend/` directory and can still be run:
+
+```bash
+# Start both backend and original frontend
+python run.py --asgi
+```
+
+### Development URLs
+
+- **Next.js Frontend**: http://localhost:3000
+- **Django Backend API**: http://localhost:8000/api/
+- **Django Admin**: http://localhost:8000/admin/
+- **Legacy Frontend**: http://localhost:8080 (when using original)
 
 ## Quick Start
 

@@ -137,9 +137,21 @@ def run_django_server():
 
 def run_frontend_server():
     """Run the frontend server."""
-    logger.info("Starting frontend server on port 8080")
+    root_dir = os.path.dirname(os.path.abspath(__file__))
     
-    frontend_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend")
+    # Check if we have Next.js setup
+    package_json = os.path.join(root_dir, "package.json")
+    if os.path.exists(package_json):
+        logger.info("Starting Next.js frontend server on port 3000")
+        return run_command_in_thread(
+            ["npm", "run", "dev"],
+            cwd=root_dir,
+            prefix="Next.js"
+        )
+    
+    # Fall back to original frontend
+    logger.info("Next.js not found, falling back to original frontend server on port 8080")
+    frontend_dir = os.path.join(root_dir, "frontend")
     
     # Try to use smart_server.py if it exists
     smart_server = os.path.join(frontend_dir, "smart_server.py")
@@ -234,8 +246,15 @@ def main():
     if args.backend and is_port_in_use(8000):
         logger.warning("Port 8000 is already in use. Backend may not start correctly.")
     
-    if args.frontend and is_port_in_use(8080):
-        logger.warning("Port 8080 is already in use. Frontend may not start correctly.")
+    if args.frontend:
+        # Check for Next.js first (port 3000), then fallback (port 8080)
+        package_json = os.path.join(os.path.dirname(os.path.abspath(__file__)), "package.json")
+        if os.path.exists(package_json):
+            if is_port_in_use(3000):
+                logger.warning("Port 3000 is already in use. Next.js frontend may not start correctly.")
+        else:
+            if is_port_in_use(8080):
+                logger.warning("Port 8080 is already in use. Original frontend may not start correctly.")
     
     backend_thread = None
     frontend_thread = None

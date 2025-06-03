@@ -34,6 +34,12 @@ venv/
 env/
 ENV/
 
+# Next.js
+.next/
+out/
+node_modules/
+*.tsbuildinfo
+
 # IDEs and editors
 .idea/
 .vscode/

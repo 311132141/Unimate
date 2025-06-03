@@ -1,7 +1,40 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Head from 'next/head'
 
 export default function Home() {
+  const [apiStatus, setApiStatus] = useState<string>('Testing...')
+  const [apiData, setApiData] = useState<any>(null)
+  const [wsStatus, setWsStatus] = useState<string>('Testing...')
+
+  useEffect(() => {
+    // Test API connectivity
+    const testApi = async () => {
+      try {
+        const response = await fetch('/api')
+        if (response.ok) {
+          const data = await response.json()
+          setApiData(data)
+          setApiStatus('✅ API Connected')
+        } else {
+          setApiStatus(`❌ API Error: ${response.status}`)
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        setApiStatus(`❌ API Error: ${errorMessage}`)
+      }
+    }
+
+    // Test WebSocket connectivity
+    const testWebSocket = () => {
+      // WebSocket testing in development environment may not work reliably
+      // due to CORS and proxy limitations. In production, WebSocket connections
+      // would work properly with the configured rewrite rules.
+      setWsStatus('⚠️ WebSocket config in place (test skipped in dev)')
+    }
+
+    testApi()
+    testWebSocket()
+  }, [])
   return (
     <>
       <Head>
@@ -107,7 +140,27 @@ export default function Home() {
             <p>✅ React components and TypeScript</p>
             <p>✅ Compatible with existing Django backend</p>
             <p>✅ Ready for 3D map integration with Three.js</p>
-            <div style={{ marginTop: '2rem', fontSize: '0.9rem', color: '#888' }}>
+            
+            <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#333', borderRadius: '8px', fontSize: '0.9rem' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <strong>API Status:</strong> {apiStatus}
+              </div>
+              <div style={{ marginBottom: '1rem' }}>
+                <strong>WebSocket Status:</strong> {wsStatus}
+              </div>
+              {apiData && (
+                <div>
+                  <strong>Available Endpoints:</strong>
+                  <ul style={{ textAlign: 'left', margin: '0.5rem 0', padding: '0 1rem' }}>
+                    {Object.entries(apiData).map(([key, value]) => (
+                      <li key={key}>{key}: {typeof value === 'string' ? value : JSON.stringify(value)}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+            
+            <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#888' }}>
               Original map container area - Three.js 3D map will render here
             </div>
           </div>

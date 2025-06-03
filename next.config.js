@@ -3,12 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   async rewrites() {
     return [
-      // Proxy API requests to Django backend
-      {
-        source: '/api/:path*',
-        destination: 'http://localhost:8000/api/:path*',
-      },
-      // Proxy WebSocket connections
+      // Proxy WebSocket connections to Django backend
       {
         source: '/ws/:path*',
         destination: 'http://localhost:8000/ws/:path*',

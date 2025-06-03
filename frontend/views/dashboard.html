@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unimate - Dashboard</title>
     <link href="../static/site.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" onerror="window.THREE_FAILED=true;"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js" onerror="window.ORBIT_FAILED=true;"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js" onerror="window.AXIOS_FAILED=true;"></script>
     <style>
         .dashboard-container {
             display: flex;
@@ -522,6 +522,7 @@
                             <div class="event-title">Career Fair 2025</div>
                             <div class="event-meta">June 5 at 9:00 AM · Student Center</div>
                             <div class="event-meta">Over 50 companies will be present</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -555,7 +556,7 @@
                         </div>
                         <div>
                             <button class="login-button">Save Changes</button>
-                    </div>
+                        </div>
                 </div>
             </div>
         </div>
@@ -602,8 +603,25 @@
                 // Setup navigation
                 setupNavigation();
             } else {
-                // Redirect to login page if not authenticated
-                window.location.href = 'index.html';
+                // Check if we're in development mode (localhost)
+                const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                
+                if (isDevelopment) {
+                    // In development mode, proceed without authentication
+                    document.getElementById('user-name').textContent = 'Demo User';
+                    
+                    // Initialize 3D map
+                    initDashboardMap();
+                    
+                    // Fetch and load timetable data
+                    fetchTimetableData();
+                    
+                    // Setup navigation
+                    setupNavigation();
+                } else {
+                    // Redirect to login page if not authenticated in production
+                    window.location.href = 'index.html';
+                }
             }
             
             // Set up logout functionality
@@ -619,6 +637,26 @@
         
         function initDashboardMap() {
             const container = document.getElementById('map-container');
+            
+            // Check if THREE.js is available
+            if (typeof THREE === 'undefined' || window.THREE_FAILED) {
+                // Show fallback message when THREE.js is not available
+                container.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; 
+                                background-color: #1a1a1a; border-radius: 4px; color: #888; text-align: center;">
+                        <div>
+                            <h3 style="margin: 0 0 10px 0; color: #fff;">Campus Map</h3>
+                            <p style="margin: 0;">3D map unavailable in offline mode</p>
+                            <div style="margin-top: 20px; padding: 10px; background-color: #222; border-radius: 4px;">
+                                <strong>Available Buildings:</strong><br>
+                                Engineering Building • Library • Student Center<br>
+                                Science Building • Arts Building • Health Sciences
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
             
             // Create scene with background color
             mapScene = new THREE.Scene();
@@ -1055,6 +1093,33 @@
 
         function initFullscreenMap() {
             const container = document.getElementById('fullscreen-map-container');
+            
+            // Check if THREE.js is available
+            if (typeof THREE === 'undefined' || window.THREE_FAILED) {
+                // Show fallback message when THREE.js is not available
+                container.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; 
+                                background-color: #1a1a1a; color: #888; text-align: center;">
+                        <div>
+                            <h3 style="margin: 0 0 10px 0; color: #fff;">Campus Map - Full View</h3>
+                            <p style="margin: 0;">3D map unavailable in offline mode</p>
+                            <div style="margin-top: 20px; padding: 20px; background-color: #222; border-radius: 4px; max-width: 400px;">
+                                <strong>Campus Buildings:</strong><br><br>
+                                <div style="text-align: left;">
+                                • Engineering Building<br>
+                                • Library<br>
+                                • Student Center<br>
+                                • Science Building<br>
+                                • General Building<br>
+                                • Arts Building<br>
+                                • Health Sciences
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
             
             // Create scene
             fullscreenMapScene = new THREE.Scene();

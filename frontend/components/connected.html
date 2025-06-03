@@ -444,19 +444,146 @@
     </div>
 
     <script>
-        // Initialize Map (placeholder for now)
+        // 3D Map variables
+        let mapScene, mapCamera, mapRenderer;
+        let interactiveObjects = [];
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+
+        // Initialize 3D Map
         function initMap() {
-            const mapContainer = document.getElementById('map-container');
+            const container = document.getElementById('map-container');
             
-            // Use an iframe to show a Google Maps view for now
-            // This is just for demonstration. In production, use the Three.js map or Google Maps API
-            const iframe = document.createElement('iframe');
-            iframe.src = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5587.867820291437!2d174.76568619358058!3d-36.85292772229561!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6d0d47fb5a9ce6fb%3A0x500ef6143a29917!2sThe%20University%20of%20Auckland!5e0!3m2!1sen!2snz!4v1593482149224!5m2!1sen!2snz';
-            iframe.width = '100%';
-            iframe.height = '100%';
-            iframe.style.border = '0';
-            iframe.allowFullscreen = true;
-            mapContainer.appendChild(iframe);
+            // Create scene
+            mapScene = new THREE.Scene();
+            mapScene.background = new THREE.Color(0x1a1a1a);
+            
+            // Create camera
+            mapCamera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            mapCamera.position.set(0, 15, 20);
+            mapCamera.lookAt(0, 0, 0);
+            
+            // Create renderer
+            mapRenderer = new THREE.WebGLRenderer({ antialias: true });
+            mapRenderer.setSize(container.clientWidth, container.clientHeight);
+            mapRenderer.setPixelRatio(window.devicePixelRatio);
+            mapRenderer.shadowMap.enabled = true;
+            container.appendChild(mapRenderer.domElement);
+            
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            mapScene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 5);
+            directionalLight.castShadow = true;
+            mapScene.add(directionalLight);
+            
+            // Create campus model
+            createCampusModel();
+            
+            // Add event listeners for map interaction
+            container.addEventListener('mousedown', onMapMouseDown);
+            document.addEventListener('mousemove', onMapMouseMove);
+            document.addEventListener('mouseup', onMapMouseUp);
+            window.addEventListener('resize', onMapResize);
+            
+            // Start animation loop
+            animate();
+        }
+
+        function createCampusModel() {
+            // Floor/ground
+            const floorGeometry = new THREE.PlaneGeometry(40, 40);
+            const floorMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x95c795,
+                roughness: 0.8
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -0.1;
+            mapScene.add(floor);
+            
+            // Campus buildings
+            const buildings = [
+                { id: 'main', name: 'Main Building', x: 0, z: 0, width: 4, depth: 3, height: 2, color: 0x555555 },
+                { id: 'library', name: 'Library', x: -8, z: 0, width: 3, depth: 3, height: 1.8, color: 0x5A6377 },
+                { id: 'engineering', name: 'Engineering Building', x: 8, z: 0, width: 4, depth: 4, height: 2.5, color: 0x7B4397 },
+                { id: 'science', name: 'Science Building', x: 0, z: 8, width: 3.5, depth: 3, height: 2.2, color: 0x4A90E2 },
+                { id: 'arts', name: 'Arts Building', x: -8, z: 8, width: 3, depth: 2.5, height: 1.5, color: 0xE74C3C },
+                { id: 'business', name: 'Business School', x: 8, z: 8, width: 3.5, depth: 3.5, height: 2.8, color: 0x8E44AD },
+                { id: 'medical', name: 'Medical School', x: 0, z: -8, width: 4, depth: 3, height: 2.5, color: 0x2ECC71 },
+                { id: 'cafeteria', name: 'Student Cafeteria', x: -8, z: -8, width: 3, depth: 2, height: 1.2, color: 0xF39C12 },
+                { id: 'sports', name: 'Sports Center', x: 8, z: -8, width: 5, depth: 4, height: 1.8, color: 0x1ABC9C }
+            ];
+
+            buildings.forEach(building => {
+                const buildingGeometry = new THREE.BoxGeometry(building.width, building.height, building.depth);
+                const buildingMaterial = new THREE.MeshStandardMaterial({ 
+                    color: building.color,
+                    roughness: 0.7,
+                    metalness: 0.3
+                });
+                
+                const buildingMesh = new THREE.Mesh(buildingGeometry, buildingMaterial);
+                buildingMesh.position.set(building.x, building.height / 2, building.z);
+                buildingMesh.castShadow = true;
+                buildingMesh.receiveShadow = true;
+                
+                // Store building data for interaction
+                buildingMesh.userData = {
+                    id: building.id,
+                    name: building.name,
+                    type: 'building'
+                };
+                
+                mapScene.add(buildingMesh);
+                interactiveObjects.push(buildingMesh);
+            });
+        }
+
+        function onMapMouseDown(event) {
+            isDragging = true;
+            previousMousePosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
+        }
+
+        function onMapMouseMove(event) {
+            if (isDragging) {
+                const deltaX = event.clientX - previousMousePosition.x;
+                const deltaY = event.clientY - previousMousePosition.y;
+                
+                // Rotate camera around the center
+                const spherical = new THREE.Spherical();
+                spherical.setFromVector3(mapCamera.position);
+                spherical.theta -= deltaX * 0.01;
+                spherical.phi += deltaY * 0.01;
+                spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+                
+                mapCamera.position.setFromSpherical(spherical);
+                mapCamera.lookAt(0, 0, 0);
+                
+                previousMousePosition.x = event.clientX;
+                previousMousePosition.y = event.clientY;
+            }
+        }
+
+        function onMapMouseUp() {
+            isDragging = false;
+        }
+
+        function onMapResize() {
+            const container = document.getElementById('map-container');
+            mapCamera.aspect = container.clientWidth / container.clientHeight;
+            mapCamera.updateProjectionMatrix();
+            mapRenderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            mapRenderer.render(mapScene, mapCamera);
         }
 
         // Show login modal

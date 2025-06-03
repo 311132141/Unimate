@@ -329,6 +329,131 @@
         .status-success { background-color: #065f46; color: #d1fae5; border: 1px solid #047857;}
 
         .hidden { display: none !important; }
+        
+        /* Map Navigation UI */
+        #map-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 10;
+        }
+        
+        .map-control-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+        
+        .map-control-btn:hover {
+            background: rgba(50, 50, 50, 0.9);
+        }
+        
+        /* Building selection UI */
+        #building-selector {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 5px;
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10;
+            max-width: 250px;
+        }
+        
+        #building-selector h3 {
+            color: white;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        #building-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .building-option {
+            background: rgba(60, 60, 60, 0.7);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 8px 12px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .building-option:hover {
+            background: rgba(80, 80, 80, 0.9);
+        }
+        
+        .building-option.selected {
+            background: #1f3a93;
+        }
+        
+        .building-option:before {
+            content: "";
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            margin-right: 8px;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            background-color: transparent;
+        }
+        
+        .building-option.selected:before {
+            background-color: #1f3a93;
+            content: "✓";
+            font-size: 10px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Route info UI */
+        #route-info {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 5px;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            color: white;
+            max-width: 250px;
+            font-size: 12px;
+        }
+        
+        #route-info h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        #selected-destination {
+            font-weight: bold;
+            color: #4dabf7;
+        }
 
         /* Print styles adapted for dark theme */
         @media print {
@@ -430,7 +555,27 @@
         </div>
 
         <div id="map-container">
-            <!-- Map will be loaded here -->
+            <!-- Map controls -->
+            <div id="map-controls">
+                <button class="map-control-btn" id="zoom-in-btn" title="Zoom In">+</button>
+                <button class="map-control-btn" id="zoom-out-btn" title="Zoom Out">-</button>
+                <button class="map-control-btn" id="reset-view-btn" title="Reset View">⟲</button>
+                <button class="map-control-btn" id="top-view-btn" title="Top View">⤓</button>
+            </div>
+            
+            <!-- Route information -->
+            <div id="route-info">
+                <h3>Navigation</h3>
+                <div>From: <span id="current-location">Main Entrance</span></div>
+                <div>To: <span id="selected-destination">Select a building</span></div>
+                <div id="distance-info" style="margin-top: 5px; font-size: 12px;"></div>
+            </div>
+            
+            <!-- Building selector -->
+            <div id="building-selector">
+                <h3>Campus Buildings</h3>
+                <div id="building-list"></div>
+            </div>
         </div>
     </div>
 
@@ -449,6 +594,15 @@
         let interactiveObjects = [];
         let isDragging = false;
         let previousMousePosition = { x: 0, y: 0 };
+        let cameraRotation = { x: 0, y: 0 };
+        let selectedBuilding = null;
+        let currentRoute = null;
+        let raycaster = new THREE.Raycaster();
+        let mouse = new THREE.Vector2();
+        let currentUserPosition = { x: 0, z: 12 }; // Default user position
+        
+        // Campus buildings data
+        let campusBuildings = {};
 
         // Initialize 3D Map
         function initMap() {
@@ -488,23 +642,45 @@
             document.addEventListener('mouseup', onMapMouseUp);
             window.addEventListener('resize', onMapResize);
             
+            // Setup map controls
+            setupMapControls();
+            
+            // Populate building list
+            populateBuildingList();
+            
             // Start animation loop
             animate();
         }
 
         function createCampusModel() {
-            // Floor/ground
-            const floorGeometry = new THREE.PlaneGeometry(40, 40);
-            const floorMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x95c795,
+            // Enhanced ground with terrain
+            const groundGeometry = new THREE.PlaneGeometry(50, 50, 20, 20);
+            const groundMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x4a6741,
                 roughness: 0.8
             });
-            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-            floor.rotation.x = -Math.PI / 2;
-            floor.position.y = -0.1;
-            mapScene.add(floor);
             
-            // Campus buildings
+            // Add some height variation to the ground
+            const positions = groundGeometry.attributes.position;
+            for (let i = 0; i < positions.count; i++) {
+                const x = positions.getX(i);
+                const z = positions.getZ(i);
+                const height = Math.sin(x * 0.1) * Math.cos(z * 0.1) * 0.1;
+                positions.setY(i, height);
+            }
+            positions.needsUpdate = true;
+            groundGeometry.computeVertexNormals();
+            
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = -0.1;
+            ground.receiveShadow = true;
+            mapScene.add(ground);
+            
+            // Add roads
+            createCampusRoads();
+            
+            // Campus buildings with enhanced designs
             const buildings = [
                 { id: 'main', name: 'Main Building', x: 0, z: 0, width: 4, depth: 3, height: 2, color: 0x555555 },
                 { id: 'library', name: 'Library', x: -8, z: 0, width: 3, depth: 3, height: 1.8, color: 0x5A6377 },
@@ -518,28 +694,157 @@
             ];
 
             buildings.forEach(building => {
-                const buildingGeometry = new THREE.BoxGeometry(building.width, building.height, building.depth);
-                const buildingMaterial = new THREE.MeshStandardMaterial({ 
-                    color: building.color,
-                    roughness: 0.7,
-                    metalness: 0.3
-                });
-                
-                const buildingMesh = new THREE.Mesh(buildingGeometry, buildingMaterial);
-                buildingMesh.position.set(building.x, building.height / 2, building.z);
-                buildingMesh.castShadow = true;
-                buildingMesh.receiveShadow = true;
-                
-                // Store building data for interaction
-                buildingMesh.userData = {
-                    id: building.id,
-                    name: building.name,
-                    type: 'building'
+                const buildingMesh = createEnhancedBuilding(building);
+                campusBuildings[building.id] = {
+                    mesh: buildingMesh,
+                    data: building
                 };
-                
-                mapScene.add(buildingMesh);
-                interactiveObjects.push(buildingMesh);
             });
+            
+            // Add landscape elements
+            addLandscapeElements();
+        }
+        
+        function createEnhancedBuilding(building) {
+            const buildingGeometry = new THREE.BoxGeometry(building.width, building.height, building.depth);
+            const buildingMaterial = new THREE.MeshStandardMaterial({ 
+                color: building.color,
+                roughness: 0.7,
+                metalness: 0.3
+            });
+            
+            const buildingMesh = new THREE.Mesh(buildingGeometry, buildingMaterial);
+            buildingMesh.position.set(building.x, building.height / 2, building.z);
+            buildingMesh.castShadow = true;
+            buildingMesh.receiveShadow = true;
+            
+            // Store original color and building data
+            buildingMesh.userData = {
+                originalColor: building.color,
+                id: building.id,
+                name: building.name,
+                type: 'building'
+            };
+            
+            // Add windows
+            addBuildingWindows(buildingMesh, building);
+            
+            // Add building label
+            createBuildingLabel(building.x, building.height + 0.8, building.z, building.name);
+            
+            mapScene.add(buildingMesh);
+            interactiveObjects.push(buildingMesh);
+            
+            return buildingMesh;
+        }
+        
+        function addBuildingWindows(buildingMesh, building) {
+            const windowMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x87CEEB, 
+                metalness: 0.9,
+                roughness: 0.1,
+                transparent: true,
+                opacity: 0.7
+            });
+            
+            const windowWidth = 0.3;
+            const windowHeight = 0.4;
+            const windowDepth = 0.05;
+            
+            // Front windows
+            for (let i = -1; i <= 1; i += 0.7) {
+                if (i !== 0) {
+                    const windowGeometry = new THREE.BoxGeometry(windowWidth, windowHeight, windowDepth);
+                    const window = new THREE.Mesh(windowGeometry, windowMaterial);
+                    window.position.set(i * (building.width * 0.25), 0, building.depth / 2 + 0.01);
+                    buildingMesh.add(window);
+                }
+            }
+        }
+        
+        function createBuildingLabel(x, y, z, text) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 256;
+            canvas.height = 64;
+            
+            context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            
+            context.font = 'bold 16px Arial';
+            context.fillStyle = 'white';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(text, canvas.width / 2, canvas.height / 2);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMaterial = new THREE.SpriteMaterial({ 
+                map: texture,
+                transparent: true,
+                opacity: 0.9
+            });
+            
+            const sprite = new THREE.Sprite(spriteMaterial);
+            sprite.position.set(x, y, z);
+            sprite.scale.set(4, 1, 1);
+            mapScene.add(sprite);
+        }
+        
+        function createCampusRoads() {
+            const roadMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
+            
+            // Main roads
+            createRoad(-15, 0, 30, 2, roadMaterial);
+            createRoad(0, -15, 2, 30, roadMaterial);
+            
+            // Secondary roads
+            createRoad(-10, 5, 10, 1.5, roadMaterial);
+            createRoad(5, 5, 10, 1.5, roadMaterial);
+            createRoad(-10, -7, 15, 1.5, roadMaterial);
+            createRoad(7, -7, 8, 1.5, roadMaterial);
+        }
+        
+        function createRoad(x, z, width, depth, material) {
+            const roadGeo = new THREE.PlaneGeometry(width, depth);
+            const road = new THREE.Mesh(roadGeo, material);
+            road.rotation.x = -Math.PI / 2;
+            road.position.y = -0.05;
+            road.position.x = x;
+            road.position.z = z;
+            mapScene.add(road);
+        }
+        
+        function addLandscapeElements() {
+            // Add trees
+            const treePositions = [
+                { x: -15, z: -15 }, { x: -12, z: -10 }, { x: -18, z: -5 },
+                { x: 15, z: 15 }, { x: 12, z: 10 }, { x: 18, z: 5 },
+                { x: -15, z: 15 }, { x: -12, z: 10 }, { x: -18, z: 5 },
+                { x: 15, z: -15 }, { x: 12, z: -10 }, { x: 18, z: -5 }
+            ];
+            
+            treePositions.forEach(pos => {
+                createTree(pos.x, pos.z);
+            });
+        }
+        
+        function createTree(x, z) {
+            const trunkGeometry = new THREE.CylinderGeometry(0.2, 0.3, 0.8, 8);
+            const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+            trunk.position.set(x, 0.4, z);
+            
+            const foliageGeometry = new THREE.ConeGeometry(1, 1.5, 8);
+            const foliageMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x228B22,
+                roughness: 0.8
+            });
+            
+            const foliage = new THREE.Mesh(foliageGeometry, foliageMaterial);
+            foliage.position.y = 1.3;
+            trunk.add(foliage);
+            
+            mapScene.add(trunk);
         }
 
         function onMapMouseDown(event) {
@@ -548,6 +853,22 @@
                 x: event.clientX,
                 y: event.clientY
             };
+            
+            // Handle building selection
+            const container = document.getElementById('map-container');
+            const rect = container.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, mapCamera);
+            const intersects = raycaster.intersectObjects(interactiveObjects);
+            
+            if (intersects.length > 0) {
+                const building = intersects[0].object;
+                if (building.userData.type === 'building') {
+                    selectDestination(building.userData.id, building.userData.name);
+                }
+            }
         }
 
         function onMapMouseMove(event) {
@@ -555,14 +876,17 @@
                 const deltaX = event.clientX - previousMousePosition.x;
                 const deltaY = event.clientY - previousMousePosition.y;
                 
-                // Rotate camera around the center
-                const spherical = new THREE.Spherical();
-                spherical.setFromVector3(mapCamera.position);
-                spherical.theta -= deltaX * 0.01;
-                spherical.phi += deltaY * 0.01;
-                spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+                // Rotate camera based on mouse movement
+                cameraRotation.y += deltaX * 0.01;
+                cameraRotation.x += deltaY * 0.01;
+                cameraRotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraRotation.x));
                 
-                mapCamera.position.setFromSpherical(spherical);
+                // Calculate camera position
+                const distance = mapCamera.position.length();
+                mapCamera.position.x = distance * Math.sin(cameraRotation.y) * Math.cos(cameraRotation.x);
+                mapCamera.position.z = distance * Math.cos(cameraRotation.y) * Math.cos(cameraRotation.x);
+                mapCamera.position.y = distance * Math.sin(cameraRotation.x);
+                
                 mapCamera.lookAt(0, 0, 0);
                 
                 previousMousePosition.x = event.clientX;
@@ -584,6 +908,134 @@
         function animate() {
             requestAnimationFrame(animate);
             mapRenderer.render(mapScene, mapCamera);
+        }
+        
+        function setupMapControls() {
+            // Zoom controls
+            document.getElementById('zoom-in-btn').addEventListener('click', function() {
+                const distance = mapCamera.position.length();
+                if (distance > 5) {
+                    mapCamera.position.multiplyScalar(0.8);
+                }
+            });
+            
+            document.getElementById('zoom-out-btn').addEventListener('click', function() {
+                const distance = mapCamera.position.length();
+                if (distance < 50) {
+                    mapCamera.position.multiplyScalar(1.2);
+                }
+            });
+            
+            // Reset view
+            document.getElementById('reset-view-btn').addEventListener('click', function() {
+                mapCamera.position.set(0, 15, 20);
+                mapCamera.lookAt(0, 0, 0);
+                cameraRotation = { x: 0, y: 0 };
+            });
+            
+            // Top view
+            document.getElementById('top-view-btn').addEventListener('click', function() {
+                mapCamera.position.set(0, 30, 0.1);
+                mapCamera.lookAt(0, 0, 0);
+                cameraRotation = { x: Math.PI/2 - 0.01, y: 0 };
+            });
+        }
+        
+        function populateBuildingList() {
+            const buildingList = document.getElementById('building-list');
+            
+            Object.keys(campusBuildings).forEach(buildingId => {
+                const building = campusBuildings[buildingId];
+                const button = document.createElement('button');
+                button.className = 'building-option';
+                button.textContent = building.data.name;
+                button.dataset.buildingId = buildingId;
+                
+                button.addEventListener('click', function() {
+                    selectDestination(buildingId, building.data.name);
+                    
+                    // Update UI
+                    document.querySelectorAll('.building-option').forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+                });
+                
+                buildingList.appendChild(button);
+            });
+        }
+        
+        function selectDestination(buildingId, buildingName) {
+            // Clear any existing routes
+            clearRoute();
+            
+            // Deselect previous building
+            if (selectedBuilding) {
+                const prevBuilding = campusBuildings[selectedBuilding];
+                if (prevBuilding && prevBuilding.mesh) {
+                    prevBuilding.mesh.material.color.setHex(prevBuilding.mesh.userData.originalColor);
+                    prevBuilding.mesh.material.emissive.setHex(0x000000);
+                }
+            }
+            
+            // Select new building
+            selectedBuilding = buildingId;
+            const building = campusBuildings[buildingId];
+            
+            if (building && building.mesh) {
+                // Highlight selected building
+                building.mesh.material.emissive.setHex(0x1f3a93);
+                
+                // Update destination display
+                const destinationElement = document.getElementById('selected-destination');
+                if (destinationElement) {
+                    destinationElement.textContent = buildingName;
+                }
+                
+                // Calculate and show route
+                currentRoute = calculateRoute(currentUserPosition, {
+                    x: building.data.x,
+                    z: building.data.z
+                });
+            }
+        }
+        
+        function calculateRoute(from, to) {
+            // Create a simple route
+            const points = [
+                new THREE.Vector3(from.x, 0.1, from.z),
+                new THREE.Vector3((from.x + to.x) / 2, 0.1, from.z),
+                new THREE.Vector3((from.x + to.x) / 2, 0.1, to.z),
+                new THREE.Vector3(to.x, 0.1, to.z)
+            ];
+            
+            const curve = new THREE.CatmullRomCurve3(points);
+            const routePoints = curve.getPoints(50);
+            
+            const routeGeometry = new THREE.BufferGeometry().setFromPoints(routePoints);
+            const routeMaterial = new THREE.LineBasicMaterial({
+                color: 0x00ff00,
+                linewidth: 3
+            });
+            
+            const routeLine = new THREE.Line(routeGeometry, routeMaterial);
+            mapScene.add(routeLine);
+            
+            // Calculate distance
+            const distance = Math.sqrt(Math.pow(to.x - from.x, 2) + Math.pow(to.z - from.z, 2)) * 10; // Scale to meters
+            const walkingTime = Math.max(2, Math.ceil(distance / 70)); // Rough walking time
+            
+            const distanceInfo = document.getElementById('distance-info');
+            if (distanceInfo) {
+                distanceInfo.textContent = `Distance: ${Math.round(distance)}m • Walking time: ${walkingTime}min`;
+            }
+            
+            return routeLine;
+        }
+        
+        function clearRoute() {
+            if (currentRoute) {
+                mapScene.remove(currentRoute);
+                currentRoute = null;
+            }
         }
 
         // Show login modal

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unimate - Map Interface</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initGoogleMap" async defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         /* Base styles */
         body {
@@ -226,128 +226,152 @@
     </div>
 
     <script>
-        let map;
+        // 3D Map variables
+        let mapScene, mapCamera, mapRenderer;
+        let interactiveObjects = [];
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
         
-        // Initialize Google Maps
-        function initGoogleMap() {
-            // Remove the API key requirement for development
-            if (!google || !google.maps) {
-                console.error("Google Maps API not loaded. Using fallback.");
-                document.getElementById('map-container').innerHTML = 
-                    '<img src="https://via.placeholder.com/1200x800/e0e0e0/888888?text=Map+Interface+Placeholder" style="width:100%;height:100%;object-fit:cover;">';
-                return;
-            }
+        // Initialize 3D Map
+        function initMap() {
+            const container = document.getElementById('map-container');
+            
+            // Create scene
+            mapScene = new THREE.Scene();
+            mapScene.background = new THREE.Color(0x1a1a1a);
+            
+            // Create camera
+            mapCamera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            mapCamera.position.set(0, 15, 20);
+            mapCamera.lookAt(0, 0, 0);
+            
+            // Create renderer
+            mapRenderer = new THREE.WebGLRenderer({ antialias: true });
+            mapRenderer.setSize(container.clientWidth, container.clientHeight);
+            mapRenderer.setPixelRatio(window.devicePixelRatio);
+            mapRenderer.shadowMap.enabled = true;
+            container.appendChild(mapRenderer.domElement);
+            
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            mapScene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 5);
+            directionalLight.castShadow = true;
+            mapScene.add(directionalLight);
+            
+            // Create campus model
+            createCampusModel();
+            
+            // Add event listeners for map interaction
+            container.addEventListener('mousedown', onMapMouseDown);
+            document.addEventListener('mousemove', onMapMouseMove);
+            document.addEventListener('mouseup', onMapMouseUp);
+            window.addEventListener('resize', onMapResize);
+            
+            // Start animation loop
+            animate();
+        }
 
-            map = new google.maps.Map(document.getElementById('map-container'), {
-                center: { lat: -36.852, lng: 174.768 }, // Auckland coordinates
-                zoom: 14,
-                styles: [
-                    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-                    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-                    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-                    {
-                        featureType: "administrative.locality",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#d59563" }],
-                    },
-                    {
-                        featureType: "poi",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#d59563" }],
-                    },
-                    {
-                        featureType: "poi.park",
-                        elementType: "geometry",
-                        stylers: [{ color: "#263c3f" }],
-                    },
-                    {
-                        featureType: "poi.park",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#6b9a76" }],
-                    },
-                    {
-                        featureType: "road",
-                        elementType: "geometry",
-                        stylers: [{ color: "#38414e" }],
-                    },
-                    {
-                        featureType: "road",
-                        elementType: "geometry.stroke",
-                        stylers: [{ color: "#212a37" }],
-                    },
-                    {
-                        featureType: "road",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#9ca5b3" }],
-                    },
-                    {
-                        featureType: "road.highway",
-                        elementType: "geometry",
-                        stylers: [{ color: "#746855" }],
-                    },
-                    {
-                        featureType: "road.highway",
-                        elementType: "geometry.stroke",
-                        stylers: [{ color: "#1f2835" }],
-                    },
-                    {
-                        featureType: "road.highway",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#f3d19c" }],
-                    },
-                    {
-                        featureType: "transit",
-                        elementType: "geometry",
-                        stylers: [{ color: "#2f3948" }],
-                    },
-                    {
-                        featureType: "transit.station",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#d59563" }],
-                    },
-                    {
-                        featureType: "water",
-                        elementType: "geometry",
-                        stylers: [{ color: "#17263c" }],
-                    },
-                    {
-                        featureType: "water",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#515c6d" }],
-                    },
-                    {
-                        featureType: "water",
-                        elementType: "labels.text.stroke",
-                        stylers: [{ color: "#17263c" }],
-                    },
-                ],
+        function createCampusModel() {
+            // Floor/ground
+            const floorGeometry = new THREE.PlaneGeometry(40, 40);
+            const floorMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x95c795,
+                roughness: 0.8
             });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -0.1;
+            mapScene.add(floor);
+            
+            // Campus buildings
+            const buildings = [
+                { id: 'main', name: 'Main Building', x: 0, z: 0, width: 4, depth: 3, height: 2, color: 0x555555 },
+                { id: 'library', name: 'Library', x: -8, z: 0, width: 3, depth: 3, height: 1.8, color: 0x5A6377 },
+                { id: 'engineering', name: 'Engineering Building', x: 8, z: 0, width: 4, depth: 4, height: 2.5, color: 0x7B4397 },
+                { id: 'science', name: 'Science Building', x: 0, z: 8, width: 3.5, depth: 3, height: 2.2, color: 0x4A90E2 },
+                { id: 'arts', name: 'Arts Building', x: -8, z: 8, width: 3, depth: 2.5, height: 1.5, color: 0xE74C3C },
+                { id: 'business', name: 'Business School', x: 8, z: 8, width: 3.5, depth: 3.5, height: 2.8, color: 0x8E44AD },
+                { id: 'medical', name: 'Medical School', x: 0, z: -8, width: 4, depth: 3, height: 2.5, color: 0x2ECC71 },
+                { id: 'cafeteria', name: 'Student Cafeteria', x: -8, z: -8, width: 3, depth: 2, height: 1.2, color: 0xF39C12 },
+                { id: 'sports', name: 'Sports Center', x: 8, z: -8, width: 5, depth: 4, height: 1.8, color: 0x1ABC9C }
+            ];
 
-            // Add some sample markers
-            addMarker({ lat: -36.852, lng: 174.768 }, "University of Auckland");
-            addMarker({ lat: -36.8567, lng: 174.7628 }, "Central Library");
-            addMarker({ lat: -36.8506, lng: 174.7679 }, "Engineering Building");
-        }
-
-        // Add a marker to the map
-        function addMarker(position, title) {
-            if (map) {
-                new google.maps.Marker({
-                    position: position,
-                    map: map,
-                    title: title
+            buildings.forEach(building => {
+                const buildingGeometry = new THREE.BoxGeometry(building.width, building.height, building.depth);
+                const buildingMaterial = new THREE.MeshStandardMaterial({ 
+                    color: building.color,
+                    roughness: 0.7,
+                    metalness: 0.3
                 });
+                
+                const buildingMesh = new THREE.Mesh(buildingGeometry, buildingMaterial);
+                buildingMesh.position.set(building.x, building.height / 2, building.z);
+                buildingMesh.castShadow = true;
+                buildingMesh.receiveShadow = true;
+                
+                // Store building data for interaction
+                buildingMesh.userData = {
+                    id: building.id,
+                    name: building.name,
+                    type: 'building'
+                };
+                
+                mapScene.add(buildingMesh);
+                interactiveObjects.push(buildingMesh);
+            });
+        }
+
+        function onMapMouseDown(event) {
+            isDragging = true;
+            previousMousePosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
+        }
+
+        function onMapMouseMove(event) {
+            if (isDragging) {
+                const deltaX = event.clientX - previousMousePosition.x;
+                const deltaY = event.clientY - previousMousePosition.y;
+                
+                // Rotate camera around the center
+                const spherical = new THREE.Spherical();
+                spherical.setFromVector3(mapCamera.position);
+                spherical.theta -= deltaX * 0.01;
+                spherical.phi += deltaY * 0.01;
+                spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+                
+                mapCamera.position.setFromSpherical(spherical);
+                mapCamera.lookAt(0, 0, 0);
+                
+                previousMousePosition.x = event.clientX;
+                previousMousePosition.y = event.clientY;
             }
         }
 
-        // Fallback if Google Maps API fails to load
-        window.setTimeout(function() {
-            if (!window.google || !window.google.maps) {
-                console.warn("Google Maps API not loaded after timeout. Using fallback.");
-                document.getElementById('map-container').innerHTML = 
-                    '<img src="https://via.placeholder.com/1200x800/e0e0e0/888888?text=Map+Interface+Placeholder" style="width:100%;height:100%;object-fit:cover;">';
-            }
-        }, 3000);
+        function onMapMouseUp() {
+            isDragging = false;
+        }
+
+        function onMapResize() {
+            const container = document.getElementById('map-container');
+            mapCamera.aspect = container.clientWidth / container.clientHeight;
+            mapCamera.updateProjectionMatrix();
+            mapRenderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            mapRenderer.render(mapScene, mapCamera);
+        }
+
+        // Initialize the map when the page loads
+        window.addEventListener('load', function() {
+            initMap();
+        });
     </script>
 </body>
 

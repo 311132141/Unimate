@@ -304,7 +304,33 @@ header h1 {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    /* Switch to vertical layout for mobile devices */
+    .main-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #333;
+        order: -1; /* Ensure sidebar appears above main content */
+    }
+    
     #timetable {
         font-size: 0.9rem;
+    }
+}
+
+/* Portrait tablet layout - stack vertically on tall, narrow screens */
+@media (max-width: 1024px) and (orientation: portrait) {
+    .main-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #333;
+        order: -1;
     }
 }

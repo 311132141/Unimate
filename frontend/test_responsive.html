@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Layout Test - Unimate</title>
+    <link href="../static/site.css" rel="stylesheet">
+    <style>
+        /* Test-specific styles to highlight the layout changes */
+        .sidebar {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%) !important;
+        }
+        #map-container {
+            background: linear-gradient(135deg, #222 0%, #333 100%) !important;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            text-align: center;
+            padding: 2rem;
+        }
+        .layout-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .breakpoint-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            z-index: 9999;
+        }
+        
+        /* Show different indicators based on screen size */
+        .breakpoint-indicator::after {
+            content: "Desktop (>1024px)";
+        }
+        
+        @media (max-width: 1024px) and (orientation: portrait) {
+            .breakpoint-indicator::after {
+                content: "Tablet Portrait (≤1024px)";
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .breakpoint-indicator::after {
+                content: "Mobile (≤768px)";
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="breakpoint-indicator"></div>
+    
+    <header>
+        <h1>Unimate - Responsive Test</h1>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Test responsive layout">
+        </div>
+        <button class="login-button">Test Button</button>
+    </header>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h2>Sidebar Content</h2>
+                <div class="layout-info">
+                    <strong>Responsive Layout Test</strong><br>
+                    Resize your browser window to see the layout change:
+                    <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                        <li><strong>Wide screens:</strong> Sidebar left, content right</li>
+                        <li><strong>Mobile/Portrait:</strong> Sidebar top, content bottom</li>
+                    </ul>
+                </div>
+                <div class="event-list">
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-title">Navigation Item 1</div>
+                            <div class="event-meta">Sample sidebar content</div>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-title">Navigation Item 2</div>
+                            <div class="event-meta">More sidebar content</div>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <div class="event-content">
+                            <div class="event-title">Settings</div>
+                            <div class="event-meta">Configuration options</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="map-container">
+            <div>
+                <h2>Main Content Area</h2>
+                <p>This demonstrates the responsive layout behavior:</p>
+                <div class="layout-info">
+                    <strong>Current Layout:</strong><br>
+                    • <strong>Horizontal (Landscape):</strong> Sidebar appears on the left, main content on the right<br>
+                    • <strong>Vertical (Portrait/Mobile):</strong> Sidebar appears on top, main content below<br><br>
+                    <strong>Breakpoints:</strong><br>
+                    • Mobile: ≤768px width<br>
+                    • Tablet Portrait: ≤1024px width + portrait orientation<br>
+                    • Desktop: >1024px width or landscape orientation
+                </div>
+                <p><strong>Try:</strong> Resize your browser window or rotate your device to see the layout automatically switch between horizontal and vertical orientations.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

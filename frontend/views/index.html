@@ -436,7 +436,7 @@
         }
 
         function createCampusModel() {
-            // Floor/ground
+            // Floor/ground - matching campus layout from image
             const floorGeometry = new THREE.PlaneGeometry(40, 40);
             const floorMaterial = new THREE.MeshStandardMaterial({ 
                 color: 0x95c795,
@@ -447,42 +447,143 @@
             floor.position.y = -0.1;
             mapScene.add(floor);
             
-            // Campus buildings
+            // Campus buildings - same layout as dashboard map
             const buildings = [
                 { id: 'main', name: 'Main Building', x: 0, z: 0, width: 4, depth: 3, height: 2, color: 0x555555 },
                 { id: 'library', name: 'Library', x: -8, z: 0, width: 3, depth: 3, height: 1.8, color: 0x5A6377 },
-                { id: 'engineering', name: 'Engineering Building', x: 8, z: 0, width: 4, depth: 4, height: 2.5, color: 0x7B4397 },
-                { id: 'science', name: 'Science Building', x: 0, z: 8, width: 3.5, depth: 3, height: 2.2, color: 0x4A90E2 },
-                { id: 'arts', name: 'Arts Building', x: -8, z: 8, width: 3, depth: 2.5, height: 1.5, color: 0xE74C3C },
-                { id: 'business', name: 'Business School', x: 8, z: 8, width: 3.5, depth: 3.5, height: 2.8, color: 0x8E44AD },
-                { id: 'medical', name: 'Medical School', x: 0, z: -8, width: 4, depth: 3, height: 2.5, color: 0x2ECC71 },
-                { id: 'cafeteria', name: 'Student Cafeteria', x: -8, z: -8, width: 3, depth: 2, height: 1.2, color: 0xF39C12 },
-                { id: 'sports', name: 'Sports Center', x: 8, z: -8, width: 5, depth: 4, height: 1.8, color: 0x1ABC9C }
+                { id: 'science', name: 'Science Block', x: 6, z: -5, width: 3, depth: 2.5, height: 1.5, color: 0x4C6A73 },
+                { id: 'engineering', name: 'Engineering Building', x: -5, z: 6, width: 4, depth: 2, height: 2, color: 0x5D6854 },
+                { id: 'bizschool', name: 'Business School', x: 8, z: 6, width: 5, depth: 3, height: 3, color: 0x876E58 },
+                { id: 'student_center', name: 'Student Center', x: 0, z: -8, width: 6, depth: 4, height: 1, color: 0x786558 },
+                { id: 'general', name: 'General Building', x: -6, z: -6, width: 3, depth: 5, height: 2, color: 0x606060 },
+                { id: 'arts', name: 'Arts Building', x: 10, z: 0, width: 3, depth: 2, height: 2.2, color: 0x67685D },
+                { id: 'health', name: 'Health Sciences', x: 7, z: -9, width: 2.5, depth: 2.5, height: 2, color: 0x607673 }
             ];
-
+            
+            // Store building references for interaction
+            window.campusBuildings = {};
+            
+            // Create all buildings
             buildings.forEach(building => {
-                const buildingGeometry = new THREE.BoxGeometry(building.width, building.height, building.depth);
-                const buildingMaterial = new THREE.MeshStandardMaterial({ 
-                    color: building.color,
-                    roughness: 0.7,
-                    metalness: 0.3
-                });
+                const buildingMesh = createBuilding(
+                    building.x, 
+                    building.z, 
+                    building.width, 
+                    building.depth, 
+                    building.height, 
+                    building.color, 
+                    building.name,
+                    building.id
+                );
                 
-                const buildingMesh = new THREE.Mesh(buildingGeometry, buildingMaterial);
-                buildingMesh.position.set(building.x, building.height / 2, building.z);
-                buildingMesh.castShadow = true;
-                buildingMesh.receiveShadow = true;
-                
-                // Store building data for interaction
-                buildingMesh.userData = {
-                    id: building.id,
-                    name: building.name,
-                    type: 'building'
+                // Store reference for interaction
+                window.campusBuildings[building.id] = {
+                    mesh: buildingMesh,
+                    data: building
                 };
-                
-                mapScene.add(buildingMesh);
-                interactiveObjects.push(buildingMesh);
             });
+            
+            // Create roads
+            createRoads();
+        }
+        
+        function createBuilding(x, z, width, depth, height, color, name, id) {
+            // Create a group to hold the building and its details
+            const buildingGroup = new THREE.Group();
+            buildingGroup.position.set(x, 0, z);
+            
+            // Create the main building structure
+            const geometry = new THREE.BoxGeometry(width, height, depth);
+            
+            // Use custom material with basic details
+            const material = new THREE.MeshStandardMaterial({ 
+                color: color,
+                metalness: 0.1,
+                roughness: 0.8
+            });
+            
+            const building = new THREE.Mesh(geometry, material);
+            building.position.y = height/2;
+            
+            // Store original color for hover effects
+            building.userData = {
+                originalColor: color,
+                name: name,
+                id: id
+            };
+            
+            // Add the main building to the group
+            buildingGroup.add(building);
+            
+            // Add windows for more detail
+            addWindows(buildingGroup, width, depth, height);
+            
+            // Add the building group to the scene
+            mapScene.add(buildingGroup);
+            
+            // Make building interactive
+            building.callback = function() {
+                console.log('Selected building:', name);
+            };
+            
+            // Add to interactive objects array
+            interactiveObjects.push(building);
+            
+            return building;
+        }
+        
+        function addWindows(buildingGroup, width, depth, height) {
+            // Window material
+            const windowMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x90BBDB, 
+                metalness: 0.9,
+                roughness: 0.1,
+                transparent: true,
+                opacity: 0.7
+            });
+            
+            // Window dimensions
+            const windowWidth = 0.3;
+            const windowHeight = 0.4;
+            const windowDepth = 0.05;
+            
+            // Front and back windows - simplified for dashboard view
+            const frontWindowZ = depth / 2 + 0.01;
+            
+            for (let i = -1; i <= 1; i += 2) { // Just add windows on the sides for simplicity
+                const x = i * (width / 3);
+                
+                // Front windows
+                const frontWindowGeometry = new THREE.BoxGeometry(windowWidth, windowHeight, windowDepth);
+                const frontWindow = new THREE.Mesh(frontWindowGeometry, windowMaterial);
+                frontWindow.position.set(x, height * 0.4, frontWindowZ);
+                buildingGroup.add(frontWindow);
+            }
+        }
+        
+        function createRoads() {
+            const roadMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
+            
+            // Main roads - same as dashboard map
+            createRoad(-15, 0, 30, 2, roadMaterial);
+            createRoad(0, -15, 2, 30, roadMaterial);
+            
+            // Secondary roads
+            createRoad(-10, 5, 10, 1.5, roadMaterial);
+            createRoad(5, 5, 10, 1.5, roadMaterial);
+            createRoad(-10, -7, 15, 1.5, roadMaterial);
+            createRoad(7, -7, 8, 1.5, roadMaterial);
+        }
+        
+        function createRoad(x, z, width, depth, material) {
+            const roadGeo = new THREE.PlaneGeometry(width, depth);
+            const road = new THREE.Mesh(roadGeo, material);
+            road.rotation.x = -Math.PI / 2;
+            road.position.y = -0.05;
+            road.position.x = x;
+            road.position.z = z;
+            mapScene.add(road);
+            return road;
         }
 
         function onMapMouseDown(event) {

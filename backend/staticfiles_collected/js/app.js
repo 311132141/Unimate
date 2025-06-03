@@ -298,8 +298,13 @@ function renderTimetable(events) {
 
 // Show event details and route
 function showEventDetails(event) {
-    // Show the event details in a modal or highlight
-    alert(`${event.title}\nLocation: ${event.room ? `${event.room.building} ${event.room.number}` : 'TBA'}\nTime: ${new Date(event.start_time).toLocaleString()} - ${new Date(event.end_time).toLocaleTimeString()}\nLecturer: ${event.lecturer || 'N/A'}`);
+    // Show the event details in a modal popup
+    if (typeof showEventDetailsModal === 'function') {
+        showEventDetailsModal(event);
+    } else {
+        // Fallback to alert if modal function is not available
+        alert(`${event.title}\nLocation: ${event.room ? `${event.room.building} ${event.room.number}` : 'TBA'}\nTime: ${new Date(event.start_time).toLocaleString()} - ${new Date(event.end_time).toLocaleTimeString()}\nLecturer: ${event.lecturer || 'N/A'}`);
+    }
 
     // Get route to the room
     if (event.room) {

@@ -385,6 +385,129 @@
             z-index: 1000;
             border: 1px solid #3b82f6;
         }
+
+        /* Event Details Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            padding: 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 500px;
+            color: #fff;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: #fff;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .event-detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            align-items: flex-start;
+        }
+
+        .event-detail-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #888;
+            min-width: 80px;
+        }
+
+        .urgent-badge {
+            background-color: #ef4444;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #333;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .modal-btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            background-color: #2563eb;
+        }
+
+        .modal-btn-secondary {
+            background-color: #374151;
+            color: #d1d5db;
+        }
+
+        .modal-btn-secondary:hover {
+            background-color: #4b5563;
+        }
     </style>
 </head>
 
@@ -849,6 +972,9 @@
                 const startTime = new Date(event.start_time);
                 const endTime = new Date(event.end_time);
             
+            // Store full event data on the DOM element for later use
+            item.eventData = event;
+            
             // Store building ID for navigation
             let buildingId = '';
             if (event.room && event.room.building) {
@@ -881,10 +1007,9 @@
                     navigateToBuilding(buildingId);
                 });
                 
-                // Make entire item clickable to view details (optional)
+                // Make entire item clickable to view details
                 item.addEventListener('click', function() {
-                    // Could show event details in the future
-                    console.log('Event clicked:', event.title);
+                    showEventDetailsModal(event);
                 });
             }
             
@@ -1001,11 +1126,13 @@
                                 const infoItems = child.querySelectorAll('.timetable-info div');
                                 const info1 = infoItems[0] ? infoItems[0].textContent : '';
                                 const info2 = infoItems[1] ? infoItems[1].textContent : '';
+                                const eventData = child.eventData; // Get stored event data
                                 
                                 // Create new item
                                 const fullItem = document.createElement('div');
                                 fullItem.className = child.className;
                                 if (buildingId) fullItem.dataset.buildingId = buildingId;
+                                if (eventData) fullItem.eventData = eventData; // Store event data on the copy too
                                 
                                 fullItem.innerHTML = `
                                     <div class="timetable-title">${title}</div>
@@ -1025,7 +1152,9 @@
                                     });
                                     
                                     fullItem.addEventListener('click', function() {
-                                        console.log('Full timetable event clicked:', title);
+                                        if (fullItem.eventData) {
+                                            showEventDetailsModal(fullItem.eventData);
+                                        }
                                     });
                                 }
                                 
@@ -2555,7 +2684,130 @@
             
             return routeLine;
         }
+
+        // Event Details Modal Functions
+        let currentModalEvent = null;
+
+        function showEventDetailsModal(event) {
+            currentModalEvent = event;
+            
+            // Populate modal with event details
+            document.getElementById('modal-event-title').textContent = event.title || 'Untitled Event';
+            
+            // Course info
+            const courseInfo = event.course ? `${event.course.code} - ${event.course.name || event.course.code}` : 'N/A';
+            document.getElementById('modal-event-course').textContent = courseInfo;
+            
+            // Event type
+            const eventType = event.event_type === 'exam' ? 'Exam' : 'Class';
+            document.getElementById('modal-event-type').textContent = eventType;
+            
+            // Location
+            const location = event.room ? `${event.room.building} ${event.room.number}` : 'TBA';
+            document.getElementById('modal-event-location').textContent = location;
+            
+            // Time
+            const startTime = new Date(event.start_time);
+            const endTime = new Date(event.end_time);
+            const timeInfo = `${startTime.toLocaleDateString()} • ${startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${endTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+            document.getElementById('modal-event-time').textContent = timeInfo;
+            
+            // Lecturer
+            document.getElementById('modal-event-lecturer').textContent = event.lecturer || 'N/A';
+            
+            // Urgent badge
+            const urgentBadge = document.getElementById('modal-event-urgent');
+            if (event.is_urgent) {
+                urgentBadge.style.display = 'block';
+            } else {
+                urgentBadge.style.display = 'none';
+            }
+            
+            // Navigate button
+            const navigateBtn = document.getElementById('modal-navigate-btn');
+            if (event.room && event.room.building) {
+                navigateBtn.style.display = 'inline-block';
+            } else {
+                navigateBtn.style.display = 'none';
+            }
+            
+            // Show modal
+            document.getElementById('event-details-modal').style.display = 'flex';
+        }
+
+        function closeEventModal() {
+            document.getElementById('event-details-modal').style.display = 'none';
+            currentModalEvent = null;
+        }
+
+        function navigateFromModal() {
+            if (currentModalEvent && currentModalEvent.room && currentModalEvent.room.building) {
+                // Determine building ID for navigation
+                let buildingId = '';
+                switch(currentModalEvent.room.building) {
+                    case 'ENG': buildingId = 'engineering'; break;
+                    case 'SCI': buildingId = 'science'; break;
+                    case 'LIB': buildingId = 'library'; break;
+                    case 'BUS': buildingId = 'bizschool'; break;
+                    case 'ARTS': buildingId = 'arts'; break;
+                    case 'HSB': buildingId = 'health'; break;
+                    default: buildingId = 'main';
+                }
+                
+                closeEventModal();
+                navigateToBuilding(buildingId);
+            }
+        }
+
+        // Close modal when clicking outside of it
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('event-details-modal');
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeEventModal();
+                }
+            });
+        });
     </script>
+
+    <!-- Event Details Modal -->
+    <div id="event-details-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-event-title">Event Details</h3>
+                <button class="modal-close" onclick="closeEventModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="event-detail-item">
+                    <span class="detail-label">Course:</span>
+                    <span id="modal-event-course">-</span>
+                </div>
+                <div class="event-detail-item">
+                    <span class="detail-label">Type:</span>
+                    <span id="modal-event-type">-</span>
+                </div>
+                <div class="event-detail-item">
+                    <span class="detail-label">Location:</span>
+                    <span id="modal-event-location">-</span>
+                </div>
+                <div class="event-detail-item">
+                    <span class="detail-label">Time:</span>
+                    <span id="modal-event-time">-</span>
+                </div>
+                <div class="event-detail-item">
+                    <span class="detail-label">Lecturer:</span>
+                    <span id="modal-event-lecturer">-</span>
+                </div>
+                <div id="modal-event-urgent" class="urgent-badge" style="display: none;">
+                    URGENT
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" onclick="closeEventModal()">Close</button>
+                <button id="modal-navigate-btn" class="modal-btn modal-btn-primary" style="display: none;" onclick="navigateFromModal()">Navigate</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html> 

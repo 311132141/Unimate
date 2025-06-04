@@ -350,6 +350,9 @@ function createEventDetailsModal() {
     const modal = document.createElement('div');
     modal.id = 'event-details-modal';
     modal.className = 'modal-overlay';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'modal-event-title');
     modal.style.cssText = `
         position: fixed;
         top: 0;
@@ -374,6 +377,8 @@ function createEventDetailsModal() {
         max-width: 28rem;
         color: #fff;
         position: relative;
+        max-height: 80vh;
+        overflow-y: auto;
     `;
 
     modalContent.innerHTML = `
@@ -534,6 +539,8 @@ function hideEventDetailsModal() {
     const modal = document.getElementById('event-details-modal');
     if (modal) {
         modal.style.display = 'none';
+        // Try to return focus to the body or first focusable element
+        document.body.focus();
     }
 }
 

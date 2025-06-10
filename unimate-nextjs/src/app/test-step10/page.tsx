@@ -41,7 +41,7 @@ export default function TestStep10Page() {
             } else {
                 results.push('❌ LocalStorage failed');
             }
-        } catch (error) {
+        } catch {
             results.push('❌ LocalStorage error');
         }
 
@@ -63,7 +63,7 @@ export default function TestStep10Page() {
             } else {
                 return `❌ API proxy error: ${response.status}`;
             }
-        } catch (error) {
+        } catch {
             return '❌ API proxy connection failed';
         }
     };

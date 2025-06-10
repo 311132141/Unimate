@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 0 0% 100%;
+        --foreground: 222.2 84% 4.9%;
+        --card: 0 0% 100%;
+        --card-foreground: 222.2 84% 4.9%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 222.2 84% 4.9%;
+        --primary: 221.2 83.2% 53.3%;
+        --primary-foreground: 210 40% 98%;
+        --secondary: 210 40% 96%;
+        --secondary-foreground: 222.2 84% 4.9%;
+        --muted: 210 40% 96%;
+        --muted-foreground: 215.4 16.3% 46.9%;
+        --accent: 210 40% 96%;
+        --accent-foreground: 222.2 84% 4.9%;
+        --destructive: 0 72.22% 50.59%;
+        --destructive-foreground: 210 40% 98%;
+        --border: 214.3 31.8% 91.4%;
+        --input: 214.3 31.8% 91.4%;
+        --ring: 221.2 83.2% 53.3%;
+        --radius: 0.5rem;
+        --chart-1: 12 76% 61%;
+        --chart-2: 173 58% 39%;
+        --chart-3: 197 37% 24%;
+        --chart-4: 43 74% 66%;
+        --chart-5: 27 87% 67%;
+    }
+
+    .dark {
+        --background: 222.2 84% 4.9%;
+        --foreground: 210 40% 98%;
+        --card: 222.2 84% 4.9%;
+        --card-foreground: 210 40% 98%;
+        --popover: 222.2 84% 4.9%;
+        --popover-foreground: 210 40% 98%;
+        --primary: 217.2 91.2% 59.8%;
+        --primary-foreground: 222.2 84% 4.9%;
+        --secondary: 217.2 32.6% 17.5%;
+        --secondary-foreground: 210 40% 98%;
+        --muted: 217.2 32.6% 17.5%;
+        --muted-foreground: 215 20.2% 65.1%;
+        --accent: 217.2 32.6% 17.5%;
+        --accent-foreground: 210 40% 98%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 210 40% 98%;
+        --border: 217.2 32.6% 17.5%;
+        --input: 217.2 32.6% 17.5%;
+        --ring: 224.3 76.3% 94.1%;
+        --chart-1: 220 70% 50%;
+        --chart-2: 160 60% 45%;
+        --chart-3: 30 80% 55%;
+        --chart-4: 280 65% 60%;
+        --chart-5: 340 75% 55%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+        font-feature-settings:
+            'rlig' 1,
+            'calt' 1;
+    }
+}
+
+@layer components {
+
+    /* Custom scrollbar styles */
+    .scrollbar-thin {
+        scrollbar-width: thin;
+        scrollbar-color: hsl(var(--muted-foreground)) hsl(var(--muted));
+    }
+
+    .scrollbar-thin::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-track {
+        @apply bg-muted rounded-full;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        @apply bg-muted-foreground rounded-full;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+        @apply bg-foreground/60;
+    }
+
+    /* Loading animations */
+    .loading-dots {
+        @apply inline-flex items-center;
+    }
+
+    .loading-dots::after {
+        content: '...';
+        @apply animate-pulse;
+    }
+
+    /* Glass morphism effect */
+    .glass {
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        @apply bg-background/80 border border-border/50;
+    }
+
+    /* Gradient backgrounds */
+    .gradient-university {
+        background: linear-gradient(135deg,
+                hsl(var(--university-500)),
+                hsl(var(--university-700)));
+    }
+
+    .gradient-campus {
+        background: linear-gradient(135deg,
+                hsl(var(--campus-500)),
+                hsl(var(--campus-700)));
+    }
+
+    /* 3D Map specific styles */
+    .map-container {
+        @apply relative w-full h-full overflow-hidden rounded-lg;
+    }
+
+    .map-overlay {
+        @apply absolute top-4 left-4 z-10 glass p-4 rounded-lg;
+    }
+
+    .map-controls {
+        @apply absolute bottom-4 right-4 z-10 flex flex-col gap-2;
+    }
+
+    /* Kiosk mode styles */
+    .kiosk-mode {
+        @apply h-screen w-screen overflow-hidden select-none;
+    }
+
+    .kiosk-header {
+        @apply sticky top-0 z-50 glass border-b;
+    }
+
+    /* Event card styles */
+    .event-card {
+        @apply relative overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md;
+    }
+
+    .event-card-featured {
+        @apply ring-2 ring-university-500 shadow-lg;
+    }
+
+    /* Timetable grid */
+    .timetable-grid {
+        @apply grid gap-1 text-sm;
+        grid-template-columns: 80px repeat(7, 1fr);
+        grid-template-rows: 40px repeat(24, 40px);
+    }
+
+    .timetable-slot {
+        @apply border border-border/30 flex items-center justify-center text-xs font-medium;
+    }
+
+    .timetable-event {
+        @apply rounded bg-university-100 dark:bg-university-900 border border-university-200 dark:border-university-800 p-1 text-university-900 dark:text-university-100;
+    }
+
+    /* Responsive utilities */
+    .container-responsive {
+        @apply w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8;
+    }
+
+    /* Focus styles for accessibility */
+    .focus-visible {
+        @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+    }
+}

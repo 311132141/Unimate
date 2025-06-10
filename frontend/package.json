@@ -1,0 +1,22 @@
+{
+  "name": "unimate-frontend",
+  "version": "1.0.0",
+  "description": "Interactive university information kiosk system",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server -p 8080",
+    "dev": "http-server -p 8080 -c-1",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "three": "^0.128.0",
+    "axios": "^1.6.7",
+    "tailwindcss": "^3.4.1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "author": "",
+  "license": "ISC",
+  "keywords": []
+}

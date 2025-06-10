@@ -5,9 +5,8 @@ const nextConfig: NextConfig = {
     serverActions: {
       allowedOrigins: ['localhost:3000'],
     },
-  },
-  images: {
-    domains: ['localhost'],
+  },  images: {
+    domains: ['localhost', 'picsum.photos'],
     formats: ['image/webp', 'image/avif'],
   },
   async headers() {

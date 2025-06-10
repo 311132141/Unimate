@@ -159,7 +159,7 @@ export default function TestStep9Page() {
                             <p><strong>LOGIN:</strong> {API_ENDPOINTS.LOGIN}</p>
                             <p><strong>LOGOUT:</strong> {API_ENDPOINTS.LOGOUT}</p>
                             <p><strong>REFRESH:</strong> {API_ENDPOINTS.REFRESH}</p>
-                            <p><strong>SCAN:</strong> {API_ENDPOINTS.SCAN}</p>            </div>
+                            <p><strong>SCAN:</strong> {API_ENDPOINTS.RFID_SCAN}</p>            </div>
                         <div>
                             <p><strong>EVENTS:</strong> {API_ENDPOINTS.EVENTS}</p>
                             <p><strong>BUILDINGS:</strong> {API_ENDPOINTS.BUILDINGS}</p>

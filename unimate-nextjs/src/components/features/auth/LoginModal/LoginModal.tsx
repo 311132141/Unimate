@@ -1,11 +1,11 @@
 import * as React from 'react';
 import {
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalTitle,
-    ModalDescription,
-} from '@/components/ui/Modal';
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from '@/components/ui/dialog';
 import { LoginForm } from '../LoginForm';
 
 export interface LoginModalProps {
@@ -22,25 +22,23 @@ const LoginModal: React.FC<LoginModalProps> = ({
     const handleLogin = async (data: { username: string; password: string }) => {
         await onLogin(data);
         onOpenChange(false);
-    };
-
-    return (
-        <Modal open={open} onOpenChange={onOpenChange}>
-            <ModalContent className="sm:max-w-md">
-                <ModalHeader>
-                    <ModalTitle>Login</ModalTitle>
-                    <ModalDescription>
+    };    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Login</DialogTitle>
+                    <DialogDescription>
                         Enter your credentials to access your dashboard
-                    </ModalDescription>
-                </ModalHeader>
+                    </DialogDescription>
+                </DialogHeader>
 
                 <LoginForm onSubmit={handleLogin} />
 
                 <div className="mt-4 text-center text-sm text-muted-foreground">
                     <p>Or scan your RFID card for quick access</p>
                 </div>
-            </ModalContent>
-        </Modal>
+            </DialogContent>
+        </Dialog>
     );
 };
 

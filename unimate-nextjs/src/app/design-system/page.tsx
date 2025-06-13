@@ -9,6 +9,12 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+// Import our design system components
+import { EventCard } from "@/components/design-system/EventCard";
+import { SidebarSection } from "@/components/design-system/SidebarSection";
+import { SearchInput } from "@/components/design-system/SearchInput";
+import { TimetableView } from "@/components/design-system/TimetableView";
+
 export default function DesignSystemPage() {
   return (
     <div className="min-h-screen bg-background text-foreground p-8">
@@ -53,14 +59,204 @@ export default function DesignSystemPage() {
           </CardContent>
         </Card>
 
-        {/* Components Showcase */}
-        <Tabs defaultValue="buttons" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+        {/* Components Showcase */}        <Tabs defaultValue="unimate" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="unimate">Unimate Components</TabsTrigger>
             <TabsTrigger value="buttons">Buttons</TabsTrigger>
             <TabsTrigger value="cards">Cards</TabsTrigger>
             <TabsTrigger value="forms">Forms</TabsTrigger>
             <TabsTrigger value="data">Data Display</TabsTrigger>
           </TabsList>
+
+          {/* Unimate Components Tab */}
+          <TabsContent value="unimate" className="space-y-6">
+            {/* EventCard Demo */}
+            <Card>
+              <CardHeader>
+                <CardTitle>EventCard Component</CardTitle>
+                <CardDescription>Event display cards with thumbnails and metadata</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <EventCard
+                  category="LECTURE"
+                  title="Introduction to Computer Science"
+                  time="9:00 AM - 10:30 AM"
+                  organizer="Dr. Smith"
+                  thumbnail="/api/placeholder/48/48"
+                />
+                <EventCard
+                  category="EXAM"
+                  title="Mathematics Final Exam"
+                  time="2:00 PM - 4:00 PM"
+                  organizer="Prof. Johnson"
+                  thumbnail="/api/placeholder/48/48"
+                />
+                <EventCard
+                  category="STUDY GROUP"
+                  title="Physics Study Session"
+                  time="7:00 PM - 9:00 PM"
+                  organizer="Student Association"
+                  thumbnail="/api/placeholder/48/48"
+                />
+              </CardContent>
+            </Card>
+
+            {/* SearchInput Demo */}
+            <Card>
+              <CardHeader>
+                <CardTitle>SearchInput Component</CardTitle>
+                <CardDescription>Enhanced search input with icon and modern styling</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <SearchInput placeholder="Find place" />
+                <SearchInput placeholder="Search events..." />
+                <SearchInput placeholder="Search courses..." />
+              </CardContent>
+            </Card>
+
+            {/* SidebarSection and TimetableView Demo */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>SidebarSection Component</CardTitle>
+                  <CardDescription>Scrollable sidebar sections with organized content</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <SidebarSection title="Today's Events">
+                    <EventCard
+                      category="LECTURE"
+                      title="Calculus I"
+                      time="9:00 AM"
+                      organizer="Dr. Adams"
+                      thumbnail="/api/placeholder/48/48"
+                    />
+                    <EventCard
+                      category="LAB"
+                      title="Chemistry Lab"
+                      time="11:00 AM"
+                      organizer="Prof. Wilson"
+                      thumbnail="/api/placeholder/48/48"
+                    />
+                    <EventCard
+                      category="MEETING"
+                      title="Study Group"
+                      time="3:00 PM"
+                      organizer="Student Club"
+                      thumbnail="/api/placeholder/48/48"
+                    />
+                    <EventCard
+                      category="EXAM"
+                      title="Physics Quiz"
+                      time="5:00 PM"
+                      organizer="Dr. Brown"
+                      thumbnail="/api/placeholder/48/48"
+                    />
+                  </SidebarSection>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>TimetableView Component</CardTitle>
+                  <CardDescription>Daily schedule with time slots and events</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <TimetableView
+                    selectedDay="Monday"
+                    events={[
+                      {
+                        id: "1",
+                        name: "Computer Science Lecture",
+                        startTime: "9 AM",
+                        endTime: "10:30 AM"
+                      },
+                      {
+                        id: "2",
+                        name: "Mathematics Tutorial",
+                        startTime: "11 AM",
+                        endTime: "12:00 PM"
+                      },
+                      {
+                        id: "3",
+                        name: "Physics Lab",
+                        startTime: "2 PM",
+                        endTime: "4:00 PM"
+                      },
+                      {
+                        id: "4",
+                        name: "Study Group",
+                        startTime: "7 PM",
+                        endTime: "9:00 PM"
+                      }
+                    ]}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Kiosk Mode Preview */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Kiosk Mode Preview</CardTitle>
+                <CardDescription>Full-screen interface simulation using design system components</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-background border rounded-lg p-6 min-h-[400px] space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-2xl font-bold">Campus Navigator</h2>
+                    <Badge variant="outline">Kiosk Mode</Badge>
+                  </div>
+                  
+                  <SearchInput placeholder="Where would you like to go?" className="max-w-md" />
+                  
+                  <div className="grid grid-cols-2 gap-6">
+                    <SidebarSection title="Quick Access">
+                      <EventCard
+                        category="LOCATION"
+                        title="Library"
+                        time="Open 24/7"
+                        organizer="Main Campus"
+                        thumbnail="/api/placeholder/48/48"
+                      />
+                      <EventCard
+                        category="LOCATION"
+                        title="Cafeteria"
+                        time="6:00 AM - 10:00 PM"
+                        organizer="Building A"
+                        thumbnail="/api/placeholder/48/48"
+                      />
+                      <EventCard
+                        category="LOCATION"
+                        title="Computer Lab"
+                        time="8:00 AM - 6:00 PM"
+                        organizer="Building B"
+                        thumbnail="/api/placeholder/48/48"
+                      />
+                    </SidebarSection>
+                      <div className="space-y-4">
+                      <h3 className="text-lg font-medium">Today&apos;s Schedule</h3>
+                      <div className="space-y-2">
+                        <EventCard
+                          category="NOW"
+                          title="Mathematics Lecture"
+                          time="Current - 10:30 AM"
+                          organizer="Room 205"
+                          thumbnail="/api/placeholder/48/48"
+                        />
+                        <EventCard
+                          category="NEXT"
+                          title="Physics Lab"
+                          time="11:00 AM - 1:00 PM"
+                          organizer="Lab 3"
+                          thumbnail="/api/placeholder/48/48"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Buttons Tab */}
           <TabsContent value="buttons" className="space-y-4">

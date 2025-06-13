@@ -14,11 +14,19 @@ Unimate Next.js Frontend is a production-ready web application built with Next.j
 ## 🚀 Technology Stack
 
 ### Core Technologies
-- **Next.js 14**: App Router with React Server Components
+- **Next.js 15.3.3**: App Router with React Server Components
 - **TypeScript**: Full type safety and enhanced developer experience
-- **Tailwind CSS**: Utility-first CSS framework for responsive design
+- **Tailwind CSS 4**: Utility-first CSS framework for responsive design
+- **shadcn/ui**: Modern component library with dark theme design system
 - **React Query**: Efficient server state management and data fetching
 - **NextAuth.js**: Authentication with RFID and traditional login support
+
+### Design System
+- **shadcn/ui Components**: Professional UI component library
+- **Dark Theme**: Pure black aesthetic matching kiosk design
+- **CSS Custom Properties**: Dynamic theming system
+- **Class Variance Authority**: Component variant management
+- **Responsive Design**: Mobile-first approach with touch optimization
 
 ### Key Dependencies
 - **Axios**: HTTP client for API communications
@@ -31,7 +39,7 @@ Unimate Next.js Frontend is a production-ready web application built with Next.j
 ```
 unimate-nextjs/
 ├── 📂 src/                           # Source code directory
-│   ├── 📂 app/                       # Next.js 14 App Router pages and layouts
+│   ├── 📂 app/                       # Next.js 15.3.3 App Router pages and layouts
 │   │   ├── 📄 layout.tsx             # Root application layout with providers
 │   │   ├── 📄 page.tsx               # Homepage (kiosk interface)
 │   │   ├── 📂 (auth)/                # Authentication route group
@@ -42,6 +50,8 @@ unimate-nextjs/
 │   │   ├── 📂 dashboard/             # User dashboard pages
 │   │   │   ├── 📄 layout.tsx         # Dashboard layout with sidebar
 │   │   │   └── 📄 page.tsx           # Main dashboard with timetable/map
+│   │   ├── 📂 design-system/         # Design system showcase
+│   │   │   └── 📄 page.tsx           # shadcn/ui component demonstration
 │   │   ├── 📂 api/                   # API routes (Next.js API)
 │   │   │   └── 📂 auth/
 │   │   │       └── 📂 [...nextauth]/
@@ -77,8 +87,13 @@ unimate-nextjs/
 │   │   │   │   └── 📄 LoadingSpinner.tsx # Loading states and spinners
 │   │   │   ├── 📂 StatusMessage/
 │   │   │   │   └── 📄 StatusMessage.tsx  # Notification and alert messages
-│   │   │   ├── 📄 Button.tsx         # Legacy button component
+│   │   │   ├── 📄 Button.tsx         # Modern shadcn/ui button component
 │   │   │   ├── 📄 Card.tsx           # Legacy card component  
+│   │   │   ├── 📄 avatar.tsx         # User profile images (shadcn/ui)
+│   │   │   ├── 📄 dialog.tsx         # Modal dialogs (shadcn/ui)
+│   │   │   ├── 📄 scroll-area.tsx    # Custom scrollable areas (shadcn/ui)
+│   │   │   ├── 📄 separator.tsx      # Visual content dividers (shadcn/ui)
+│   │   │   ├── 📄 tabs.tsx           # Tabbed navigation (shadcn/ui)
 │   │   │   └── 📄 Toaster.tsx        # Toast notification system
 │   │   │
 │   │   ├── 📂 layout/                # Layout components (3 components)

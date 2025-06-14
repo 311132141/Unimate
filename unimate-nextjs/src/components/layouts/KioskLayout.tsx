@@ -32,18 +32,18 @@ export function KioskLayout({
         {/* Header */}
         <header className="flex items-center justify-between px-8 py-4 border-b border-border">
           <h1 className="text-2xl font-medium">{title}</h1>
-          
+
           <div className="flex items-center gap-4">
             <SearchInput className="w-96" />
             {isLoggedIn ? (
-              <Button 
+              <Button
                 onClick={onPrint}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground px-8"
               >
                 Print
               </Button>
             ) : (
-              <Button 
+              <Button
                 onClick={onLogin}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground px-8"
               >

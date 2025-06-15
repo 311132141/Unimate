@@ -1,0 +1,1 @@
+export { KioskMap } from './KioskMap';

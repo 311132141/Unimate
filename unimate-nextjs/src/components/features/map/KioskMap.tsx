@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface MapMarker {
   id: string;
@@ -13,6 +13,7 @@ interface MapMarker {
 
 interface KioskMapProps {
   className?: string;
+  searchQuery?: string;
 }
 
 // Mock data positioned as percentages for campus layout
@@ -27,9 +28,25 @@ const mockMarkers: MapMarker[] = [
   { id: '8', x: 40, y: 70, type: 'building', name: 'Engineering', color: '#C44569' },
 ];
 
-export function KioskMap({ className }: KioskMapProps) {
+export function KioskMap({ className, searchQuery }: KioskMapProps) {
   const [selectedMarker, setSelectedMarker] = useState<string | null>(null);
   const [hoveredMarker, setHoveredMarker] = useState<string | null>(null);
+
+  // Filter markers based on search query
+  const filteredMarkers = searchQuery 
+    ? mockMarkers.filter(marker => 
+        marker.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : mockMarkers;
+
+  // Auto-select first search result
+  useEffect(() => {
+    if (searchQuery && filteredMarkers.length > 0) {
+      setSelectedMarker(filteredMarkers[0].id);
+    } else if (!searchQuery) {
+      setSelectedMarker(null);
+    }
+  }, [searchQuery, filteredMarkers]);
 
   return (
     <div 
@@ -92,38 +109,43 @@ export function KioskMap({ className }: KioskMapProps) {
 
       {/* Green spaces/parks */}
       <div className="absolute top-[25%] right-[10%] w-16 h-12 bg-[#263c3f] opacity-60 rounded-full"></div>
-      <div className="absolute bottom-[30%] left-[10%] w-20 h-16 bg-[263c3f] opacity-60 rounded-full"></div>
+      <div className="absolute bottom-[30%] left-[10%] w-20 h-16 bg-[#263c3f] opacity-60 rounded-full"></div>
 
       {/* Map Markers - Pink/purple dots as per Figma */}
-      {mockMarkers.map(marker => (
-        <div
-          key={marker.id}
-          className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-200 hover:scale-125"
-          style={{
-            left: `${marker.x}%`,
-            top: `${marker.y}%`,
-            zIndex: selectedMarker === marker.id ? 20 : 10,
-          }}
-          title={marker.name}
-          onClick={() => setSelectedMarker(selectedMarker === marker.id ? null : marker.id)}
-          onMouseEnter={() => setHoveredMarker(marker.id)}
-          onMouseLeave={() => setHoveredMarker(null)}
-        >
-          <div 
-            className={`w-4 h-4 rounded-full border-2 border-white shadow-lg transition-all duration-200 ${
-              selectedMarker === marker.id ? 'animate-pulse scale-125' : 
-              hoveredMarker === marker.id ? 'animate-pulse' : ''
+      {mockMarkers.map(marker => {
+        const isFiltered = searchQuery ? filteredMarkers.find(m => m.id === marker.id) : true;
+        return (
+          <div
+            key={marker.id}
+            className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-200 hover:scale-125 ${
+              !isFiltered ? 'opacity-30' : ''
             }`}
-            style={{ backgroundColor: marker.color }}
-          />
-          {/* Marker label on hover */}
-          {hoveredMarker === marker.id && (
-            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-              {marker.name}
-            </div>
-          )}
-        </div>
-      ))}
+            style={{
+              left: `${marker.x}%`,
+              top: `${marker.y}%`,
+              zIndex: selectedMarker === marker.id ? 20 : 10,
+            }}
+            title={marker.name}
+            onClick={() => setSelectedMarker(selectedMarker === marker.id ? null : marker.id)}
+            onMouseEnter={() => setHoveredMarker(marker.id)}
+            onMouseLeave={() => setHoveredMarker(null)}
+          >
+            <div 
+              className={`w-4 h-4 rounded-full border-2 border-white shadow-lg transition-all duration-200 ${
+                selectedMarker === marker.id ? 'animate-pulse scale-125' : 
+                hoveredMarker === marker.id ? 'animate-pulse' : ''
+              }`}
+              style={{ backgroundColor: marker.color }}
+            />
+            {/* Marker label on hover */}
+            {hoveredMarker === marker.id && (
+              <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                {marker.name}
+              </div>
+            )}
+          </div>
+        );
+      })}
 
       {/* Campus Area Labels */}
       <div className="absolute top-[10%] left-[10%] text-white/60 text-sm font-medium">
@@ -164,6 +186,21 @@ export function KioskMap({ className }: KioskMapProps) {
           <span>You are here</span>
         </div>
       </div>
+
+      {/* Search result indicator (when search is active) */}
+      {selectedMarker && (
+        <div className="absolute bottom-4 right-4 bg-green-500/20 backdrop-blur-sm rounded-lg p-3 border border-green-500/50 max-w-xs">
+          <div className="text-green-300 text-sm">
+            <div className="font-medium">
+              {mockMarkers.find(m => m.id === selectedMarker)?.name}
+            </div>
+            <div className="text-xs opacity-80 mt-1">
+              {mockMarkers.find(m => m.id === selectedMarker)?.type === 'building' ? 'Academic Building' :
+               mockMarkers.find(m => m.id === selectedMarker)?.type === 'event' ? 'Event Location' : 'Point of Interest'}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

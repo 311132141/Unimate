@@ -82,6 +82,13 @@ const techNews = [
 export default function KioskPage() {
     const router = useRouter();
     const [loginModalOpen, setLoginModalOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    
+    const handleSearch = (query: string) => {
+        setSearchQuery(query);
+        // In a real implementation, this would filter markers or navigate to search results
+        console.log('Searching for:', query);
+    };
     
     const sidebarContent = (
         <div className="space-y-[18px]">
@@ -109,6 +116,7 @@ export default function KioskPage() {
                 sidebarContent={sidebarContent}
                 isLoggedIn={false}
                 onLogin={() => setLoginModalOpen(true)}
+                onSearch={handleSearch}
                 title="Map"
             >
                 {/* Interactive Map with Figma styling */}
@@ -121,7 +129,7 @@ export default function KioskPage() {
                     {/* Border exactly as in Figma with precise 2px width */}
                     <div className="absolute border-[2px] border-solid border-white inset-0 pointer-events-none rounded-[26px] z-10" />
                     {/* Map Component */}
-                    <KioskMap className="w-full h-full rounded-[26px]" />
+                    <KioskMap className="w-full h-full rounded-[26px]" searchQuery={searchQuery} />
                 </div>
             </KioskLayout>            <LoginModal
                 open={loginModalOpen}

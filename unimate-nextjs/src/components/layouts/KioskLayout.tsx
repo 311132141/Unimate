@@ -1,7 +1,6 @@
 'use client';
 
 import { SearchInput } from "@/components/design-system/SearchInput";
-import { cn } from "@/lib/utils";
 
 interface KioskLayoutProps {
   children: React.ReactNode;
@@ -10,6 +9,7 @@ interface KioskLayoutProps {
   onLogin?: () => void;
   onPrint?: () => void;
   title?: string;
+  onSearch?: (query: string) => void;
 }
 
 export function KioskLayout({
@@ -18,7 +18,8 @@ export function KioskLayout({
   isLoggedIn = false,
   onLogin,
   onPrint,
-  title = "Map"
+  title = "Map",
+  onSearch
 }: KioskLayoutProps) {
   return (
     <div className="bg-[#000000] h-screen relative overflow-hidden">
@@ -38,7 +39,7 @@ export function KioskLayout({
 
       {/* Search Input */}
       <div className="absolute left-[837px] top-7 w-[406px]">
-        <SearchInput />
+        <SearchInput onChange={onSearch} />
       </div>      {/* Login/Print Button - Exact match from Figma */}
       <div className="absolute left-[1264px] top-7">
         <button

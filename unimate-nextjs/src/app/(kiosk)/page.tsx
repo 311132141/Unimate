@@ -6,6 +6,7 @@ import { KioskLayout } from '@/components/layouts/KioskLayout';
 import { SidebarSection } from '@/components/design-system/SidebarSection';
 import { EventCard } from '@/components/design-system/EventCard';
 import { LoginModal } from '@/components/features/auth/LoginModal/LoginModal';
+import { KioskMap } from '@/components/features/map/KioskMap';
 
 // Mock data - exact from Figma
 const techEvents = [
@@ -81,6 +82,13 @@ const techNews = [
 export default function KioskPage() {
     const router = useRouter();
     const [loginModalOpen, setLoginModalOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    
+    const handleSearch = (query: string) => {
+        setSearchQuery(query);
+        // In a real implementation, this would filter markers or navigate to search results
+        console.log('Searching for:', query);
+    };
     
     const sidebarContent = (
         <div className="space-y-[18px]">
@@ -108,18 +116,20 @@ export default function KioskPage() {
                 sidebarContent={sidebarContent}
                 isLoggedIn={false}
                 onLogin={() => setLoginModalOpen(true)}
-                title="Map"            >                {/* Map placeholder - exact styling from Figma */}
+                onSearch={handleSearch}
+                title="Map"
+            >
+                {/* Interactive Map with Figma styling */}
                 <div
                     className="backdrop-blur-[15.4103px] w-full h-full rounded-[26px] overflow-hidden relative"
                     style={{
-                        backgroundImage: 'url("https://maps.googleapis.com/maps/api/staticmap?center=Auckland+University+of+Technology&zoom=16&size=1082x816&maptype=roadmap&style=element:geometry%7Ccolor:0x242f3e&style=element:labels.text.fill%7Ccolor:0x746855&style=element:labels.text.stroke%7Ccolor:0x242f3e&style=feature:administrative.locality%7Celement:labels.text.fill%7Ccolor:0xd59563&style=feature:poi%7Celement:labels.text.fill%7Ccolor:0xd59563&style=feature:poi.park%7Celement:geometry%7Ccolor:0x263c3f&style=feature:poi.park%7Celement:labels.text.fill%7Ccolor:0x6b9a76&style=feature:road%7Celement:geometry%7Ccolor:0x38414e&style=feature:road%7Celement:geometry.stroke%7Ccolor:0x212a37&style=feature:road%7Celement:labels.text.fill%7Ccolor:0x9ca5b3&style=feature:road.highway%7Celement:geometry%7Ccolor:0x746855&style=feature:road.highway%7Celement:geometry.stroke%7Ccolor:0x1f2835&style=feature:road.highway%7Celement:labels.text.fill%7Ccolor:0xf3d19c&style=feature:transit%7Celement:geometry%7Ccolor:0x2f3948&style=feature:transit.station%7Celement:labels.text.fill%7Ccolor:0xd59563&style=feature:water%7Celement:geometry%7Ccolor:0x17263c&style=feature:water%7Celement:labels.text.fill%7Ccolor:0x515c6d&style=feature:water%7Celement:labels.text.stroke%7Ccolor:0x17263c&key=YOUR_API_KEY")',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
                         boxShadow: '0px 1.54103px 0px 0px rgba(0,0,0,0.05), 0px 6.1641px 6.1641px 0px rgba(0,0,0,0.05), 0px 15.4103px 15.4103px 0px rgba(0,0,0,0.1)'
                     }}
                 >
                     {/* Border exactly as in Figma with precise 2px width */}
-                    <div className="absolute border-[2px] border-solid border-white inset-0 pointer-events-none rounded-[26px]" />
+                    <div className="absolute border-[2px] border-solid border-white inset-0 pointer-events-none rounded-[26px] z-10" />
+                    {/* Map Component */}
+                    <KioskMap className="w-full h-full rounded-[26px]" searchQuery={searchQuery} />
                 </div>
             </KioskLayout>            <LoginModal
                 open={loginModalOpen}

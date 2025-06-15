@@ -3,10 +3,11 @@
 import { KioskLayout } from '@/components/layouts/KioskLayout';
 import { TimetableView } from '@/components/design-system/TimetableView';
 
+// Mock data - exact from Figma Time Table view
 const mockEvents = [
-  { id: '1', name: 'Des200', startTime: '7 AM', endTime: '8 AM' },
-  { id: '2', name: 'Comp 220', startTime: '10 AM', endTime: '12 PM' },
-  { id: '3', name: 'Des201', startTime: '4 PM', endTime: '6 PM' },
+  { id: '1', name: 'Des200', time: '7 AM' },
+  { id: '2', name: 'Comp 220', time: '10 AM' },
+  { id: '3', name: 'Des201', time: '4 PM' },
 ];
 
 export default function DashboardPage() {
@@ -20,10 +21,26 @@ export default function DashboardPage() {
       isLoggedIn={true}
       onPrint={handlePrint}
       title="Time Table"
-    >
-      {/* Hub 3D Explorer */}
-      <div className="w-full h-full flex items-center justify-center bg-secondary/20">
-        <p className="text-muted-foreground">Hub 3D Explorer will be rendered here</p>
+    >      {/* 3D Explorer - exact styling from Figma */}
+      <div
+        className="w-full h-full rounded-[26px] border-2 border-white overflow-hidden"
+        style={{
+          background: '#282828',
+          backdropFilter: 'blur(15.41px)',
+          boxShadow: '0px 1.541px 0px 0px rgba(0,0,0,0.05), 0px 6.164px 6.164px 0px rgba(0,0,0,0.05), 0px 15.41px 15.41px 0px rgba(0,0,0,0.1)'
+        }}
+      >
+        {/* Placeholder for 3D content */}
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="text-white text-[24px]" 
+               style={{
+                 fontFamily: '"Geist", sans-serif',
+                 fontWeight: 500,
+                 lineHeight: 1
+               }}>
+            3D Explorer
+          </div>
+        </div>
       </div>
     </KioskLayout>
   );

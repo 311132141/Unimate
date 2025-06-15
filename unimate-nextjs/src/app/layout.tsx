@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
+import { GeistSans } from 'geist/font/sans';
 import './globals.css';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/lib/utils';
 import { Providers } from '@/components/providers/Providers';
 
 export const metadata: Metadata = {
@@ -17,12 +18,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={cn(
-          'min-h-screen bg-background font-sans antialiased dark'
-        )}
-      >
+    <html lang="en" suppressHydrationWarning className={GeistSans.className}>
+      <body className="font-sans">
         <Providers>{children}</Providers>
       </body>
     </html>

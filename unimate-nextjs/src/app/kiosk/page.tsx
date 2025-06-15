@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { KioskLayout } from '@/components/layouts/KioskLayout';
 import { SidebarSection } from '@/components/design-system/SidebarSection';
 import { EventCard } from '@/components/design-system/EventCard';

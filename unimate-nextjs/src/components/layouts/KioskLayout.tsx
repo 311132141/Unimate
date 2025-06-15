@@ -1,7 +1,6 @@
 'use client';
 
 import { SearchInput } from "@/components/design-system/SearchInput";
-import { cn } from "@/lib/utils";
 
 interface KioskLayoutProps {
   children: React.ReactNode;

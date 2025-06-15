@@ -4,86 +4,190 @@
 
 @layer base {
   :root {
-    /* Pure black background like in the images */
+    /* Exact colors from Figma design */
     --background: 0 0% 0%;
+    /* #000000 - Pure black background */
     --foreground: 0 0% 100%;
+    /* #ffffff - White text */
 
-    /* Dark gray cards matching the sidebar */
-    --card: 0 0% 10%;
+    /* Sidebar background from Figma */
+    --card: 0 0% 15.7%;
+    /* #282828 - Exact sidebar color */
     --card-foreground: 0 0% 100%;
 
-    /* Slightly lighter for hover states */
-    --popover: 0 0% 12%;
+    /* Popover and secondary backgrounds */
+    --popover: 0 0% 13%;
     --popover-foreground: 0 0% 100%;
 
-    /* Blue accent color from the UI */
-    --primary: 224 71% 64%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary blue from Figma - #5872c6 */
+    --primary: 225 63% 60%;
+    /* Exact #5872c6 conversion */
+    --primary-foreground: 210 40% 98%;
+    /* #f8fafc from Figma vars */
 
-    /* Muted backgrounds */
-    --secondary: 0 0% 15%;
+    /* Secondary backgrounds for inputs/hover */
+    --secondary: 0 0% 17%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 60%;
+    /* Muted text colors - from Figma time labels #949494 */
+    --muted: 0 0% 25%;
+    --muted-foreground: 0 0% 58%;
+    /* #949494 conversion */
 
-    --accent: 224 71% 64%;
+    /* Accent matches primary */
+    --accent: 225 63% 60%;
+    /* Same as primary */
     --accent-foreground: 0 0% 100%;
 
-    /* Status colors */
+    /* Destructive colors */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders */
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 224 71% 64%;
+    /* Borders - very subtle */
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 225 63% 60%;
 
-    /* Border radius matching the design */
+    /* Border radius from Figma - 26px for main containers, 12px for buttons */
     --radius: 0.75rem;
-  }
-
-  .dark {
-    /* Same as root for pure dark theme */
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
+    /* 12px for buttons */
   }
 }
 
 @layer base {
   * {
-    border-color: hsl(var(--border));
+    @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    @apply bg-background text-foreground antialiased;
+    font-family: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 500;
+    /* Medium weight from Figma */
+    font-size: 16px;
+    /* Base font size */
+    line-height: 1.4;
+    letter-spacing: 0.01em;
   }
 }
 
-/* Custom scrollbar for dark theme */
+/* Event card specific styles - matching Figma design */
+@layer components {
+  .event-card {
+    @apply rounded-xl bg-card/80 backdrop-blur-sm p-3.5 transition-all hover:bg-card;
+  }
+
+  .event-card-image {
+    @apply w-11 h-11 rounded-lg object-cover;
+  }
+
+  .sidebar-section {
+    /* Matches Figma: backdrop-blur-[15.4103px] bg-[#282828] rounded-[26px] */
+    @apply rounded-2xl backdrop-blur-sm border border-white/5;
+    background: #282828;
+    /* Exact Figma color */
+    backdrop-filter: blur(15.41px);
+    /* Exact Figma blur */
+  }
+
+  .search-input {
+    /* Matches Figma search input with gradient background */
+    @apply h-11 rounded-xl backdrop-blur-sm border-white/10 px-4;
+    @apply placeholder:text-muted-foreground/60 focus:bg-white/8;
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 88.889%);
+    backdrop-filter: blur(14.82px);
+    /* Exact Figma blur */
+  }
+
+  .primary-button {
+    /* Matches Figma button: bg-[#5872c6] backdrop-blur-[15.4103px] */
+    @apply h-11 px-7 rounded-xl hover:bg-primary/90;
+    @apply font-medium tracking-wide transition-colors;
+    background: #5872c6;
+    /* Exact Figma primary color */
+    backdrop-filter: blur(15.41px);
+    /* Exact Figma blur */
+    font-family: "Geist", sans-serif;
+    font-weight: 500;
+    /* Medium */
+    font-size: 18px;
+    /* From Figma variables */
+    color: #f8fafc;
+    /* var(--primary-foreground) from Figma */
+  }
+
+  .timetable-event {
+    /* Event blocks in timetable - exact Figma styling */
+    @apply rounded-xl hover:bg-primary;
+    @apply px-4 py-3 text-sm font-medium transition-all;
+    background: #5872c6;
+    /* Exact primary color */
+    backdrop-filter: blur(15.41px);
+    /* Exact Figma blur */
+    font-family: "Geist", sans-serif;
+    font-weight: 500;
+    /* Medium */
+    font-size: 16px;
+    color: #f8fafc;
+    /* Slate-50 from Figma */
+    box-shadow:
+      0px 1.541px 0px 0px rgba(0, 0, 0, 0.05),
+      0px 6.164px 6.164px 0px rgba(0, 0, 0, 0.05),
+      0px 15.41px 15.41px 0px rgba(0, 0, 0, 0.1);
+  }
+
+  .time-slot {
+    /* Time labels - matches Figma #949494 color and Geist font */
+    font-family: "Geist", sans-serif;
+    font-weight: 500;
+    /* Medium */
+    font-size: 12px;
+    /* From Figma code */
+    color: #949494;
+    /* Exact Figma color */
+    line-height: 1;
+  }
+}
+
+/* Custom scrollbar styling */
 @layer utilities {
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--muted)) transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--muted));
-    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: hsl(var(--muted-foreground));
+    background-color: rgba(255, 255, 255, 0.2);
   }
+}
+
+/* Glass morphism effects */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 @media print {

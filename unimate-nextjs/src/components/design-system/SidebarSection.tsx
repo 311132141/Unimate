@@ -1,5 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 interface SidebarSectionProps {
@@ -10,17 +8,34 @@ interface SidebarSectionProps {
 
 export function SidebarSection({ title, children, className }: SidebarSectionProps) {
   return (
-    <Card className={cn("border-0 bg-card/50 backdrop-blur", className)}>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-normal">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <ScrollArea className="h-[300px]">
-          <div className="space-y-[1px]">
-            {children}
-          </div>
-        </ScrollArea>
-      </CardContent>
-    </Card>
+    <div
+      className={cn("relative w-[312px]", className)}
+      style={{
+        background: '#282828',
+        backdropFilter: 'blur(15.41px)',
+        borderRadius: '26px',
+        border: '2px solid #ffffff',
+        boxShadow: '0px 1.541px 0px 0px rgba(0,0,0,0.05), 0px 6.164px 6.164px 0px rgba(0,0,0,0.05), 0px 15.41px 15.41px 0px rgba(0,0,0,0.1)'
+      }}
+    >
+      {/* Section title positioned exactly as in Figma */}
+      <div
+        className="absolute left-6 top-[41.5px] -translate-y-1/2"
+        style={{
+          fontFamily: '"Geist", sans-serif',
+          fontWeight: 500,
+          fontSize: '18px',
+          lineHeight: 1,
+          color: '#ffffff'
+        }}
+      >
+        {title}
+      </div>
+
+      {/* Content area positioned exactly as in Figma */}
+      <div className="absolute left-[18px] top-[69px] w-[280px]">
+        {children}
+      </div>
+    </div>
   );
 }

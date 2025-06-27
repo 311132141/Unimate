@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Design System Colors */
+  --background: #fafafa;
+  /* white from design tokens */
+  --foreground: #0c0d0e;
+  /* black from design tokens */
+  --background-dark: #0b1523;
+  --secondary-dark: #1f2732;
+  --primary: #3769ae;
+  --secondary: #dce2e9;
+  --tertiary: #556377;
+  --destructive: #af3737;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0b1523;
+    /* background-dark from design tokens */
+    --foreground: #fafafa;
+    /* white from design tokens */
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Custom Scrollbar Styles */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    background-color: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgb(31 41 55);
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(55 65 81);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+}
+
+/* Button Primary - Using Design System Colors */
+@layer components {
+  .btn-primary {
+    background: #3769ae;
+    /* primary color from design tokens */
+    box-shadow:
+      0px 1.541px 0px 0px rgba(0, 0, 0, 0.05),
+      0px 6.164px 6.164px 0px rgba(0, 0, 0, 0.05),
+      0px 15.41px 15.41px 0px rgba(0, 0, 0, 0.10);
+    backdrop-filter: blur(15.410257339477539px);
+    border: 1.541px solid transparent;
+  }
+
+  .btn-primary:hover {
+    background: #3e5ab6;
+    /* primary-scale-600 from design tokens */
+  }
+
+  .btn-primary:active {
+    background: #344b98;
+    /* primary-scale-700 from design tokens */
+  }
+
+  .btn-primary:disabled {
+    background: rgba(55, 105, 174, 0.5);
+    /* primary with opacity */
+  }
+
+  /* Shiny Button Gradient Classes */
+  .radial-gradient {
+    background: radial-gradient(circle at center,
+        #3769ae 0%,
+        #2c5897 50%,
+        #1e4176 100%);
+  }
+
+  .linear-mask {
+    mask: linear-gradient(-75deg, rgba(255, 255, 255, 0.6) calc(var(--x) + 20%), transparent calc(var(--x) + 25%), transparent calc(var(--x) + 100%));
+  }
+
+  .linear-overlay {
+    background: linear-gradient(-75deg,
+        transparent calc(var(--x) + 20%),
+        rgba(255, 255, 255, 0.3) calc(var(--x) + 25%),
+        rgba(255, 255, 255, 0.6) calc(var(--x) + 50%),
+        transparent calc(var(--x) + 90%));
+  }
+
+  /* Top-Right Light Effect Button */
+  .top-right-light {
+    background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.3) 0%,
+        rgba(55, 105, 174, 0.9) 25%,
+        rgba(44, 88, 151, 1) 50%,
+        rgba(30, 65, 118, 1) 100%);
+    position: relative;
+  }
+
+  .gradient-border {
+    background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.6) 0%,
+        rgba(255, 255, 255, 0.3) 25%,
+        rgba(55, 105, 174, 0.4) 50%,
+        rgba(30, 65, 118, 0.6) 100%);
+    padding: 2px;
+    border-radius: inherit;
+  }
+
+  .gradient-border-inner {
+    background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(55, 105, 174, 0.95) 20%,
+        rgba(44, 88, 151, 1) 60%,
+        rgba(30, 65, 118, 1) 100%);
+    border-radius: inherit;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .top-light-highlight {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(ellipse at top right,
+        rgba(255, 255, 255, 0.4) 0%,
+        rgba(255, 255, 255, 0.2) 30%,
+        transparent 70%);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+}
+
+.child-container {
+  border-radius: calc(3.5rem - 1px);
+}

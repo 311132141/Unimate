@@ -34,8 +34,8 @@ urlpatterns = [
     path('api/scan/', rfid_scan),
     path('api/login/', login),
     path('api/route/', route),
-    # Serve index.html for the root path and any other non-api path
-    re_path(r'^(?!api/).*$', TemplateView.as_view(template_name='views/index.html')),
+    # Serve connected.html for any non-api path
+    re_path(r'^(?!api/).*$', lambda request: serve_frontend_file(request, 'components/connected.html')),
     
     # Custom frontend file serving
     path('app/<str:filename>', serve_frontend_file, name='serve_frontend_file'),

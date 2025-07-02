@@ -39,7 +39,8 @@ def rfid_scan(request):
                 'id': user.id,
                 'username': user.username,
                 'events': EventSerializer(events, many=True).data
-            }
+            },
+            'redirect': '/dashboard'  # Add redirect instruction
         }
         
         # Try to send WebSocket notification, but don't fail if it doesn't work
@@ -51,9 +52,15 @@ def rfid_scan(request):
                     {
                         "type": "user.login",
                         "message": {
-                            "user_id": user.id,
-                            "username": user.username,
-                            "events": EventSerializer(events, many=True).data
+                            "access": str(refresh.access_token),
+                            "refresh": str(refresh),
+                            "user": {
+                                "id": user.id,
+                                "username": user.username,
+                                "events": EventSerializer(events, many=True).data
+                            },
+                            "action": "navigate",
+                            "redirect": "/dashboard"
                         }
                     }
                 )

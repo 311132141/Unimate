@@ -58,17 +58,16 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 class ProxyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
+        # Special handling for root path BEFORE calling super()
+        if self.path == '/' or self.path == '':
+            self.path = '/components/connected.html'
+        
         # If it's an API request, proxy to the backend
         if self.path.startswith('/api/'):
             self.proxy_request('GET')
         else:
             # For other requests, serve from the local directory
             super().do_GET()
-            
-            # Special handling for root path after super().do_GET()
-            if (self.path == '/' or self.path == '') and hasattr(self, 'path_handled') and not self.path_handled:
-                self.path = '/components/connected.html'
-                super().do_GET()
     
     def do_POST(self):
         # If it's an API request, proxy to the backend

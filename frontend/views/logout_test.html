@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Logout Test Page</title>
+</head>
+<body>
+    <h1>Logout Test</h1>
+    <button id="test-logout" onclick="testLogout()">Test Logout Redirect</button>
+    <div id="result"></div>
+    
+    <script>
+    function testLogout() {
+        console.log('Testing logout redirect...');
+        console.log('Current location:', window.location.href);
+        
+        // Simulate the exact same redirect as dashboard
+        console.log('Redirecting to: ../components/connected.html');
+        window.location.href = '../components/connected.html';
+    }
+    </script>
+</body>
+</html>

@@ -8,9 +8,12 @@ class UnimateConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         logger.info("UnimateConsumer: connect() called")
         
+        # Join the "unimate" group to receive RFID scan notifications
+        await self.channel_layer.group_add("unimate", self.channel_name)
+        
         # Accept the WebSocket connection
         await self.accept()
-        logger.info("UnimateConsumer: Connection accepted")
+        logger.info("UnimateConsumer: Connection accepted and joined 'unimate' group")
         
         # Send a welcome message
         await self.send(text_data=json.dumps({
@@ -20,6 +23,9 @@ class UnimateConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         logger.info(f"UnimateConsumer: disconnect() called with close_code: {close_code}")
+        
+        # Leave the "unimate" group
+        await self.channel_layer.group_discard("unimate", self.channel_name)
 
     async def receive(self, text_data):
         logger.info(f"UnimateConsumer: received data: {text_data[:100]}")
@@ -37,6 +43,19 @@ class UnimateConsumer(AsyncWebsocketConsumer):
                 }))
         except json.JSONDecodeError:
             logger.error(f"UnimateConsumer: Invalid JSON received: {text_data[:100]}")
+
+    async def user_login(self, event):
+        # Handle user login events for the main unimate group
+        logger.info("UnimateConsumer: Handling user login event")
+        message_data = event['message']
+        
+        # Send the login data with navigation instructions
+        await self.send(text_data=json.dumps({
+            'type': 'user.login',
+            'message': message_data,
+            'action': message_data.get('action', 'login'),
+            'redirect': message_data.get('redirect')
+        }))
 
 class KioskConsumer(AsyncWebsocketConsumer):
     """Dedicated consumer for kiosk connections used in the test script"""
@@ -86,7 +105,12 @@ class KioskConsumer(AsyncWebsocketConsumer):
     async def user_login(self, event):
         # Handle user login events
         logger.info("KioskConsumer: Handling user login event")
+        message_data = event['message']
+        
+        # Send the login data with navigation instructions
         await self.send(text_data=json.dumps({
             'type': 'user.login',
-            'message': event['message']
+            'message': message_data,
+            'action': message_data.get('action', 'login'),
+            'redirect': message_data.get('redirect')
         })) 

@@ -586,8 +586,15 @@
             // Check if user is logged in
             const token = localStorage.getItem('access_token');
             const username = localStorage.getItem('username');
+            const userData = localStorage.getItem('user_data');
+            
+            console.log('🔍 Dashboard checking localStorage:');
+            console.log('- access_token:', token ? token.substring(0, 50) + '...' : 'NOT FOUND');
+            console.log('- username:', username || 'NOT FOUND');
+            console.log('- user_data:', userData ? 'FOUND' : 'NOT FOUND');
             
             if (token) {
+                console.log('✅ Token found, initializing dashboard');
                 // Update UI for logged-in user
                 if (username) {
                     document.getElementById('user-name').textContent = username;
@@ -602,8 +609,9 @@
                 // Setup navigation
                 setupNavigation();
             } else {
+                console.log('❌ No token found, redirecting to login');
                 // Redirect to login page if not authenticated
-                window.location.href = 'index.html';
+                window.location.href = '../components/connected.html';
             }
             
             // Set up logout functionality
@@ -613,7 +621,7 @@
                 localStorage.removeItem('username');
                 
                 // Redirect to login page
-                window.location.href = 'index.html';
+                window.location.href = '../components/connected.html';
             });
         });
         
@@ -1885,11 +1893,6 @@
             setupNavigation();
             fetchTimetableData();
             initDashboardMap();
-            
-            // Set up logout functionality
-            document.getElementById('logout-button').addEventListener('click', function() {
-                logoutUser();
-            });
             
             // Initialize building list once map view is active
             document.querySelector('.event-item[data-view="map-view"]').addEventListener('click', function() {

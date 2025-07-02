@@ -25,9 +25,9 @@ def create_users():
     
     # Create users with the plaintext passwords (Django will handle hashing)
     users = [
-        ('alice', 'Pass123!', 'Alice', 'Wonderland', '04A1B2C3D4'),
-        ('bob', 'Pass123!', 'Bob', 'Builder', '04B5C6D7E8'),
-        ('carol', 'Pass123!', 'Carol', 'Danvers', '0499AA11BB'),
+        ('alice', 'Pass123!', 'Alice', 'Wonderland', '5A653600'),
+        ('bob', 'Pass123!', 'Bob', 'Builder', '73D83B1C'),
+        ('carol', 'Pass123!', 'Carol', 'Danvers', '36BA1205'),
     ]
     
     for username, password, first_name, last_name, rfid_uid in users:

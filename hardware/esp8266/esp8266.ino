@@ -8,7 +8,7 @@
 // Network configuration
 const char *ssid = "BlackGorilla";                             // WiFi SSID
 const char *password = "77777778";                             // WiFi password
-const char *serverUrl = "http://192.168.20.22:8000/api/scan/"; // Backend server IP
+const char *serverUrl = "http://192.168.79.64:8000/api/scan/"; // Backend server IP - Updated to correct IP
 const char *kioskId = "kiosk-1";                               // Unique ID for this kiosk
 
 // SDA/SS pin = D8 (GPIO15), RST pin = D3 (GPIO0)

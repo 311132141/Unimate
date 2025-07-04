@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://txkt22tapsvi"]
+
+[ext_resource type="Script" uid="uid://bhd057y1re364" path="res://Scripts/snake_arrow.gd" id="1_dhduh"]
+
+[sub_resource type="Curve3D" id="Curve3D_uy1cn"]
+
+[node name="Path3D" type="Path3D"]
+curve = SubResource("Curve3D_uy1cn")
+script = ExtResource("1_dhduh")
+
+[node name="PathFollow3D" type="PathFollow3D" parent="."]

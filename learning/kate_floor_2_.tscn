@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://diutxiiller5h"]
+
+[ext_resource type="PackedScene" uid="uid://dee56xydal4k1" path="res://Assets/kate_floor_2 .blend" id="1_v8bhb"]
+
+[node name="kate_floor_2 " instance=ExtResource("1_v8bhb")]

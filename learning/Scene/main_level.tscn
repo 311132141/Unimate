@@ -1,0 +1,56 @@
+[gd_scene load_steps=8 format=3 uid="uid://cy8nhp1n5de21"]
+
+[ext_resource type="PackedScene" uid="uid://oqj3kkujp0e0" path="res://Scene/MapFloor1.tscn" id="1_i232l"]
+[ext_resource type="PackedScene" uid="uid://cfsrd4fu7vm5v" path="res://Scene/MapFloor2.tscn" id="2_1uui5"]
+[ext_resource type="PackedScene" uid="uid://c4thmsq2soqup" path="res://Scene/navigation_npc.tscn" id="3_2xk1g"]
+[ext_resource type="Script" uid="uid://dgqvv6jwrwiw" path="res://Scripts/camera_position.gd" id="4_1uui5"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_i232l"]
+sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
+ground_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
+
+[sub_resource type="Sky" id="Sky_1uui5"]
+sky_material = SubResource("ProceduralSkyMaterial_i232l")
+
+[sub_resource type="Environment" id="Environment_2xk1g"]
+background_mode = 2
+sky = SubResource("Sky_1uui5")
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="MainLevel" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 0, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_2xk1g")
+
+[node name="NavigationRegion3D" parent="." instance=ExtResource("1_i232l")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.9833, 0)
+
+[node name="NavigationRegion3D2" parent="." instance=ExtResource("2_1uui5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 55.6457, 0)
+
+[node name="NavigationNPC" parent="." instance=ExtResource("3_2xk1g")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.09912, 3.89649, 2.43003)
+visible = false
+
+[node name="NavigationNPC2" parent="." instance=ExtResource("3_2xk1g")]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, -14.4445, 9.6111, 15.8185)
+move_speed = 10.0
+
+[node name="NavigationLink3D" type="NavigationLink3D" parent="."]
+start_position = Vector3(0, 7.23, 0)
+end_position = Vector3(15.84, 56.73, 0)
+
+[node name="CameraPosition" type="Node3D" parent="."]
+script = ExtResource("4_1uui5")
+
+[node name="CameraRotationX" type="Node3D" parent="CameraPosition"]
+
+[node name="CameraZoomPivot" type="Node3D" parent="CameraPosition/CameraRotationX"]
+transform = Transform3D(1, 0, 0, 0, 0.766044, 0.642788, 0, -0.642788, 0.766044, 0, 33, 44)
+
+[node name="Camera3D" type="Camera3D" parent="CameraPosition/CameraRotationX/CameraZoomPivot"]
